@@ -1,0 +1,6 @@
+C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\bin\Debug\LabVIEW CLI.exe.config
+C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\bin\Debug\LabVIEW CLI.exe
+C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\bin\Debug\LabVIEW CLI.pdb
+C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\obj\Debug\LabVIEW CLI.csprojResolveAssemblyReference.cache
+C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\obj\Debug\LabVIEW CLI.exe
+C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\obj\Debug\LabVIEW CLI.pdb
