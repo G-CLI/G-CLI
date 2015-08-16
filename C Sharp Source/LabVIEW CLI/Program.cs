@@ -15,10 +15,16 @@ namespace LabVIEW_CLI
             int exitCode = 0;
             lvComms lvInterface = new lvComms();
             lvMsg latestMessage = new lvMsg("NOOP", "");
+            LvLauncher launcher;
 
 
 
             // Args don't include the exe name.
+            if (args.Length != 0)
+            {
+                launcher = new LvLauncher(args[0]);
+                launcher.Start();
+            }
 
             lvInterface.waitOnConnection();
 
