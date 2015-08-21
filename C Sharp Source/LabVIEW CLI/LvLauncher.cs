@@ -9,28 +9,33 @@ namespace LabVIEW_CLI
 {
     class LvLauncher
     {
-        private String lvPath = "C:\\Program Files (x86)\\National Instruments\\LabVIEW 2014\\labview.exe";
         private ProcessStartInfo procInfo;
         private Process process;
+        private Output output = Output.Instance;
 
-        public LvLauncher(String launchPath)
+        public LvLauncher(String launchPath, String lvPath, int port, string[] args)
         {
 
             procInfo = new ProcessStartInfo();
 
-            if(isExe(launchPath))
+            string arguments = "-- -p:" + port + " " + String.Join(" ", args);
+
+            if (isExe(launchPath))
             {
                 procInfo.FileName = launchPath;
+                procInfo.Arguments = arguments;
             }
             else
             {
                 procInfo.FileName = lvPath;
-                procInfo.Arguments = "\"" + launchPath + "\"";
+                procInfo.Arguments = "\"" + launchPath + "\" " + arguments;
             }
         }
 
         public void Start()
         {
+            output.writeInfo("Launching Program:");
+            output.writeInfo(procInfo.FileName + " " + procInfo.Arguments);
             process = Process.Start(procInfo);
         }
 

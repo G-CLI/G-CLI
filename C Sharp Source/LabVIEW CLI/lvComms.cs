@@ -10,6 +10,7 @@ namespace LabVIEW_CLI
 {
     class lvComms
     {
+        private Output output = Output.Instance;
         private TcpListener _listener;
         private TcpClient _client;
         private NetworkStream _stream;
@@ -32,23 +33,32 @@ namespace LabVIEW_CLI
         public void waitOnConnection() {
 
             //Blocking call to wait for TCP Client
+            output.writeInfo("Waiting for connection on port " + _port);
             _client = _listener.AcceptTcpClient();
             _clientConnected = true;
             _stream = _client.GetStream();
+            output.writeInfo("Client Connected");
+        }
+
+        public int port {
+            get { return _port;  }
         }
 
         public lvMsg readMessage()
         {
             int length = 0;
             Byte[] lengthBuff = new Byte[4];
-            string msgType, msgData;
+            string msgType = "", msgData = "";
 
             _stream.Read(lengthBuff, 0, 4);
             Array.Reverse(lengthBuff);
             length = BitConverter.ToInt32(lengthBuff, 0);
-            _stream.Read(_dataBuffer, 0, length);
-            msgType = Encoding.ASCII.GetString(_dataBuffer, 0, 4);
-            msgData = Encoding.ASCII.GetString(_dataBuffer, 4, length - 4);
+            if (length > 4)
+            {
+                _stream.Read(_dataBuffer, 0, length);
+                msgType = Encoding.ASCII.GetString(_dataBuffer, 0, 4);
+                msgData = Encoding.ASCII.GetString(_dataBuffer, 4, length - 4);
+            }
 
             return new lvMsg(msgType, msgData);
         }

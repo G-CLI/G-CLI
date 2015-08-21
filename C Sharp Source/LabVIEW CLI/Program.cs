@@ -13,16 +13,32 @@ namespace LabVIEW_CLI
 
             Boolean stop = false;
             int exitCode = 0;
+            Output output = Output.Instance;
+
+            string[] cliArgs, lvArgs;
             lvComms lvInterface = new lvComms();
             lvMsg latestMessage = new lvMsg("NOOP", "");
             LvLauncher launcher;
+            CliOptions options = new CliOptions();
 
+            splitArguments(args, out cliArgs, out lvArgs);
+            CommandLine.Parser.Default.ParseArguments(cliArgs, options);
+            string launchPath = cliArgs[cliArgs.Length - 1];
+
+            output.setVerbose(options.Verbose);
+            output.writeInfo("LabVIEW CLI Started - Verbose Mode");
+            output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
+            output.writeInfo("LabVIEW User Arguments: " + String.Join(" ", lvArgs));           
 
 
             // Args don't include the exe name.
-            if (args.Length != 0)
+            if (options.noLaunch)
             {
-                launcher = new LvLauncher(args[0]);
+                output.writeMessage("Auto Launch Disabled");
+            }
+            else
+            {
+                launcher = new LvLauncher(launchPath, lvPathFinder(options), lvInterface.port, lvArgs);
                 launcher.Start();
             }
 
@@ -39,11 +55,11 @@ namespace LabVIEW_CLI
                         break;
                     case "EXIT":
                         exitCode = lvInterface.extractExitCode(latestMessage.messageData);
-                        Console.WriteLine("Recieved Exit Code " + exitCode);
+                        output.writeMessage("Recieved Exit Code " + exitCode);
                         stop = true;
                         break;
                     default:
-                        Console.WriteLine("Unknown Message Type Recieved:" + latestMessage.messageType);
+                        output.writeError("Unknown Message Type Recieved:" + latestMessage.messageType);
                         break;
                 }
 
@@ -53,5 +69,45 @@ namespace LabVIEW_CLI
             lvInterface.Close();
             return exitCode;
         }
+
+        private static void splitArguments(string[] args, out string[] cliArgs, out string[] lvArgs)
+        {
+
+            int splitterLocation = -1;
+
+            for(int i = 0; i < args.Length; i++)
+            {
+                if(args[i] == "--")
+                {
+                    splitterLocation = i;
+                }
+            }
+
+            if(splitterLocation > 0)
+            {
+                cliArgs = args.Take(splitterLocation).ToArray();
+                lvArgs = args.Skip(splitterLocation + 1).ToArray();
+            }
+            else
+            {
+                cliArgs = args;
+                lvArgs = new string[0];
+            }
+
+        }
+        private static string lvPathFinder(CliOptions options)
+        {
+            if (options.lvExe == null)
+            {
+                return "C:\\Program Files (x86)\\National Instruments\\LabVIEW 2014\\labview.exe";
+            }
+            else
+            {
+                return options.lvExe;
+            }
+        }
+
     }
+
+
 }
