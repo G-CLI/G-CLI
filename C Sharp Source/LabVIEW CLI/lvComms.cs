@@ -46,21 +46,34 @@ namespace LabVIEW_CLI
 
         public lvMsg readMessage()
         {
-            int length = 0;
+            int bytesRead = 0, length = 0;
             Byte[] lengthBuff = new Byte[4];
             string msgType = "", msgData = "";
 
-            _stream.Read(lengthBuff, 0, 4);
-            Array.Reverse(lengthBuff);
-            length = BitConverter.ToInt32(lengthBuff, 0);
-            if (length > 4)
-            {
-                _stream.Read(_dataBuffer, 0, length);
-                msgType = Encoding.ASCII.GetString(_dataBuffer, 0, 4);
-                msgData = Encoding.ASCII.GetString(_dataBuffer, 4, length - 4);
+            try {
+                bytesRead = _stream.Read(lengthBuff, 0, 4);
             }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Exception Found");
+            }
+            if (bytesRead == 4)
+            {
+                Array.Reverse(lengthBuff);
+                length = BitConverter.ToInt32(lengthBuff, 0);
+                if (length > 4)
+                {
+                    _stream.Read(_dataBuffer, 0, length);
+                    msgType = Encoding.ASCII.GetString(_dataBuffer, 0, 4);
+                    msgData = Encoding.ASCII.GetString(_dataBuffer, 4, length - 4);
+                }
 
-            return new lvMsg(msgType, msgData);
+                return new lvMsg(msgType, msgData);
+            }
+            else
+            {
+                return new lvMsg("RDER", "");
+            }
         }
 
         public int extractExitCode(string msgData)

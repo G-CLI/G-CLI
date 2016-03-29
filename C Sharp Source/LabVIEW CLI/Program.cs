@@ -23,51 +23,64 @@ namespace LabVIEW_CLI
 
             splitArguments(args, out cliArgs, out lvArgs);
             CommandLine.Parser.Default.ParseArguments(cliArgs, options);
-            string launchPath = cliArgs[cliArgs.Length - 1];
 
-            output.setVerbose(options.Verbose);
-            output.writeInfo("LabVIEW CLI Started - Verbose Mode");
-            output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
-            output.writeInfo("LabVIEW User Arguments: " + String.Join(" ", lvArgs));           
-
-
-            // Args don't include the exe name.
-            if (options.noLaunch)
+            if (cliArgs.Length < 1)
             {
-                output.writeMessage("Auto Launch Disabled");
+                output.writeError("No Arguments Used");
+                return -1;
             }
             else
             {
-                launcher = new LvLauncher(launchPath, lvPathFinder(options), lvInterface.port, lvArgs);
-                launcher.Start();
-            }
+                string launchPath = cliArgs[cliArgs.Length - 1];
 
-            lvInterface.waitOnConnection();
+                output.setVerbose(options.Verbose);
+                output.writeInfo("LabVIEW CLI Started - Verbose Mode");
+                output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
+                output.writeInfo("LabVIEW User Arguments: " + String.Join(" ", lvArgs));
 
-            do
-            {
-                latestMessage = lvInterface.readMessage();
 
-                switch (latestMessage.messageType)
+                // Args don't include the exe name.
+                if (options.noLaunch)
                 {
-                    case "OUTP":
-                        Console.Write(latestMessage.messageData);
-                        break;
-                    case "EXIT":
-                        exitCode = lvInterface.extractExitCode(latestMessage.messageData);
-                        output.writeMessage("Recieved Exit Code " + exitCode);
-                        stop = true;
-                        break;
-                    default:
-                        output.writeError("Unknown Message Type Recieved:" + latestMessage.messageType);
-                        break;
+                    output.writeMessage("Auto Launch Disabled");
+                }
+                else
+                {
+                    launcher = new LvLauncher(launchPath, lvPathFinder(options), lvInterface.port, lvArgs);
+                    launcher.Start();
                 }
 
+                lvInterface.waitOnConnection();
 
-            } while (!stop);
+                do
+                {
+                    latestMessage = lvInterface.readMessage();
 
-            lvInterface.Close();
-            return exitCode;
+                    switch (latestMessage.messageType)
+                    {
+                        case "OUTP":
+                            Console.Write(latestMessage.messageData);
+                            break;
+                        case "EXIT":
+                            exitCode = lvInterface.extractExitCode(latestMessage.messageData);
+                            output.writeMessage("Recieved Exit Code " + exitCode);
+                            stop = true;
+                            break;
+                        case "RDER":
+                            output.writeError("Read Error");
+                            stop = true;
+                            break;
+                        default:
+                            output.writeError("Unknown Message Type Recieved:" + latestMessage.messageType);
+                            break;
+                    }
+
+
+                } while (!stop);
+
+                lvInterface.Close();
+                return exitCode;
+            }
         }
 
         private static void splitArguments(string[] args, out string[] cliArgs, out string[] lvArgs)

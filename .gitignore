@@ -15,3 +15,6 @@
 *.aliases
 *.lvlps
 /C Sharp Source/LabVIEW CLI/bin
+/C Sharp Source/LabVIEW CLI/obj
+/Installer
+/C Sharp Source/LabVIEW CLI Setup/LabVIEW CLI Setup/Express

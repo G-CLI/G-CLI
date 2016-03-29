@@ -6,3 +6,7 @@ C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C S
 C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\obj\Debug\labview-cli.pdb
 C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\bin\Debug\CommandLine.dll
 C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\bin\Debug\CommandLine.xml
+C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\bin\Debug\labview-cli.exe.manifest
+C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\bin\Debug\labview-cli.application
+C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\obj\Debug\labview-cli.exe.manifest
+C:\Users\James\Documents\Wiresmith Projects\Open Source Projects\LabVIEW CLI\C Sharp Source\LabVIEW CLI\obj\Debug\labview-cli.application

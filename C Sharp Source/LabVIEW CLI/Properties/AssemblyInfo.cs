@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("LabVIEW CLI")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("Wiresmith Technology")]
 [assembly: AssemblyProduct("LabVIEW CLI")]
-[assembly: AssemblyCopyright("Copyright © James McNally 2015")]
+[assembly: AssemblyCopyright("Copyright © Wiresmith Technology 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

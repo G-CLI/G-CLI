@@ -1,0 +1,7 @@
+# Release Checklist #
+
+* Increment version number in VI package configuration.
+* Increment version number in LabVIEW-CLI C# project.
+* Increment product version in Installshield settings.
+* Generate new product code in Installshield settings.
+* Check max version in the remove old upgrade path in installsheild settings.
