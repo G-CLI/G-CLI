@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,8 +36,8 @@ namespace LabVIEW_CLI
 
                 output.setVerbose(options.Verbose);
                 output.writeInfo("LabVIEW CLI Started - Verbose Mode");
+                output.writeInfo("Version " + Assembly.GetExecutingAssembly().GetName().Version);
                 output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
-                output.writeInfo("LabVIEW User Arguments: " + String.Join(" ", lvArgs));
 
 
                 // Args don't include the exe name.

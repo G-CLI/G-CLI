@@ -4343,9 +4343,9 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>PROGMSG_IIS_ROLLBACKAPPPOOLS</td><td>##IDS_PROGMSG_IIS_ROLLBACKAPPPOOLS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKVROOTS</td><td>##IDS_PROGMSG_IIS_ROLLBACKVROOTS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS</td><td>##IDS_PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS##</td><td/></row>
-		<row><td>ProductCode</td><td>{47E15FF0-ECB2-4326-8BBC-C63487A2E066}</td><td/></row>
+		<row><td>ProductCode</td><td>{4D503089-AFB5-4573-873E-1D0E3795EB25}</td><td/></row>
 		<row><td>ProductName</td><td>LabVIEW CLI</td><td/></row>
-		<row><td>ProductVersion</td><td>1.00.0001</td><td/></row>
+		<row><td>ProductVersion</td><td>1.01.0002</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
 		<row><td>ProgressType2</td><td>installed</td><td/></row>
@@ -4628,7 +4628,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<col def="s72">ActionProperty</col>
 		<col def="S72">ISDisplayName</col>
 		<row><td>{00000000-0000-0000-0000-000000000000}</td><td>***ALL_VERSIONS***</td><td></td><td></td><td>2</td><td/><td>ISFOUNDNEWERPRODUCTVERSION</td><td>ISPreventDowngrade</td></row>
-		<row><td>{1EFDB3E4-2430-457E-AA06-F0C9866F9236}</td><td></td><td>1.00.9999</td><td></td><td>768</td><td/><td>ISACTIONPROP2</td><td>Remove Old</td></row>
+		<row><td>{1EFDB3E4-2430-457E-AA06-F0C9866F9236}</td><td></td><td>1.01.9999</td><td></td><td>768</td><td/><td>ISACTIONPROP2</td><td>Remove Old</td></row>
 	</table>
 
 	<table name="Verb">

@@ -18,7 +18,15 @@ namespace LabVIEW_CLI
 
             procInfo = new ProcessStartInfo();
 
-            string arguments = "-- -p:" + port + " " + String.Join(" ", args);
+            //Prepare the arguments with quotes.
+            string preparedArgs = "";
+            foreach (string arg in args)
+            {
+                preparedArgs += "\"" + arg + "\" ";
+            }
+            output.writeInfo("LabVIEW User Arguments: " + preparedArgs);
+
+            string arguments = "-- -p:" + port + " " + preparedArgs;
 
             if (isExe(launchPath))
             {
