@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define LabVIEW CLI_TargetDir=$(var.LabVIEW CLI.TargetDir)?>
+  <Product Id="*" Name="LabVIEW_CLI_WIX_Setup" Language="1033" Version="1.0.0.0" Manufacturer="Alexander Rose" UpgradeCode="5b9cec8b-8c7b-4f39-90bd-197eea086c22">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="LabVIEW_CLI_WIX_Setup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="LabVIEW_CLI_WIX_Setup" />
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+      <!-- <Component Id="ProductComponent"> -->
+      <!-- TODO: Insert files, registry keys, and other resources here. -->
+      <!-- </Component> -->
+      <Component Id="CommandLine.dll" Guid="12c93943-6e82-480d-a637-ae1925cfc177">
+        <File Id="CommandLine.dll" Name="CommandLine.dll" Source="$(var.LabVIEW CLI_TargetDir)CommandLine.dll" />
+      </Component>
+      <Component Id="labview_cli.exe" Guid="5c78c024-ef30-423b-b839-bece097dbf53">
+        <File Id="labview_cli.exe" Name="labview-cli.exe" Source="$(var.LabVIEW CLI_TargetDir)labview-cli.exe" />
+      </Component>
+      <Component Id="labview_cli.exe.config" Guid="09a86613-f6e9-497e-a9ff-df46ef5c50d6">
+        <File Id="labview_cli.exe.config" Name="labview-cli.exe.config" Source="$(var.LabVIEW CLI_TargetDir)labview-cli.exe.config" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
