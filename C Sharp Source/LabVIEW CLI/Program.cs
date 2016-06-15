@@ -68,6 +68,7 @@ namespace LabVIEW_CLI
                             stop = true;
                             break;
                         case "RDER":
+                            exitCode = 1;
                             output.writeError("Read Error");
                             stop = true;
                             break;
