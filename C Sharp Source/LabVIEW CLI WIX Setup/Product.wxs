@@ -10,9 +10,12 @@
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate />
 
-    <Feature Id="ProductFeature" Title="LabVIEW_CLI_WIX_Setup" Level="1">
+    <Feature Id="ProductFeature" Title="LabVIEW-CLI" Level="1" ConfigurableDirectory='INSTALLFOLDER'>
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <UIRef Id="WixUI_InstallDir" />
   </Product>
 
   <Fragment>
@@ -44,4 +47,5 @@
       </Component>
     </ComponentGroup>
   </Fragment>
+  
 </Wix>
