@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.NetworkInformation;
 
 namespace LabVIEW_CLI
 {
@@ -18,9 +19,25 @@ namespace LabVIEW_CLI
         private Boolean _clientConnected = false;
         private Byte[] _dataBuffer;
 
+        // Returns available port number or zero if no port is available
+        public static int GetFirstAvailableRandomPort(int startPort, int stopPort)
+        {
+            Random r = new Random();
+
+            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
+
+            var busyPorts = tcpConnInfoArray.Select(t => t.LocalEndPoint.Port).Where(v => v >= startPort && v <= stopPort).ToArray();
+
+            var firstAvailableRandomPort = Enumerable.Range(startPort, stopPort - startPort).OrderBy(v => r.Next()).FirstOrDefault(p => !busyPorts.Contains(p));
+        
+            return firstAvailableRandomPort;
+        }
+
         public lvComms()
         {
-            _port = 5001;
+            //Get first available dynamic port
+            _port = GetFirstAvailableRandomPort(49152, 65535);
 
             //Assign a buffer for incoming data. 1k should be plenty.
             _dataBuffer = new Byte[1024];
