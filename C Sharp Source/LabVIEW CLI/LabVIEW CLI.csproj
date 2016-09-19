@@ -84,6 +84,7 @@
     <Compile Include="cliOptions.cs" />
     <Compile Include="lvComms.cs" />
     <Compile Include="LvLauncher.cs" />
+    <Compile Include="LvVersions.cs" />
     <Compile Include="output.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
