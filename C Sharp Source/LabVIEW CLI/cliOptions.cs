@@ -9,7 +9,6 @@ namespace LabVIEW_CLI
 
 
     {
-
         [Option('v', "verbose", DefaultValue = false,
         HelpText = "Prints all messages to standard output.")]
         public bool Verbose { get; set; }
@@ -22,7 +21,7 @@ namespace LabVIEW_CLI
         HelpText = "Sets the LabVIEW Executable to launch VIs with")]
         public string lvExe { get; set; }
 
-        [HelpOption('h',"help", HelpText = "Dispaly this help screen.")]
+        [HelpOption('h',"help", HelpText = "Display this help screen.")]
         public string GetUsage()
         {
             return "Help Screen" + Environment.NewLine;

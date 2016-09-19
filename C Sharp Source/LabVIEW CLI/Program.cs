@@ -21,6 +21,17 @@ namespace LabVIEW_CLI
             lvMsg latestMessage = new lvMsg("NOOP", "");
             LvLauncher launcher;
             CliOptions options = new CliOptions();
+            Dictionary<string,string> versions = LvLauncher.DetectLvVersions();
+
+            if(versions.Count > 0)
+            {
+                output.writeInfo("Detected the following versions of LabVIEW:");
+                foreach (var item in versions)
+                {
+                    output.writeInfo(item.Key + ": " + item.Value);
+                }
+            }
+                
 
             splitArguments(args, out cliArgs, out lvArgs);
             CommandLine.Parser.Default.ParseArguments(cliArgs, options);

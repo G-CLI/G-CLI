@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,6 +51,44 @@ namespace LabVIEW_CLI
         private Boolean isExe(String launchPath)
         {
             return System.Text.RegularExpressions.Regex.IsMatch(launchPath, ".exe$");
+        }
+
+        /// <summary>
+        /// Detects installed LabVIEW versions by searching the registry.
+        /// 
+        /// This follows an example from the NI Developer Community (https://decibel.ni.com/content/docs/DOC-25920).
+        /// </summary>
+        /// <returns>a dictionary containing the detected versions and the respective paths</returns>
+        public static Dictionary<string, string> DetectLvVersions()
+        {
+            List<string> excludedKeys = new List<string> { "AddOns", "CurrentVersion" };
+            Dictionary<string, string> versions = new Dictionary<string, string>();
+
+            RegistryKey LvBaseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Default).OpenSubKey("SOFTWARE\\National Instruments\\LabVIEW");
+            if (LvBaseKey == null)
+            {
+                Console.Error.WriteLine("No installed version of the NI LabVIEW Development System found...");
+                return versions;
+            }
+
+            RegistryKey itemKey;
+            object itemPath;
+            object itemVersion;
+            foreach (var item in LvBaseKey.GetSubKeyNames())
+            {
+                if (excludedKeys.Contains(item))
+                    continue;
+
+                itemKey = LvBaseKey.OpenSubKey(item);
+                itemPath = itemKey.GetValue("Path");
+                itemVersion = itemKey.GetValue("VersionString");
+                if (itemPath != null && itemVersion != null)
+                {
+                    versions.Add(itemVersion.ToString(), itemPath.ToString());
+                }
+            }
+
+            return versions;
         }
     }
 }
