@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Win32;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq;
 
 namespace LabVIEW_CLI
 {
-    class LvVersions
+    static class LvVersions
     {
-        public List<lvVersion> Versions { get; private set; }
+        private const string BASE_KEY = "SOFTWARE\\National Instruments\\LabVIEW";
+        private static readonly List<string> excludedKeys = new List<string> { "AddOns", "CurrentVersion" };
+
+        public static List<lvVersion> Versions { get; private set; }
+        public static lvVersion CurrentVersion { get; private set; }
 
         /// <summary>
         /// Detects installed LabVIEW versions by searching the registry.
@@ -17,36 +19,154 @@ namespace LabVIEW_CLI
         /// This follows an example from the NI Developer Community (https://decibel.ni.com/content/docs/DOC-25920).
         /// See also in notes/LvAutoDetect.md
         /// </summary>
-        public LvVersions()
+        static LvVersions()
         {
-            List<string> excludedKeys = new List<string> { "AddOns", "CurrentVersion" };
-            Versions = new List<lvVersion>();
+            Scan();
+        }
 
-            RegistryKey LvBaseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\National Instruments\\LabVIEW");
-            if (LvBaseKey == null)
+        /// <summary>
+        /// Triggers a registry scan to determine the currently installed LabVIEW versions.
+        /// This method is automatically invoked by the static constructor.
+        /// </summary>
+        public static void Scan()
+        {
+            // Initialize Versions List
+            Versions = new List<lvVersion>();
+            CurrentVersion = null;
+
+            // Scan 32bit Registry
+            _ScanRegistry(RegistryView.Registry32);
+
+            // Scan 64bit Registry on x64 Systems
+            if (Environment.Is64BitOperatingSystem)
+                _ScanRegistry(RegistryView.Registry64);
+
+            // Determine Current Version (default if no exe or version is supplied as argument)
+            _GetCurrentVersion();
+
+            Output output = Output.Instance;
+            if (CurrentVersion == null)
             {
-                Console.Error.WriteLine("No installed version of the NI LabVIEW Development System found...");
-                return;
+                output.writeInfo("No installed LabVIEW version discovered!");
             }
+            else
+            {
+                output.writeInfo("Current Version: " + CurrentVersion.ToString());
+
+                output.writeInfo("Detected LabVIEW versions:");
+                foreach(var current in Versions)
+                {
+                    output.writeInfo(current.ToString() + "(" + current.Path + ")");
+                }
+            }
+            
+        }
+
+        /// <summary>
+        /// Tries to resolve the supplied string to one of the discovered LabVIEW versions
+        /// </summary>
+        /// <param name="versionString">the version string from the command line</param>
+        /// <exception cref="KeyNotFoundException">thrown if the versionString cannot be resolved</exception>
+        /// <returns></returns>
+        public static lvVersion ResolveVersionString(string versionString)
+        {
+            var results = from ver in Versions where ver.Version.Contains(versionString) orderby ver.Bitness ascending select ver;
+            if (results.Count() > 0)
+            {
+                return results.First();
+            }
+
+            throw new KeyNotFoundException();
+        }
+
+
+        /// <summary>
+        /// Scans the registry for installed LabVIEW versions
+        /// </summary>
+        /// <param name="regView">32bit or 64bit registry</param>
+        private static void _ScanRegistry(RegistryView regView)
+        {
+            string bitness = (regView == RegistryView.Registry32) ? "32" : "64";
+
+            RegistryKey baseKey = _GetBaseKey(regView);
+            if (baseKey == null)
+                return;
+
 
             RegistryKey itemKey;
             object itemPath;
             object itemVersion;
-            foreach (var item in LvBaseKey.GetSubKeyNames())
+            object itemGUID;
+            foreach (var item in baseKey.GetSubKeyNames())
             {
-                Console.WriteLine("Testing key \"" + item + "\"...");
                 if (excludedKeys.Contains(item))
                     continue;
 
-                itemKey = LvBaseKey.OpenSubKey(item);
+                itemKey = baseKey.OpenSubKey(item);
                 itemPath = itemKey.GetValue("Path");
                 itemVersion = itemKey.GetValue("VersionString");
+                itemGUID = itemKey.GetValue("GUID");
                 if (itemPath != null && itemVersion != null)
                 {
-                    Versions.Add(new lvVersion{ Version = itemVersion.ToString(), Path = itemPath.ToString(), Architecture = "32bit" });
-                    Console.WriteLine("found \"" + itemVersion.ToString() + "\" (" + itemPath.ToString() + ")");
+                    Versions.Add(new lvVersion { Version = itemVersion.ToString(), Path = itemPath.ToString(), Bitness = "32bit", GUID = itemGUID.ToString() });
                 }
             }
+        }
+        
+        /// <summary>
+        /// Determines the default LabVIEW version.
+        /// Favours 32bit over 64bit version, if both coexist
+        /// Falls back to using the first entry of the versions list,
+        /// </summary>
+        private static void _GetCurrentVersion()
+        {
+            // don't proceed if the scans did not discover any lv versions
+            if (Versions.Count <= 0)
+                return;
+
+            // check 32bit key
+            _CheckCurrentVersionKey(RegistryView.Registry32);
+            if (CurrentVersion != null)
+                return; //exit if found
+
+            // check 64bit
+            if (Environment.Is64BitOperatingSystem)
+                _CheckCurrentVersionKey(RegistryView.Registry64);
+            if (CurrentVersion != null)
+                return; //exit if found
+
+            // use first entry in Versions
+            CurrentVersion = Versions.First();
+        }
+
+        private static void _CheckCurrentVersionKey(RegistryView view)
+        {
+            RegistryKey currentKey = _GetBaseKey(view).OpenSubKey("CurrentVersion");
+            if (currentKey != null)
+            {
+                object GUID = currentKey.GetValue("GUID");
+                if (GUID != null)
+                {
+                    foreach (lvVersion current in Versions)
+                    {
+                        if (current.GUID == GUID.ToString())
+                        {
+                            CurrentVersion = current;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the base registry key for NI LabVIEW installations
+        /// </summary>
+        /// <param name="view">Use 32-bit or 64-bit registry</param>
+        /// <returns>the base registry key</returns>
+        private static RegistryKey _GetBaseKey(RegistryView view)
+        {
+            return RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view).OpenSubKey(BASE_KEY);
         }
     }
 
@@ -57,6 +177,21 @@ namespace LabVIEW_CLI
 
         public string Path { get; set; }
             
-        public string Architecture { get; set; }
+        public string Bitness { get; set; }
+
+        public string GUID { get; set; }
+
+        public string ExePath
+        {
+            get
+            {
+                return System.IO.Path.Combine(Path, "LabVIEW.exe");
+            }
+        }
+
+        public override string ToString()
+        {
+            return Version + ", " + Bitness; 
+        }
     }
 }
