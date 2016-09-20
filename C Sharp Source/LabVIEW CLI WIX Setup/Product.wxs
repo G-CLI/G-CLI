@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?define LabVIEW CLI_TargetDir=$(var.LabVIEW CLI.TargetDir)?>
-  <Product Name="LabVIEW CLI" Language="1033" Version="1.2.0.1" Manufacturer="LabVIEW CLI Contributors"
+  <Product Name="LabVIEW CLI" 
+           Language="1033" 
+           Version="1.2.0.1" 
+           Manufacturer="LabVIEW CLI Contributors"
            Id="*"
            UpgradeCode="1EFDB3E4-2430-457E-AA06-F0C9866F9236">
     <Package Id='*' Keywords='Installer' Description="LabVIEW CLI Installer" Manufacturer="LabVIEW CLI Contributors"
              InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
+    <MediaTemplate EmbedCab="yes"/>
 
     <Feature Id="ProductFeature" Title="LabVIEW-CLI" Level="1" ConfigurableDirectory='INSTALLFOLDER'>
       <ComponentGroupRef Id="ProductComponents" />

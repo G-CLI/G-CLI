@@ -18,6 +18,9 @@ namespace LabVIEW_CLI
         private int _port;
         private Boolean _clientConnected = false;
         private Byte[] _dataBuffer;
+        private const int LENGTH_BYTES = 4;
+        private const int TYPE_BYTES = 4;
+        private const int MAX_PAYLOAD_BYTES = 9000 - LENGTH_BYTES - TYPE_BYTES; // 9000 is multiple of default MTU of 1500.
 
         // Returns available port number or zero if no port is available
         public static int GetFirstAvailableRandomPort(int startPort, int stopPort)
@@ -40,7 +43,7 @@ namespace LabVIEW_CLI
             _port = GetFirstAvailableRandomPort(49152, 65535);
 
             //Assign a buffer for incoming data. 1k should be plenty.
-            _dataBuffer = new Byte[1024];
+            _dataBuffer = new Byte[MAX_PAYLOAD_BYTES + TYPE_BYTES];
 
             //Start up the server
             _listener = new TcpListener(IPAddress.Parse("127.0.0.1"), _port);
@@ -63,26 +66,27 @@ namespace LabVIEW_CLI
 
         public lvMsg readMessage()
         {
+
             int bytesRead = 0, length = 0;
-            Byte[] lengthBuff = new Byte[4];
+            Byte[] lengthBuff = new Byte[LENGTH_BYTES];
             string msgType = "", msgData = "";
 
             try {
-                bytesRead = _stream.Read(lengthBuff, 0, 4);
+                bytesRead = _stream.Read(lengthBuff, 0, LENGTH_BYTES);
             }
             catch(Exception ex)
             {
                 Console.WriteLine("Exception Found");
             }
-            if (bytesRead == 4)
+            if (bytesRead == LENGTH_BYTES)
             {
                 Array.Reverse(lengthBuff);
                 length = BitConverter.ToInt32(lengthBuff, 0);
-                if (length > 4)
+                if (length > TYPE_BYTES)
                 {
                     _stream.Read(_dataBuffer, 0, length);
-                    msgType = Encoding.ASCII.GetString(_dataBuffer, 0, 4);
-                    msgData = Encoding.ASCII.GetString(_dataBuffer, 4, length - 4);
+                    msgType = Encoding.ASCII.GetString(_dataBuffer, 0, TYPE_BYTES);
+                    msgData = Encoding.ASCII.GetString(_dataBuffer, TYPE_BYTES, length - TYPE_BYTES);
                 }
 
                 return new lvMsg(msgType, msgData);

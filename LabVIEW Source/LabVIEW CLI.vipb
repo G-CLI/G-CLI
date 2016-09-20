@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="0.6" Created_Date="2016-01-02 11:56:11" Modified_Date="2016-01-02 12:07:09" Creator="James McNally" Comments="" ID="4c55e8484ace4cb98d842a3fd3e4a7eb">
+<VI_Package_Builder_Settings Version="0.6" Created_Date="2016-01-02 11:56:11" Modified_Date="2016-09-20 14:56:14" Creator="James McNally" Comments="" ID="e05843d4456d6373410a5104704eca02">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_LabVIEW_CLI</Package_File_Name>
-    <Library_Version>1.0.0.2</Library_Version>
+    <Library_Version>1.2.0.2</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -34,7 +34,9 @@ You must put these VIs into your application and use them to interact with the c
       <Copyright/>
       <Packager/>
       <URL>https://github.com/JamesMc86/LabVIEW-CLI</URL>
-      <Release_Notes>First release.</Release_Notes>
+      <Release_Notes>* Added support for larger output messages.
+* Read error output code now is 1.
+</Release_Notes>
     </Description>
     <Destinations>
       <Toolkit_VIs>
@@ -126,11 +128,8 @@ You must put these VIs into your application and use them to interact with the c
       <Exclusions>
         <Path>LabVIEW CLI.lvproj</Path>
       </Exclusions>
-      <Compile_Exclusions>
-        <Path/>
-      </Compile_Exclusions>
     </Source_Files>
-    <License_Agreement_Filepath/>
+    <License_Agreement_Filepath>..\LICENSE</License_Agreement_Filepath>
     <Licensing_and_Activation>
       <License_LF_file_path/>
       <Licensed_library_file_path/>
@@ -242,7 +241,7 @@ You must put these VIs into your application and use them to interact with the c
         <Path>CLI Demo.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>E52DE37E5F0EA31DC5F3B0DAEEA7B544</GUID>
+      <GUID>B903968EC6BE6DAB4B77F79903628164</GUID>
     </Functions_Palette_Data>
     <Functions_Palette_Data>
       <Parent_Palette_Index>0</Parent_Palette_Index>
@@ -319,7 +318,7 @@ You must put these VIs into your application and use them to interact with the c
         <Path>CLI Class\Write String.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>5040CDB0015E757E8769BA892358AA4B</GUID>
+      <GUID>CA5FD83FD0B9142808F0CE580FA621FC</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
