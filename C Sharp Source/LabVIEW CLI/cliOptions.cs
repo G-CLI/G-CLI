@@ -6,8 +6,6 @@ using CommandLine;
 namespace LabVIEW_CLI
 {
     public class CliOptions
-
-
     {
         [Option('v', "verbose", DefaultValue = false,
         HelpText = "Prints all messages to standard output.")]
@@ -20,6 +18,14 @@ namespace LabVIEW_CLI
         [Option("lv-exe", DefaultValue = null,
         HelpText = "Sets the LabVIEW Executable to launch VIs with")]
         public string lvExe { get; set; }
+
+        [Option("lv-ver", DefaultValue = null,
+        HelpText = "Use the specified LabVIEW version from auto-discover")]
+        public string lvVer { get; set; }
+
+        [Option("x64", DefaultValue = false,
+        HelpText = "Use a 64-bit LabVIEW exe")]
+        public bool x64 { get; set; }
 
         [HelpOption('h',"help", HelpText = "Display this help screen.")]
         public string GetUsage()

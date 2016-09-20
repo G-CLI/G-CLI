@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace LabVIEW_CLI
 {
@@ -12,7 +13,7 @@ namespace LabVIEW_CLI
         static int Main(string[] args)
         {
 
-            Boolean stop = false;
+            bool stop = false;
             int exitCode = 0;
             Output output = Output.Instance;
 
@@ -49,8 +50,28 @@ namespace LabVIEW_CLI
                 }
                 else
                 {
-                    launcher = new LvLauncher(launchPath, lvPathFinder(options), lvInterface.port, lvArgs);
-                    launcher.Start();
+                    try
+                    {
+                        launcher = new LvLauncher(launchPath, lvPathFinder(options), lvInterface.port, lvArgs);
+                        launcher.Start();
+                    }
+                    catch(KeyNotFoundException ex)
+                    {
+                        // Fail gracefully if lv-ver option cannot be resolved
+                        string bitness = options.x64 ? " 64bit" : string.Empty;
+                        output.writeError("LabVIEW version \"" + options.lvVer + bitness + "\" not found!");
+                        output.writeMessage("Available LabVIEW versions are:");
+                        foreach(var ver in LvVersions.Versions)
+                        {
+                            output.writeMessage(ver.ToString());
+                        }
+                        return 1;
+                    }
+                    catch(FileNotFoundException ex)
+                    {
+                        output.writeError(ex.Message);
+                        return 1;
+                    }                    
                 }
 
                 lvInterface.waitOnConnection();
@@ -114,13 +135,23 @@ namespace LabVIEW_CLI
         }
         private static string lvPathFinder(CliOptions options)
         {
-            if (options.lvExe == null)
+            if (options.lvExe != null)
             {
-                return "C:\\Program Files (x86)\\National Instruments\\LabVIEW 2014\\labview.exe";
+                if (!File.Exists(options.lvExe))
+                    throw new FileNotFoundException("specified executable not found", options.lvExe);
+                return options.lvExe;
+            }
+            if (options.lvVer != null)
+            {
+                return LvVersions.ResolveVersionString(options.lvVer, options.x64).ExePath;
+            }
+            if (LvVersions.CurrentVersion != null)
+            {
+                return LvVersions.CurrentVersion.ExePath;
             }
             else
             {
-                return options.lvExe;
+                throw new FileNotFoundException("No LabVIEW.exe found...", "LabVIEW.exe");
             }
         }
 

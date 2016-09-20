@@ -68,17 +68,24 @@ namespace LabVIEW_CLI
         /// <param name="versionString">the version string from the command line</param>
         /// <exception cref="KeyNotFoundException">thrown if the versionString cannot be resolved</exception>
         /// <returns></returns>
-        public static lvVersion ResolveVersionString(string versionString)
+        public static lvVersion ResolveVersionString(string versionString, bool x64 = false)
         {
             var results = from ver in Versions where ver.Version.Contains(versionString) orderby ver.Bitness ascending select ver;
-            if (results.Count() > 0)
-            {
+            if (results.Count() <= 0)
+                throw new KeyNotFoundException();
+
+            // if 64-bit is not requested, return the first entry (which might be x64)
+            if(!x64)
                 return results.First();
-            }
+
+            // else filter out all non-x64 versions
+            var x64results = from ver in results where ver.Bitness == "64bit" select ver;
+            if (x64results.Count() > 0)
+                return x64results.First();
 
             throw new KeyNotFoundException();
         }
-
+        
 
         /// <summary>
         /// Scans the registry for installed LabVIEW versions
