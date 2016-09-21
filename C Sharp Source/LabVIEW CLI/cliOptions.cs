@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Text;
 using CommandLine;
-
+using System.Collections.Generic;
+using CommandLine.Text;
 
 namespace LabVIEW_CLI
 {
@@ -27,10 +28,14 @@ namespace LabVIEW_CLI
         HelpText = "Use a 64-bit LabVIEW exe")]
         public bool x64 { get; set; }
 
+        [ValueOption(0)]
+        public string LaunchVI { get; set; }
+
         [HelpOption('h',"help", HelpText = "Display this help screen.")]
         public string GetUsage()
         {
-            return "Help Screen" + Environment.NewLine;
+            return HelpText.AutoBuild(this,
+                (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
         }
     }
 }

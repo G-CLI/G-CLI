@@ -26,86 +26,100 @@ namespace LabVIEW_CLI
             lvVersion current = LvVersions.CurrentVersion;
 
             splitArguments(args, out cliArgs, out lvArgs);
-            CommandLine.Parser.Default.ParseArguments(cliArgs, options);
-
-            if (cliArgs.Length < 1)
+            //CommandLine.Parser.Default.ParseArguments(cliArgs, options);
+            if(!CommandLine.Parser.Default.ParseArguments(cliArgs, options))
             {
-                output.writeError("No Arguments Used");
-                return -1;
+                Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
+            }
+
+            output.setVerbose(options.Verbose);
+            output.writeInfo("LabVIEW CLI Started - Verbose Mode");
+            output.writeInfo("Version " + Assembly.GetExecutingAssembly().GetName().Version);
+            output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
+            output.writeInfo("Arguments passed to LabVIEW: " + String.Join(" ", lvArgs));
+
+            // Args don't include the exe name.
+            if (options.noLaunch)
+            {
+                output.writeMessage("Auto Launch Disabled");
             }
             else
             {
-                string launchPath = cliArgs[cliArgs.Length - 1];
-
-                output.setVerbose(options.Verbose);
-                output.writeInfo("LabVIEW CLI Started - Verbose Mode");
-                output.writeInfo("Version " + Assembly.GetExecutingAssembly().GetName().Version);
-                output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
-
-
-                // Args don't include the exe name.
-                if (options.noLaunch)
+                // check launch vi
+                if(options.LaunchVI == null)
                 {
-                    output.writeMessage("Auto Launch Disabled");
+                    output.writeError("No launch VI supplied!");
+                    return 1;
                 }
-                else
+                if (!File.Exists(options.LaunchVI))
                 {
-                    try
-                    {
-                        launcher = new LvLauncher(launchPath, lvPathFinder(options), lvInterface.port, lvArgs);
-                        launcher.Start();
-                    }
-                    catch(KeyNotFoundException ex)
-                    {
-                        // Fail gracefully if lv-ver option cannot be resolved
-                        string bitness = options.x64 ? " 64bit" : string.Empty;
-                        output.writeError("LabVIEW version \"" + options.lvVer + bitness + "\" not found!");
-                        output.writeMessage("Available LabVIEW versions are:");
-                        foreach(var ver in LvVersions.Versions)
-                        {
-                            output.writeMessage(ver.ToString());
-                        }
-                        return 1;
-                    }
-                    catch(FileNotFoundException ex)
-                    {
-                        output.writeError(ex.Message);
-                        return 1;
-                    }                    
+                    output.writeError("File \"" + options.LaunchVI + "\" does not exist!");
+                    return 1;
                 }
 
-                lvInterface.waitOnConnection();
-
-                do
+                List<string> permittedExtensions = new List<string>{ ".vi", ".lvproj" };
+                string ext = Path.GetExtension(options.LaunchVI).ToLower();
+                if (!permittedExtensions.Contains(ext))
                 {
-                    latestMessage = lvInterface.readMessage();
+                    output.writeError("Cannot handle *" + ext + " files");
+                    return 1;
+                }
 
-                    switch (latestMessage.messageType)
+                try
+                {
+                    launcher = new LvLauncher(options.LaunchVI, lvPathFinder(options), lvInterface.port, lvArgs);
+                    launcher.Start();
+                }
+                catch(KeyNotFoundException ex)
+                {
+                    // Fail gracefully if lv-ver option cannot be resolved
+                    string bitness = options.x64 ? " 64bit" : string.Empty;
+                    output.writeError("LabVIEW version \"" + options.lvVer + bitness + "\" not found!");
+                    output.writeMessage("Available LabVIEW versions are:");
+                    foreach(var ver in LvVersions.Versions)
                     {
-                        case "OUTP":
-                            Console.Write(latestMessage.messageData);
-                            break;
-                        case "EXIT":
-                            exitCode = lvInterface.extractExitCode(latestMessage.messageData);
-                            output.writeMessage("Recieved Exit Code " + exitCode);
-                            stop = true;
-                            break;
-                        case "RDER":
-                            exitCode = 1;
-                            output.writeError("Read Error");
-                            stop = true;
-                            break;
-                        default:
-                            output.writeError("Unknown Message Type Recieved:" + latestMessage.messageType);
-                            break;
+                        output.writeMessage(ver.ToString());
                     }
-
-
-                } while (!stop);
-
-                lvInterface.Close();
-                return exitCode;
+                    return 1;
+                }
+                catch(FileNotFoundException ex)
+                {
+                    output.writeError(ex.Message);
+                    return 1;
+                }                    
             }
+
+            lvInterface.waitOnConnection();
+
+            do
+            {
+                latestMessage = lvInterface.readMessage();
+
+                switch (latestMessage.messageType)
+                {
+                    case "OUTP":
+                        Console.Write(latestMessage.messageData);
+                        break;
+                    case "EXIT":
+                        exitCode = lvInterface.extractExitCode(latestMessage.messageData);
+                        output.writeMessage("Recieved Exit Code " + exitCode);
+                        stop = true;
+                        break;
+                    case "RDER":
+                        exitCode = 1;
+                        output.writeError("Read Error");
+                        stop = true;
+                        break;
+                    default:
+                        output.writeError("Unknown Message Type Recieved:" + latestMessage.messageType);
+                        break;
+                }
+
+
+            } while (!stop);
+
+            lvInterface.Close();
+            return exitCode;
         }
 
         private static void splitArguments(string[] args, out string[] cliArgs, out string[] lvArgs)
