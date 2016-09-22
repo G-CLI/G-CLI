@@ -143,7 +143,14 @@ namespace LabVIEW_CLI
             }
             if (options.lvVer != null)
             {
-                return LvVersions.ResolveVersionString(options.lvVer, options.x64).ExePath;
+                try
+                {
+                    return LvVersions.ResolveVersionString(options.lvVer, options.x64).ExePath;
+                }
+                catch(KeyNotFoundException ex)
+                {
+                    throw; // So the exception makes it to the handler above.
+                }
             }
             if (LvVersions.CurrentVersion != null)
             {

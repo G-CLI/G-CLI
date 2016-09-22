@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="LabVIEW CLI_TemporaryKey.pfx" />
     <None Include="notes\LvAutoDetect.md" />
     <None Include="packages.config" />
