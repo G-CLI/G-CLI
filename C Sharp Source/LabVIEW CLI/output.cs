@@ -32,7 +32,7 @@ namespace LabVIEW_CLI
 
         public void writeError(string message)
         {
-            Console.WriteLine(message);
+            Console.Error.WriteLine(message);
         }
 
         public void writeMessage(string message)

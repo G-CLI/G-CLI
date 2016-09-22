@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,5 +52,7 @@ namespace LabVIEW_CLI
         {
             return System.Text.RegularExpressions.Regex.IsMatch(launchPath, ".exe$");
         }
+
+        
     }
 }
