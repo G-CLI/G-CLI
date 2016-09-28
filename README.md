@@ -21,4 +21,8 @@ last argument (or last before -- if user arguments) is what to launch.
 
 --lv-exe: LabVIEW Executable to use. Defaults to LV 2014 32 bit default path at the minute.
 
+--lv-ver: LabVIEW version to use instead of specifying execution e.g. 2015
+
+--x64: Launch in 64 bit LabVIEW
+
 Any arguments after -- are passed to the application.
