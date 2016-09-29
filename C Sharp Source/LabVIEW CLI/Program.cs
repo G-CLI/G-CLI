@@ -21,7 +21,7 @@ namespace LabVIEW_CLI
             string[] cliArgs, lvArgs;
             lvComms lvInterface = new lvComms();
             lvMsg latestMessage = new lvMsg("NOOP", "");
-            LvLauncher launcher;
+            LvLauncher launcher = null;
             CliOptions options = new CliOptions();
 
             lvVersion current = LvVersions.CurrentVersion;
@@ -38,11 +38,12 @@ namespace LabVIEW_CLI
             output.writeInfo("Version " + Assembly.GetExecutingAssembly().GetName().Version);
             output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
             output.writeInfo("Arguments passed to LabVIEW: " + String.Join(" ", lvArgs));
-
-            // Args don't include the exe name.
+            
             if (options.noLaunch)
             {
                 output.writeMessage("Auto Launch Disabled");
+                // disable timeout if noLaunch is specified
+                options.timeout = -1;
             }
             else
             {
@@ -91,8 +92,17 @@ namespace LabVIEW_CLI
                 }                    
             }
 
-            lvInterface.waitOnConnection();
-            connected = true;
+            // wait for the LabVIEW application to connect to the cli
+            connected = lvInterface.waitOnConnection(options.timeout);
+
+            // if timed out, kill LabVIEW and exit with error code
+            if (!connected && launcher!=null)
+            {
+                output.writeError("Connection to LabVIEW timed out!");
+                launcher.Kill();
+                launcher.Exited -= Launcher_Exited;
+                return 1;
+            }
 
             do
             {
@@ -131,7 +141,7 @@ namespace LabVIEW_CLI
             if (!connected || !stop)
             {
                 Output output = Output.Instance;
-                output.writeError("LabVIEW exited unexpectedly");
+                output.writeError("LabVIEW terminated unexpectedly!");
                 Environment.Exit(1);
             }
         }

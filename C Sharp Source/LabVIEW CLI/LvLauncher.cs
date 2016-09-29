@@ -15,10 +15,14 @@ namespace LabVIEW_CLI
         private Process process;
         private Output output = Output.Instance;
         private Thread LvTrackingThread;
+        private ManualResetEventSlim lvStarted = new ManualResetEventSlim();
+
+        public int ProcessId { get; private set; }
+
 
         public event EventHandler Exited;
 
-        public LvLauncher(String launchPath, String lvPath, int port, string[] args)
+        public LvLauncher(string launchPath, string lvPath, int port, string[] args)
         {
 
             procInfo = new ProcessStartInfo();
@@ -55,6 +59,13 @@ namespace LabVIEW_CLI
             output.writeInfo(procInfo.FileName + " " + procInfo.Arguments);
             LvTrackingThread = new Thread(new ThreadStart(_processTrackingThread)) { Name = "LvTrackingThread" };
             LvTrackingThread.Start();
+            lvStarted.Wait();
+        }
+
+        public void Kill()
+        {
+            output.writeInfo("killing LabVIEW process (" + ProcessId + ")");
+            process.Kill();
         }
 
         /// <summary>
@@ -64,7 +75,9 @@ namespace LabVIEW_CLI
         private void _processTrackingThread()
         {
             process.Start();
+            ProcessId = process.Id;
             output.writeInfo("LabVIEW started, process ID is " + process.Id.ToString());
+            lvStarted.Set();
 
             while (!process.HasExited)
             {
