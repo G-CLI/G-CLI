@@ -10,10 +10,11 @@ namespace LabVIEW_CLI
 {
     class Program
     {
+        static bool connected = false;
+        static bool stop = false;
+
         static int Main(string[] args)
         {
-
-            bool stop = false;
             int exitCode = 0;
             Output output = Output.Instance;
 
@@ -68,6 +69,7 @@ namespace LabVIEW_CLI
                 try
                 {
                     launcher = new LvLauncher(options.LaunchVI, lvPathFinder(options), lvInterface.port, lvArgs);
+                    launcher.Exited += Launcher_Exited;
                     launcher.Start();
                 }
                 catch(KeyNotFoundException ex)
@@ -90,6 +92,7 @@ namespace LabVIEW_CLI
             }
 
             lvInterface.waitOnConnection();
+            connected = true;
 
             do
             {
@@ -120,6 +123,17 @@ namespace LabVIEW_CLI
 
             lvInterface.Close();
             return exitCode;
+        }
+
+        private static void Launcher_Exited(object sender, EventArgs e)
+        {
+            // Just quit by force if the tcp connection was not established or if LabVIEW exited without sending "EXIT" or "RDER"
+            if (!connected || !stop)
+            {
+                Output output = Output.Instance;
+                output.writeError("LabVIEW exited unexpectedly");
+                Environment.Exit(1);
+            }
         }
 
         private static void splitArguments(string[] args, out string[] cliArgs, out string[] lvArgs)
