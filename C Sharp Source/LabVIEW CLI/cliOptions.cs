@@ -13,7 +13,7 @@ namespace LabVIEW_CLI
         public bool Verbose { get; set; }
 
         [Option("no-launch", DefaultValue = false,
-        HelpText = "Prevents launching the LabVIEW App But Waits for Connection Instead")]
+        HelpText = "Prevents launching the LabVIEW app but waits for connection instead. Overrides --timeout to -1.")]
         public bool noLaunch { get; set; }
 
         [Option("lv-exe", DefaultValue = null,
@@ -27,6 +27,10 @@ namespace LabVIEW_CLI
         [Option("x64", DefaultValue = false,
         HelpText = "Use a 64-bit LabVIEW exe")]
         public bool x64 { get; set; }
+
+        [Option("timeout", DefaultValue = -1,
+        HelpText = "Maximum time (in ms) to wait for the LabVIEW program to connect to the cli. -1 = Infinity")]
+        public int timeout { get; set; }
 
         [ValueOption(0)]
         public string LaunchVI { get; set; }

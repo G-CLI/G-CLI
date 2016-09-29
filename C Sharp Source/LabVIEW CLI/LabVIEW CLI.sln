@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{143D8C52-C4CF-4B9A-9699-71B466D7CF0A}"
 	ProjectSection(SolutionItems) = preProject
 		cliOptions.cs = cliOptions.cs
+		..\..\README.md = ..\..\README.md
 	EndProjectSection
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "LabVIEW CLI WIX Setup", "..\LabVIEW CLI WIX Setup\LabVIEW CLI WIX Setup.wixproj", "{6693163A-16AF-4DE8-A21E-83340D211E66}"

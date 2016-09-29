@@ -10,17 +10,18 @@ namespace LabVIEW_CLI
 {
     class Program
     {
+        static bool connected = false;
+        static bool stop = false;
+
         static int Main(string[] args)
         {
-
-            bool stop = false;
             int exitCode = 0;
             Output output = Output.Instance;
 
             string[] cliArgs, lvArgs;
             lvComms lvInterface = new lvComms();
             lvMsg latestMessage = new lvMsg("NOOP", "");
-            LvLauncher launcher;
+            LvLauncher launcher = null;
             CliOptions options = new CliOptions();
 
             lvVersion current = LvVersions.CurrentVersion;
@@ -37,11 +38,12 @@ namespace LabVIEW_CLI
             output.writeInfo("Version " + Assembly.GetExecutingAssembly().GetName().Version);
             output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
             output.writeInfo("Arguments passed to LabVIEW: " + String.Join(" ", lvArgs));
-
-            // Args don't include the exe name.
+            
             if (options.noLaunch)
             {
                 output.writeMessage("Auto Launch Disabled");
+                // disable timeout if noLaunch is specified
+                options.timeout = -1;
             }
             else
             {
@@ -68,6 +70,7 @@ namespace LabVIEW_CLI
                 try
                 {
                     launcher = new LvLauncher(options.LaunchVI, lvPathFinder(options), lvInterface.port, lvArgs);
+                    launcher.Exited += Launcher_Exited;
                     launcher.Start();
                 }
                 catch(KeyNotFoundException ex)
@@ -89,7 +92,17 @@ namespace LabVIEW_CLI
                 }                    
             }
 
-            lvInterface.waitOnConnection();
+            // wait for the LabVIEW application to connect to the cli
+            connected = lvInterface.waitOnConnection(options.timeout);
+
+            // if timed out, kill LabVIEW and exit with error code
+            if (!connected && launcher!=null)
+            {
+                output.writeError("Connection to LabVIEW timed out!");
+                launcher.Kill();
+                launcher.Exited -= Launcher_Exited;
+                return 1;
+            }
 
             do
             {
@@ -120,6 +133,17 @@ namespace LabVIEW_CLI
 
             lvInterface.Close();
             return exitCode;
+        }
+
+        private static void Launcher_Exited(object sender, EventArgs e)
+        {
+            // Just quit by force if the tcp connection was not established or if LabVIEW exited without sending "EXIT" or "RDER"
+            if (!connected || !stop)
+            {
+                Output output = Output.Instance;
+                output.writeError("LabVIEW terminated unexpectedly!");
+                Environment.Exit(1);
+            }
         }
 
         private static void splitArguments(string[] args, out string[] cliArgs, out string[] lvArgs)

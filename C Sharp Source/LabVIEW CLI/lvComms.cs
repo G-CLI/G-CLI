@@ -50,14 +50,25 @@ namespace LabVIEW_CLI
             _listener.Start();
         }
 
-        public void waitOnConnection() {
+        /// <summary>
+        /// waits <paramref name="millisecondsTimeout"/> for a connection from the LabVIEW programm.
+        /// </summary>
+        /// <param name="millisecondsTimeout">The number of milliseconds to wait, or Infinite (-1) to wait indefinitely.</param>
+        /// <returns>true if a connection was established, false if timed out</returns>
+        public bool waitOnConnection(int millisecondsTimeout = -1) {
 
             //Blocking call to wait for TCP Client
             output.writeInfo("Waiting for connection on port " + _port);
-            _client = _listener.AcceptTcpClient();
+            Task<TcpClient> clientTask = _listener.AcceptTcpClientAsync();
+            if (!clientTask.Wait(millisecondsTimeout))
+            {
+                return false;
+            }
+            _client = clientTask.Result;
             _clientConnected = true;
             _stream = _client.GetStream();
             output.writeInfo("Client Connected");
+            return true;
         }
 
         public int port {
