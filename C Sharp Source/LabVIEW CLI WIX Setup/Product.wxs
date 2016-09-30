@@ -3,7 +3,7 @@
   <?define LabVIEW CLI_TargetDir=$(var.LabVIEW CLI.TargetDir)?>
   <Product Name="LabVIEW CLI" 
            Language="1033" 
-           Version="1.2.0.1" 
+           Version="!(bind.FileVersion.labview_cli.exe)"
            Manufacturer="LabVIEW CLI Contributors"
            Id="*"
            UpgradeCode="1EFDB3E4-2430-457E-AA06-F0C9866F9236">
