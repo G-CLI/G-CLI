@@ -3,14 +3,14 @@
   <?define LabVIEW CLI_TargetDir=$(var.LabVIEW CLI.TargetDir)?>
   <Product Name="LabVIEW CLI" 
            Language="1033" 
-           Version="1.2.0.1" 
+           Version="!(bind.FileVersion.labview_cli.exe)"
            Manufacturer="LabVIEW CLI Contributors"
            Id="*"
            UpgradeCode="1EFDB3E4-2430-457E-AA06-F0C9866F9236">
     <Package Id='*' Keywords='Installer' Description="LabVIEW CLI Installer" Manufacturer="LabVIEW CLI Contributors"
              InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MajorUpgrade AllowSameVersionUpgrades="yes" IgnoreRemoveFailure="no" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate EmbedCab="yes"/>
 
     <Feature Id="ProductFeature" Title="LabVIEW-CLI" Level="1" ConfigurableDirectory='INSTALLFOLDER'>
@@ -33,10 +33,6 @@
 
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
-      <!-- <Component Id="ProductComponent"> -->
-      <!-- TODO: Insert files, registry keys, and other resources here. -->
-      <!-- </Component> -->
       <Component Id="CommandLine.dll" Guid="12c93943-6e82-480d-a637-ae1925cfc177">
         <File Id="CommandLine.dll" Name="CommandLine.dll" Source="$(var.LabVIEW CLI_TargetDir)CommandLine.dll" />
       </Component>
