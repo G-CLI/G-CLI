@@ -32,6 +32,11 @@ namespace LabVIEW_CLI
             {
                 Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
             }
+            if (options.Version)
+            {
+                output.writeMessage(Assembly.GetExecutingAssembly().GetName().Version.ToString());
+                Environment.Exit(0);
+            }
 
             output.setVerbose(options.Verbose);
             output.writeInfo("LabVIEW CLI Started - Verbose Mode");

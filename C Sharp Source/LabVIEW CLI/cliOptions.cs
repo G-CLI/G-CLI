@@ -8,6 +8,10 @@ namespace LabVIEW_CLI
 {
     public class CliOptions
     {
+        [Option("version", DefaultValue = false,
+        HelpText = "Prints the program version.")]
+        public bool Version { get; set; }
+
         [Option('v', "verbose", DefaultValue = false,
         HelpText = "Prints all messages to standard output.")]
         public bool Verbose { get; set; }
