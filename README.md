@@ -17,6 +17,8 @@ When installed with the supplied installer the application is added to Windows p
 
 last argument (or last before -- if user arguments) is what to launch.
 
+--version: Prints the program version and exits
+
 -v: Verbose mode.
 
 --no-launch: Doesn't launch anything automatically, you must run your software manually. Overrides --timeout to -1.
