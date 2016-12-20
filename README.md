@@ -31,4 +31,6 @@ last argument (or last before -- if user arguments) is what to launch.
 
 --timeout: Maximum time (in ms) to wait for the LabVIEW program to connect to the CLI (-1 = Infinity).
 
+--kill: Forces the LabVIEW process to exit after the CLI receives a return code/error
+
 Any arguments after -- are passed to the application.

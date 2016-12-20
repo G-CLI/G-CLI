@@ -36,6 +36,10 @@ namespace LabVIEW_CLI
         HelpText = "Maximum time (in ms) to wait for the LabVIEW program to connect to the cli. -1 = Infinity")]
         public int timeout { get; set; }
 
+        [Option("kill", DefaultValue = false,
+        HelpText = "Forces the LabVIEW process to exit after the CLI receives a return code/error")]
+        public bool kill { get; set; }
+
         [ValueOption(0)]
         public string LaunchVI { get; set; }
 
