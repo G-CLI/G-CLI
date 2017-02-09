@@ -18,6 +18,7 @@ namespace LabVIEW_CLI
         private ManualResetEventSlim lvStarted = new ManualResetEventSlim();
 
         public int ProcessId { get; private set; }
+        public ManualResetEventSlim lvExited = new ManualResetEventSlim();
 
 
         public event EventHandler Exited;
@@ -96,6 +97,7 @@ namespace LabVIEW_CLI
         private void Process_Exited(object sender, EventArgs e)
         {
             output.writeInfo("LabVIEW exiting...");
+            lvExited.Set();
             Exited?.Invoke(sender, e);
         }
 

@@ -136,7 +136,20 @@ namespace LabVIEW_CLI
 
             } while (!stop);
 
+            // close tcp listener
             lvInterface.Close();
+
+            // if killswitch is set, force LabVIEW to exit if it has not closed by itself after a 10s timeout (or the period specified in --timeout)
+            if (options.kill)
+            {
+                int timeout = options.timeout == -1 ? 10000 : options.timeout;
+                if (!launcher.lvExited.Wait(timeout))
+                {
+                    output.writeMessage("Forcing LabVIEW to terminate...");
+                    launcher.Kill();
+                }
+            }
+
             return exitCode;
         }
 
