@@ -120,7 +120,7 @@ namespace LabVIEW_CLI
                         break;
                     case "EXIT":
                         exitCode = lvInterface.extractExitCode(latestMessage.messageData);
-                        output.writeMessage("Recieved Exit Code " + exitCode);
+                        output.writeMessage("Received Exit Code " + exitCode);
                         stop = true;
                         break;
                     case "RDER":
@@ -129,7 +129,7 @@ namespace LabVIEW_CLI
                         stop = true;
                         break;
                     default:
-                        output.writeError("Unknown Message Type Recieved:" + latestMessage.messageType);
+                        output.writeError("Unknown Message Type Received:" + latestMessage.messageType);
                         break;
                 }
 
