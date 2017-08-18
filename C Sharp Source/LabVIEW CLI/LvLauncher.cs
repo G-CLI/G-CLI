@@ -86,7 +86,7 @@ namespace LabVIEW_CLI
                 Thread.Sleep(500);
             }
 
-            output.writeInfo("process tracking tread finished");
+            output.writeInfo("process tracking thread finished");
         }
 
         private Boolean isExe(String launchPath)
