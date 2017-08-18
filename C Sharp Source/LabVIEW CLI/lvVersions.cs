@@ -93,7 +93,7 @@ namespace LabVIEW_CLI
         /// <param name="regView">32bit or 64bit registry</param>
         private static void _ScanRegistry(RegistryView regView)
         {
-            string bitness = (regView == RegistryView.Registry32) ? "32" : "64";
+            string bitness = (regView == RegistryView.Registry32) ? "32bit" : "64bit";
 
             RegistryKey baseKey = _GetBaseKey(regView);
             if (baseKey == null)
@@ -115,7 +115,7 @@ namespace LabVIEW_CLI
                 itemGUID = itemKey.GetValue("GUID");
                 if (itemPath != null && itemVersion != null)
                 {
-                    Versions.Add(new lvVersion { Version = itemVersion.ToString(), Path = itemPath.ToString(), Bitness = "32bit", GUID = itemGUID.ToString() });
+                    Versions.Add(new lvVersion { Version = itemVersion.ToString(), Path = itemPath.ToString(), Bitness = bitness, GUID = itemGUID.ToString() });
                 }
             }
         }

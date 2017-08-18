@@ -43,6 +43,9 @@ namespace LabVIEW_CLI
             output.writeInfo("Version " + Assembly.GetExecutingAssembly().GetName().Version);
             output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
             output.writeInfo("Arguments passed to LabVIEW: " + String.Join(" ", lvArgs));
+
+            //Force a rescan at this point to get an output - the constructor scan does not seem to write to output, possibly due to happening before we set verbose flag.
+            LvVersions.Scan();
             
             if (options.noLaunch)
             {
