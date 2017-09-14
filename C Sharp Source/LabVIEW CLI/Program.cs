@@ -67,7 +67,7 @@ namespace LabVIEW_CLI
                     return 1;
                 }
 
-                List<string> permittedExtensions = new List<string>{ ".vi", ".lvproj" };
+                List<string> permittedExtensions = new List<string>{ ".vi", ".lvproj", ".exe" };
                 string ext = Path.GetExtension(options.LaunchVI).ToLower();
                 if (!permittedExtensions.Contains(ext))
                 {

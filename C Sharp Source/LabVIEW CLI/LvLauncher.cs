@@ -77,7 +77,7 @@ namespace LabVIEW_CLI
         {
             process.Start();
             ProcessId = process.Id;
-            output.writeInfo("LabVIEW started, process ID is " + process.Id.ToString());
+            output.writeInfo("LabVIEW/App started, process ID is " + process.Id.ToString());
             lvStarted.Set();
 
             while (!process.HasExited)
@@ -96,7 +96,7 @@ namespace LabVIEW_CLI
 
         private void Process_Exited(object sender, EventArgs e)
         {
-            output.writeInfo("LabVIEW exiting...");
+            output.writeInfo("LabVIEW/App exiting...");
             lvExited.Set();
             Exited?.Invoke(sender, e);
         }
