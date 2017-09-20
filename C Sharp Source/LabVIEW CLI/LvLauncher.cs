@@ -12,7 +12,7 @@ namespace LabVIEW_CLI
     class LvLauncher
     {
         private ProcessStartInfo procInfo;
-        private Process process;
+        private Process lvProcess;
         private Output output = Output.Instance;
         private Thread LvTrackingThread;
         private ManualResetEventSlim lvStarted = new ManualResetEventSlim();
@@ -49,9 +49,9 @@ namespace LabVIEW_CLI
                 procInfo.Arguments = "\"" + launchPath + "\" " + arguments;
             }
 
-            process = new Process();
-            process.StartInfo = procInfo;
-            process.Exited += Process_Exited;
+            lvProcess = new Process();
+            lvProcess.StartInfo = procInfo;
+            lvProcess.Exited += Process_Exited;
         }
 
         public void Start()
@@ -66,23 +66,23 @@ namespace LabVIEW_CLI
         public void Kill()
         {
             output.writeInfo("killing LabVIEW process (" + ProcessId + ")");
-            process.Kill();
+            lvProcess.Kill();
         }
 
         /// <summary>
         /// Starts the LabVIEW process and keeps track of it.
-        /// Must be run in a dedicated threat.
+        /// Must be run in a dedicated thread.
         /// </summary>
         private void _processTrackingThread()
         {
-            process.Start();
-            ProcessId = process.Id;
-            output.writeInfo("LabVIEW/App started, process ID is " + process.Id.ToString());
+            lvProcess.Start();
+            ProcessId = lvProcess.Id;
+            output.writeInfo("LabVIEW/App started, process ID is " + lvProcess.Id.ToString());
             lvStarted.Set();
 
-            while (!process.HasExited)
+            while (!lvProcess.HasExited)
             {
-                process.Refresh();
+                lvProcess.Refresh();
                 Thread.Sleep(500);
             }
 
@@ -97,6 +97,18 @@ namespace LabVIEW_CLI
         private void Process_Exited(object sender, EventArgs e)
         {
             output.writeInfo("LabVIEW/App exiting...");
+
+            //notify if it looks like it wasn't a clean exit.
+            if(lvProcess.ExitCode != 0)
+            {
+                output.writeError("LabVIEW exited with code " + lvProcess.ExitCode.ToString());
+            }
+            else
+            {
+                output.writeInfo("LabVIEW exited with code " + lvProcess.ExitCode.ToString());
+            }
+
+
             lvExited.Set();
             Exited?.Invoke(sender, e);
         }

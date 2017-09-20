@@ -100,6 +100,13 @@ namespace LabVIEW_CLI
                 }                    
             }
 
+            //At this point LV should have launched so now we need to handle Ctrl+C to ensure LV is killed as well.
+            Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs e)
+            {
+                output.writeMessage("Cancel key recieved, closing LabVIEW.");
+                launcher.Kill();
+            };
+
             // wait for the LabVIEW application to connect to the cli
             connected = lvInterface.waitOnConnection(options.timeout);
 
@@ -163,6 +170,7 @@ namespace LabVIEW_CLI
             {
                 Output output = Output.Instance;
                 output.writeError("LabVIEW terminated unexpectedly!");
+                output.writeError("This could be because LabVIEW was already running. Ensure it has stopped and try again.");
                 Environment.Exit(1);
             }
         }
