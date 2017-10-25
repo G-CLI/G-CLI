@@ -1,7 +1,10 @@
 # Release Checklist #
 
-* Increment version number in VI package configuration.
 * Increment version number in LabVIEW-CLI C# project.
-* Increment product version in WiX settings
+* Build EXE
+* Build Installer
+* Copy installer MSI to "Installation Support" Folder in LabVIEW Source
+* Increment version number in VI package configuration.
+
 
 

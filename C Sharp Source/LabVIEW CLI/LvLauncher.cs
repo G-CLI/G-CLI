@@ -16,6 +16,7 @@ namespace LabVIEW_CLI
         private Output output = Output.Instance;
         private Thread LvTrackingThread;
         private ManualResetEventSlim lvStarted = new ManualResetEventSlim();
+        private Boolean cliExited = false;
 
         public int ProcessId { get; private set; }
         public ManualResetEventSlim lvExited = new ManualResetEventSlim();
@@ -69,6 +70,12 @@ namespace LabVIEW_CLI
             lvProcess.Kill();
         }
 
+        //Closes the tracking thread to ensure we don't leave it active.
+        public void Close()
+        {
+            cliExited = true;
+        }
+
         /// <summary>
         /// Starts the LabVIEW process and keeps track of it.
         /// Must be run in a dedicated thread.
@@ -80,7 +87,7 @@ namespace LabVIEW_CLI
             output.writeInfo("LabVIEW/App started, process ID is " + lvProcess.Id.ToString());
             lvStarted.Set();
 
-            while (!lvProcess.HasExited)
+            while (!lvProcess.HasExited && !cliExited)
             {
                 lvProcess.Refresh();
                 Thread.Sleep(500);

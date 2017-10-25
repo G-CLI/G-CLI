@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="0.6" Created_Date="2016-01-02 11:56:11" Modified_Date="2017-08-18 09:35:49" Creator="James McNally" Comments="" ID="3d0f94bc4b519f6cfb03534317129a6c">
+<VI_Package_Builder_Settings Version="0.6" Created_Date="2016-01-02 11:56:11" Modified_Date="2017-10-25 15:34:12" Creator="James McNally" Comments="" ID="1c5c344bab0ea85c73414c49b3e54167">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_LabVIEW_CLI</Package_File_Name>
-    <Library_Version>1.5.0.9</Library_Version>
+    <Library_Version>1.5.1.10</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -37,8 +37,9 @@ NOTE: Since the Windows application installs to path administrator access is req
       <Copyright>Copyright (c) 2017, LabVIEW CLI Contributors</Copyright>
       <Packager/>
       <URL>https://github.com/JamesMc86/LabVIEW-CLI</URL>
-      <Release_Notes>* New Exit With Error block that just converts the error in to determine exit code.
-* Bug fix with 64 bit LabVIEW launching.</Release_Notes>
+      <Release_Notes>* Fix launching built EXE instead of source VI.
+* Fixed crash on an empty message.
+* Added message that if LabVIEW closes instantly it may already be running.</Release_Notes>
     </Description>
     <Destinations>
       <Toolkit_VIs>
@@ -271,7 +272,7 @@ NOTE: Since the Windows application installs to path administrator access is req
         <Path>CLI Class\Write String.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>EE39650A3D3AD76992EC6A60E4722A85</GUID>
+      <GUID>89D2E673FACC453077BFD44D38BE1AC5</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>

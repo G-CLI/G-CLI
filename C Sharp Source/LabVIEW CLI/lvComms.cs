@@ -42,7 +42,7 @@ namespace LabVIEW_CLI
             //Get first available dynamic port
             _port = GetFirstAvailableRandomPort(49152, 65535);
 
-            //Assign a buffer for incoming data. 1k should be plenty.
+            //Assign a buffer for incoming data.
             _dataBuffer = new Byte[MAX_PAYLOAD_BYTES + TYPE_BYTES];
 
             //Start up the server
@@ -93,18 +93,34 @@ namespace LabVIEW_CLI
             {
                 Array.Reverse(lengthBuff);
                 length = BitConverter.ToInt32(lengthBuff, 0);
-                if (length > TYPE_BYTES)
+                if (length > 0 && length <= MAX_PAYLOAD_BYTES + TYPE_BYTES)
                 {
                     _stream.Read(_dataBuffer, 0, length);
                     msgType = Encoding.ASCII.GetString(_dataBuffer, 0, TYPE_BYTES);
-                    msgData = Encoding.ASCII.GetString(_dataBuffer, TYPE_BYTES, length - TYPE_BYTES);
+
+                    //If we have length data to read.
+                    if (length > TYPE_BYTES)
+                    {
+                        msgData = Encoding.ASCII.GetString(_dataBuffer, TYPE_BYTES, length - TYPE_BYTES);
+                    }
+                    else
+                    {
+                        msgData = "";
+                    }
+
+                }
+                else
+                {
+                    msgType = "RDER";
+                    msgData = "Bad Length Read: " + length;
                 }
 
                 return new lvMsg(msgType, msgData);
+
             }
             else
             {
-                return new lvMsg("RDER", "");
+                return new lvMsg("RDER", "Incorrect Read of Length Bytes");
             }
         }
 

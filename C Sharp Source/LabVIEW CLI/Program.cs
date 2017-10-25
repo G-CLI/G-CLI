@@ -136,6 +136,11 @@ namespace LabVIEW_CLI
                     case "RDER":
                         exitCode = 1;
                         output.writeError("Read Error");
+                        if(latestMessage.messageData != "")
+                        {
+                            output.writeError(": " + latestMessage.messageData);
+                        }
+                        output.writeError("Since the network stream will be out of sync the application will now exit.");
                         stop = true;
                         break;
                     default:
@@ -159,6 +164,8 @@ namespace LabVIEW_CLI
                     launcher.Kill();
                 }
             }
+
+            launcher.Close();
 
             return exitCode;
         }
