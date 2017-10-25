@@ -46,7 +46,12 @@ namespace LabVIEW_CLI
             }
             else
             {
-                procInfo.FileName = lvPath;
+                if (isLabVIEWRunning(lvPath))
+                {
+                    output.writeMessage("It looks like LabVIEW is already running. The launch may fail.");
+                }
+
+                    procInfo.FileName = lvPath;
                 procInfo.Arguments = "\"" + launchPath + "\" " + arguments;
             }
 
@@ -99,6 +104,16 @@ namespace LabVIEW_CLI
         private Boolean isExe(String launchPath)
         {
             return System.Text.RegularExpressions.Regex.IsMatch(launchPath, ".exe$");
+        }
+
+        private Boolean isLabVIEWRunning(String path)
+        {
+
+            Process[] lvProcesses = Process.GetProcessesByName("LabVIEW");
+            Process matchingProcess = lvProcesses.FirstOrDefault(p => p.MainModule.FileName.Equals(path));
+            bool isRunning = matchingProcess != default(Process);
+
+            return isRunning;
         }
 
         private void Process_Exited(object sender, EventArgs e)
