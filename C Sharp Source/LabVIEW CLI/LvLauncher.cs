@@ -46,6 +46,11 @@ namespace LabVIEW_CLI
             }
             else
             {
+                //gate on a blank LV path which means we don't have LabVIEW Installed.
+                if(lvPath == "")
+                {
+                    throw new System.IO.FileNotFoundException("No LabVIEW.exe found...", "LabVIEW.exe");
+                }
                 procInfo.FileName = lvPath;
                 procInfo.Arguments = "\"" + launchPath + "\" " + arguments;
             }
