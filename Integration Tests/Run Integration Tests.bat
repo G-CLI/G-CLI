@@ -21,11 +21,11 @@ REM Can be removed once bug fixed with exe paths (#37)RE
 REM CD exes
 
 SET test_name="Echo Parameters EXE"
-"%labview_cli_cmd%" %common_params% "exes\Echo CLI.exe" -- "Param 1" "Param 2" | find "Param 1	Param 2" || goto :failed
+"%labview_cli_cmd%" %common_params% ".\exes\Echo CLI.exe" -- "Param 1" "Param 2" | find "Param 1	Param 2" || goto :failed
 TIMEOUT %delay_between_tests%
 
 SET test_name="Large Output EXE"
-"%labview_cli_cmd%" %common_params% "exes\LargeOutput.exe" -- 10000 || goto :failed
+"%labview_cli_cmd%" %common_params% ".\exes\LargeOutput.exe" -- 10000 || goto :failed
 TIMEOUT %delay_between_tests%
 
 SET test_name="Quit With Code EXE"
@@ -36,9 +36,9 @@ REM Can be removed once bug fixed with exe paths (#37)
 CD ..
 
 echo "All Tests Completed Successfully"
-EXIT /B
+EXIT
 
 :failed
 echo "Test Failed: %test_name%"
-EXIT /B 1
+EXIT 1
 
