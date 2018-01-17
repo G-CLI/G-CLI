@@ -10,6 +10,7 @@
 
 # Executables
 *.exe
+!/Integration Tests/exes/*.exe
 
 # Metadata
 *.aliases
