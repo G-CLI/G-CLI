@@ -103,7 +103,7 @@ namespace LabVIEW_CLI
 
         private Boolean isExe(String launchPath)
         {
-            return System.Text.RegularExpressions.Regex.IsMatch(launchPath, ".exe$");
+            return System.Text.RegularExpressions.Regex.IsMatch(launchPath, ".exe$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
         private void Process_Exited(object sender, EventArgs e)
