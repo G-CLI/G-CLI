@@ -266,3 +266,4 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 /*.vip
+/C Sharp Source/LabVIEW CLI/packages

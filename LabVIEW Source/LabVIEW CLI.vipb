@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="0.6" Created_Date="2016-01-02 11:56:11" Modified_Date="2018-02-02 16:04:36" Creator="James McNally" Comments="" ID="7a9c21e451d49fd035607433d9292980">
+<VI_Package_Builder_Settings Version="0.6" Created_Date="2016-01-02 11:56:11" Modified_Date="2018-02-02 16:51:40" Creator="James McNally" Comments="" ID="78b6a8199246a060c5b26b5b0a16b803">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_LabVIEW_CLI</Package_File_Name>
-    <Library_Version>1.5.3.12</Library_Version>
+    <Library_Version>1.5.3.13</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -37,7 +37,8 @@ NOTE: Since the Windows application installs to path administrator access is req
       <Copyright>Copyright (c) 2017, LabVIEW CLI Contributors</Copyright>
       <Packager/>
       <URL>https://github.com/JamesMc86/LabVIEW-CLI</URL>
-      <Release_Notes>* Reduce string output size to avoid packet timing errors. fixes #35</Release_Notes>
+      <Release_Notes>* Reduce string output size to avoid packet timing errors. fixes #35
+* Changed exit code formatting to a string representation of the number. fixes #42</Release_Notes>
     </Description>
     <Destinations>
       <Toolkit_VIs>
@@ -270,7 +271,7 @@ NOTE: Since the Windows application installs to path administrator access is req
         <Path>CLI Class\Write String.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>1C87C38C146D8256E5F0DC577BEAAA14</GUID>
+      <GUID>E0F2F7CFDD1564E67796FFAFD17AC36D</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>

@@ -9,7 +9,7 @@ using System.Net.NetworkInformation;
 
 namespace LabVIEW_CLI
 {
-    class lvComms
+    public class lvComms
     {
         private Output output = Output.Instance;
         private TcpListener _listener;
@@ -126,12 +126,8 @@ namespace LabVIEW_CLI
 
         public int extractExitCode(string msgData)
         {
-            Byte[] codeBytes = new Byte[4];
 
-            codeBytes = Encoding.ASCII.GetBytes(msgData.ToCharArray(0, 4), 0, 4);
-            Array.Reverse(codeBytes);
-
-            return BitConverter.ToInt32(codeBytes, 0);
+            return Int32.Parse(msgData);
 
         }
 
@@ -145,7 +141,7 @@ namespace LabVIEW_CLI
         }
     }
 
-    class lvMsg
+    public class lvMsg
     {
         private string _messageType;
         private string _messageData;
