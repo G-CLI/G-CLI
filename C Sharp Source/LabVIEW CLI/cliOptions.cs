@@ -32,8 +32,8 @@ namespace LabVIEW_CLI
         HelpText = "Use a 64-bit LabVIEW exe")]
         public bool x64 { get; set; }
 
-        [Option("timeout", DefaultValue = -1,
-        HelpText = "Maximum time (in ms) to wait for the LabVIEW program to connect to the cli. -1 = Infinity")]
+        [Option("timeout", DefaultValue = 60000,
+        HelpText = "Maximum time (in ms) to wait for the LabVIEW program to connect to the cli. -1 = forever. Default is 60000 (60 seconds)")]
         public int timeout { get; set; }
 
         [Option("kill", DefaultValue = false,
