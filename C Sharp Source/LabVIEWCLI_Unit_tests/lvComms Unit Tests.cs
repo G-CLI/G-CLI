@@ -14,7 +14,6 @@ namespace LabVIEWCLI_Unit_tests
         public void setUp()
         {
             lvCommsInstance = new lvComms();
-            Console.WriteLine("Test123");
 
         }
 
@@ -45,6 +44,42 @@ namespace LabVIEWCLI_Unit_tests
             Int32 exitCode = lvCommsInstance.extractExitCode(msgData);
             Assert.AreEqual(-4587, exitCode);
 
+        }
+    }
+
+    [TestClass]
+    public class ArgumentFormatingUnitTests
+    {
+        private LabVIEW_CLI.lvComms lvCommsInstance;
+
+        [TestInitialize]
+        public void setUp()
+        {
+            lvCommsInstance = new lvComms();
+
+        }
+
+        [TestCleanup]
+        public void tearDown()
+        {
+            lvCommsInstance.Close();
+
+        }
+
+        [TestMethod]
+        public void testStandardCommandLineMessageFormatting()
+        {
+
+            string[] lvArgs = { "arg1", "arg2", "arg3" };
+
+            lvMsg expectedMessage = new lvMsg("ARGS", "arg1\targ2\targ3");
+
+            lvMsg messageToSend;
+
+            messageToSend = lvCommsInstance.generateArgumentsMessage(lvArgs);
+
+            Assert.AreEqual(expectedMessage.messageType, messageToSend.messageType);
+            Assert.AreEqual(expectedMessage.messageData, messageToSend.messageData);
         }
     }
 }

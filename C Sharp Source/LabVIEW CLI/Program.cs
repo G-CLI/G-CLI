@@ -117,6 +117,9 @@ namespace LabVIEW_CLI
                 return 1;
             }
 
+            //Write the use arguments
+            lvInterface.writeArguments(lvArgs);
+
             do
             {
                 latestMessage = lvInterface.readMessage();

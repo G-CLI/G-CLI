@@ -20,7 +20,7 @@ namespace LabVIEW_CLI
         private Byte[] _dataBuffer;
         private const int LENGTH_BYTES = 4;
         private const int TYPE_BYTES = 4;
-        private const int MAX_PAYLOAD_BYTES = 9000 - LENGTH_BYTES - TYPE_BYTES; // 9000 is multiple of default MTU of 1500.
+        private const int MAX_PAYLOAD_BYTES = 1032 - LENGTH_BYTES - TYPE_BYTES; // 9000 is multiple of default MTU of 1500.
 
         // Returns available port number or zero if no port is available
         public static int GetFirstAvailableRandomPort(int startPort, int stopPort)
@@ -124,11 +124,45 @@ namespace LabVIEW_CLI
             }
         }
 
+        public void writeArguments(string[] lvArgs)
+        {
+            writeMessage(generateArgumentsMessage(lvArgs));
+        }
+
+        private void writeMessage(lvMsg messageToWrite)
+        {
+
+            byte[] buffer = new byte[MAX_PAYLOAD_BYTES];
+            int messageDataSize = messageToWrite.messageData.Length;
+            byte[] binaryLength = new byte[4];
+
+            if (messageDataSize > 1024)
+            {
+                throw new ArgumentOutOfRangeException("Message Data Length", messageDataSize, "Must be 1024 bytes max");
+            }
+
+            //First sort the overall length
+            binaryLength = BitConverter.GetBytes(messageDataSize + 4);
+            Array.Reverse(binaryLength); //To big endian
+            Array.Copy(binaryLength, buffer, 4);
+
+            //Now write message type and data.
+            Array.Copy(Encoding.ASCII.GetBytes(messageToWrite.messageType), 0, buffer, 4, 4);
+            Array.Copy(Encoding.ASCII.GetBytes(messageToWrite.messageData), 0, buffer, 8, messageDataSize);
+
+            _stream.Write(buffer, 0, messageDataSize + 8);
+        }
+
         public int extractExitCode(string msgData)
         {
 
             return Int32.Parse(msgData);
 
+        }
+
+        public lvMsg generateArgumentsMessage(string[] lvArgs)
+        {
+            return new lvMsg("ARGS", String.Join("\t", lvArgs));
         }
 
         public void Close()
