@@ -25,7 +25,6 @@ namespace LabVIEW_CLI
             lvVersion current = LvVersions.CurrentVersion;
 
             splitArguments(args, out cliArgs, out lvArgs);
-            //CommandLine.Parser.Default.ParseArguments(cliArgs, options);
             if(!CommandLine.Parser.Default.ParseArguments(cliArgs, options))
             {
                 Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
@@ -75,7 +74,7 @@ namespace LabVIEW_CLI
 
                 try
                 {
-                    launcher = new LvLauncher(options.LaunchVI, lvPathFinder(options), lvInterface.port, lvArgs);
+                    launcher = new LvLauncher(options.LaunchVI, lvPathFinder(options), lvInterface.port);
                     launcher.Exited += Launcher_Exited;
                     launcher.Start();
                 }
