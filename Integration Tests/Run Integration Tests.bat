@@ -42,5 +42,5 @@ EXIT
 
 :failed
 echo "Test Failed: %test_name%"
-EXIT 0
+EXIT 1
 
