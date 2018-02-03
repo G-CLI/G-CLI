@@ -24,20 +24,12 @@ namespace LabVIEW_CLI
 
         public event EventHandler Exited;
 
-        public LvLauncher(string launchPath, string lvPath, int port, string[] args)
+        public LvLauncher(string launchPath, lvVersion lvVer, int port, portRegistration portRegistration)
         {
 
             procInfo = new ProcessStartInfo();
 
-            //Prepare the arguments with quotes.
-            string preparedArgs = "";
-            foreach (string arg in args)
-            {
-                preparedArgs += "\"" + arg + "\" ";
-            }
-            output.writeInfo("LabVIEW User Arguments: " + preparedArgs);
-
-            string arguments = "-- -p:" + port + " " + preparedArgs;
+            string arguments = "-- -p:" + port;
 
             if (isExe(launchPath))
             {
@@ -47,12 +39,13 @@ namespace LabVIEW_CLI
             else
             {
                 //gate on a blank LV path which means we don't have LabVIEW Installed.
-                if(lvPath == "")
+                if(lvVer.ExePath == "")
                 {
                     throw new System.IO.FileNotFoundException("No LabVIEW.exe found...", "LabVIEW.exe");
                 }
-                procInfo.FileName = lvPath;
+                procInfo.FileName = lvVer.ExePath;
                 procInfo.Arguments = "\"" + launchPath + "\" " + arguments;
+                portRegistration.registerPort(launchPath, lvVer, port);
             }
 
             lvProcess = new Process();

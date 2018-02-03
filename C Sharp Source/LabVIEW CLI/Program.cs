@@ -21,8 +21,8 @@ namespace LabVIEW_CLI
             lvMsg latestMessage = new lvMsg("NOOP", "");
             LvLauncher launcher = null;
             CliOptions options = new CliOptions();
-
             lvVersion current = LvVersions.CurrentVersion;
+            portRegistration portRegistration = new portRegistration();
 
             splitArguments(args, out cliArgs, out lvArgs);
             if(!CommandLine.Parser.Default.ParseArguments(cliArgs, options))
@@ -74,7 +74,7 @@ namespace LabVIEW_CLI
 
                 try
                 {
-                    launcher = new LvLauncher(options.LaunchVI, lvPathFinder(options), lvInterface.port);
+                    launcher = new LvLauncher(options.LaunchVI, lvPathFinder(options), lvInterface.port, portRegistration);
                     launcher.Exited += Launcher_Exited;
                     launcher.Start();
                 }
@@ -106,6 +106,7 @@ namespace LabVIEW_CLI
 
             // wait for the LabVIEW application to connect to the cli
             connected = lvInterface.waitOnConnection(options.timeout);
+            portRegistration.unRegister();
 
             // if timed out, kill LabVIEW and exit with error code
             if (!connected && launcher!=null)
@@ -170,6 +171,8 @@ namespace LabVIEW_CLI
             return exitCode;
         }
 
+
+
         private static void Launcher_Exited(object sender, EventArgs e)
         {
             // Just quit by force if the tcp connection was not established or if LabVIEW exited without sending "EXIT" or "RDER"
@@ -207,19 +210,20 @@ namespace LabVIEW_CLI
             }
 
         }
-        private static string lvPathFinder(CliOptions options)
+        private static lvVersion lvPathFinder(CliOptions options)
         {
             if (options.lvExe != null)
             {
                 if (!File.Exists(options.lvExe))
                     throw new FileNotFoundException("specified executable not found", options.lvExe);
-                return options.lvExe;
+                lvVersion exeVersion = new lvVersion{ Path = options.lvExe };
+                return exeVersion;
             }
             if (options.lvVer != null)
             {
                 try
                 {
-                    return LvVersions.ResolveVersionString(options.lvVer, options.x64).ExePath;
+                    return LvVersions.ResolveVersionString(options.lvVer, options.x64);
                 }
                 catch(KeyNotFoundException ex)
                 {
@@ -228,11 +232,11 @@ namespace LabVIEW_CLI
             }
             if (LvVersions.CurrentVersion != null)
             {
-                return LvVersions.CurrentVersion.ExePath;
+                return LvVersions.CurrentVersion;
             }
             else
             {
-                return "";
+                return new lvVersion();
             }
         }
 

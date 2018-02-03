@@ -107,6 +107,7 @@
     <Compile Include="LvLauncher.cs" />
     <Compile Include="LvVersions.cs" />
     <Compile Include="output.cs" />
+    <Compile Include="portRegistration.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
