@@ -17,6 +17,7 @@ namespace LabVIEW_CLI
         private Thread LvTrackingThread;
         private ManualResetEventSlim lvStarted = new ManualResetEventSlim();
         private Boolean cliExited = false;
+        private Boolean processSwitched = false;
 
         public int ProcessId { get; private set; }
         public ManualResetEventSlim lvExited = new ManualResetEventSlim();
@@ -50,7 +51,6 @@ namespace LabVIEW_CLI
 
             lvProcess = new Process();
             lvProcess.StartInfo = procInfo;
-            lvProcess.Exited += Process_Exited;
         }
 
         public void Start()
@@ -83,7 +83,35 @@ namespace LabVIEW_CLI
             lvProcess.Start();
             ProcessId = lvProcess.Id;
             output.writeInfo("LabVIEW/App started, process ID is " + lvProcess.Id.ToString());
+            output.writeInfo("Process Name " + lvProcess.ProcessName.ToString());
             lvStarted.Set();
+
+            //wait for once second to work out if the process has held the PID or connected to existing process.
+            Thread.Sleep(500);
+            lvProcess.Refresh();
+            output.writeInfo("Process Exited after one second: " + lvProcess.HasExited.ToString());
+
+            //If it has exited we will attempt to recover a different PID.
+            if(lvProcess.HasExited)
+            {
+                output.writeInfo("LabVIEW process exited rapidly. Checking for process switch");
+
+                Process newProcess = findLabVIEWProcessByPath(lvProcess.StartInfo.FileName);
+                if(newProcess != null) //found a process.
+                {
+                    output.writeInfo("LabVIEW still found with PID " + newProcess.Id.ToString());
+                    lvProcess = newProcess;
+                    processSwitched = true;
+                }     
+                else
+                {
+                    //call process exited.
+                    Process_Exited(lvProcess, null); //fake event.
+                }     
+            }
+
+
+            lvProcess.Exited += Process_Exited;
 
             while (!lvProcess.HasExited && !cliExited)
             {
@@ -103,19 +131,49 @@ namespace LabVIEW_CLI
         {
             output.writeInfo("LabVIEW/App exiting...");
 
-            //notify if it looks like it wasn't a clean exit.
-            if(lvProcess.ExitCode != 0)
+            //check exit code if we havent switched processes. (If we have then this is unsupported.)
+            if (!processSwitched)
             {
-                output.writeError("LabVIEW exited with code " + lvProcess.ExitCode.ToString());
+                //notify if it looks like it wasn't a clean exit.
+                if (lvProcess.ExitCode != 0)
+                {
+                    output.writeError("LabVIEW exited with code " + lvProcess.ExitCode.ToString());
+                }
+                else
+                {
+                    output.writeInfo("LabVIEW exited with code " + lvProcess.ExitCode.ToString());
+                }
             }
-            else
-            {
-                output.writeInfo("LabVIEW exited with code " + lvProcess.ExitCode.ToString());
-            }
-
 
             lvExited.Set();
             Exited?.Invoke(sender, e);
+        }
+
+        private Process findLabVIEWProcessByPath(string path)
+        {
+            Process[] AllMatching;
+            Process FullMatch = null;
+
+            AllMatching = Process.GetProcessesByName("LabVIEW");
+
+            foreach(Process currentProcess in AllMatching)
+            {
+                string modulePath = currentProcess.MainModule.FileName;
+                if(modulePath == path)
+                {
+                    FullMatch = currentProcess;
+                    return FullMatch;
+                }
+            }
+
+            if(FullMatch == null)
+            {
+                throw new System.Exception("Not Found");
+            }
+
+            return FullMatch;
+            
+
         }
 
     }

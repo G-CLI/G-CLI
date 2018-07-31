@@ -180,7 +180,6 @@ namespace LabVIEW_CLI
             {
                 Output output = Output.Instance;
                 output.writeError("LabVIEW terminated unexpectedly!");
-                output.writeError("This could be because LabVIEW was already running. Ensure it has stopped and try again.");
                 Environment.Exit(1);
             }
         }
