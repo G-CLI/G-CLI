@@ -8,6 +8,7 @@ stage 'Get Dependencies'
 
 stage 'VS Build'
     bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/LabVIEW CLI.sln\" /p:Configuration=Release /p:Platform=\"Any CPU\""
+	bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/LabVIEW CLI.sln\" /p:Configuration=Release /p:Platform=\"x64\""
 	
 stage 'VS Test'
     bat "if exist VSTestResults.trx del VSTestResults.trx"
@@ -15,6 +16,6 @@ stage 'VS Test'
 	step([$class: 'MSTestPublisher', testResultsFile:"VSTestResults.trx", failOnError: true, keepLongStdio: true])
     
 stage 'Integration Test'
-    bat 'pushd \"Integration Tests\" & \"Run Integration Tests.bat\" \"../C Sharp Source/LabVIEW CLI/bin/Release/" & popd'
+    bat 'pushd \"Integration Tests\" & \"Run Integration Tests.bat\" \"../C Sharp Source/LabVIEW CLI/bin/x64/Release/" & popd'
 
 }

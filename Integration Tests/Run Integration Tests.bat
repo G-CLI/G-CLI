@@ -1,7 +1,7 @@
-@echo off
+
 REM call with path to LabVIEW-CLI. No parameter will run the installed CLI.
 
-SET common_params="--kill"
+SET common_params=-v --kill
 SET delay_between_tests=3000
 SET labview_cli_cmd="%1labview-cli"
 
