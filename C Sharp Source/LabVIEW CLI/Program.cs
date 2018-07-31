@@ -135,7 +135,7 @@ namespace LabVIEW_CLI
                         stop = true;
                         break;
                     case "RDER":
-                        exitCode = 1;
+                        //exitCode = 1;
                         output.writeError("Read Error");
                         if(latestMessage.messageData != "")
                         {
@@ -180,7 +180,7 @@ namespace LabVIEW_CLI
             {
                 Output output = Output.Instance;
                 output.writeError("LabVIEW terminated unexpectedly!");
-                Environment.Exit(1);
+                //Environment.Exit(1);
             }
         }
 

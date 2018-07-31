@@ -72,6 +72,8 @@ namespace LabVIEW_CLI
         public void Close()
         {
             cliExited = true;
+            //block this call until the thread has stopped.
+            LvTrackingThread.Join();
         }
 
         /// <summary>

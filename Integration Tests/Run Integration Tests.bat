@@ -1,9 +1,13 @@
-
+@echo off
 REM call with path to LabVIEW-CLI. No parameter will run the installed CLI.
 
-SET common_params=-v --kill
+REM need to eliminate the ERRORLEVEL that might have been set before.
+SET ERRORLEVEL=
+
+SET common_params=-v
 SET delay_between_tests=3000
-SET labview_cli_cmd="%1labview-cli"
+echo %1
+SET labview_cli_cmd=%~1labview-cli
 
 SET test_name="Echo Parameters VI"
 "%labview_cli_cmd%" %common_params% "Echo Parameters.vi" -- "Param 1" "Param 2" | find "Param 1	Param 2" || goto :failed
@@ -15,12 +19,14 @@ ping 127.0.0.1 -n1 -w %delay_between_tests% >NUL
 
 SET test_name="Quit With Code VI"
 "%labview_cli_cmd%" %common_params% "Quit With Parameter Code.vi" -- 10000
-if %errorlevel% NEQ 10000 goto :failed
+echo "Exit Code %ERRORLEVEL%"
+if %ERRORLEVEL% NEQ 10000 goto :failed
 ping 127.0.0.1 -n1 -w %delay_between_tests% >NUL 
 
 SET test_name="Quit With Negative Code VI"
 "%labview_cli_cmd%" %common_params% "Quit With Parameter Code.vi" -- -10000
-if %errorlevel% NEQ -10000 goto :failed
+echo "Exit Code %ERRORLEVEL%"
+if %ERRORLEVEL% NEQ -10000 goto :failed
 ping 127.0.0.1 -n1 -w %delay_between_tests% >NUL 
 
 
@@ -38,9 +44,12 @@ ping 127.0.0.1 -n1 -w %delay_between_tests% >NUL
 
 
 echo "All Tests Completed Successfully"
-EXIT
+set ERRORLEVEL=0
+goto :end
 
 :failed
 echo "Test Failed: %test_name%"
-EXIT /B 1
+set ERRORLEVEL=1
+
+:end
 
