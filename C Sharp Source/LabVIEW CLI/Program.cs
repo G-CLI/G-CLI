@@ -37,7 +37,7 @@ namespace LabVIEW_CLI
 
             output.setVerbose(options.Verbose);
             output.writeInfo("LabVIEW CLI Started - Verbose Mode");
-            output.writeInfo("Version " + Assembly.GetExecutingAssembly().GetName().Version);
+            output.writeInfo("Version " + Assembly.GetExecutingAssembly().GetName().Version + " " + Assembly.GetExecutingAssembly().GetName().ProcessorArchitecture);
             output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
             output.writeInfo("Arguments passed to LabVIEW: " + String.Join(" ", lvArgs));
 

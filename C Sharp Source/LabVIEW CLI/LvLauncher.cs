@@ -89,7 +89,6 @@ namespace LabVIEW_CLI
             //wait for once second to work out if the process has held the PID or connected to existing process.
             Thread.Sleep(500);
             lvProcess.Refresh();
-            output.writeInfo("Process Exited after one second: " + lvProcess.HasExited.ToString());
 
             //If it has exited we will attempt to recover a different PID.
             if(lvProcess.HasExited)
@@ -119,7 +118,7 @@ namespace LabVIEW_CLI
                 Thread.Sleep(500);
             }
 
-            output.writeInfo("process tracking thread finished");
+            output.writeInfo("Process Tracking Thread Finished.");
         }
 
         private Boolean isExe(String launchPath)
