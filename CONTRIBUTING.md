@@ -28,7 +28,7 @@ Please include unit tests where appropriate for testing.
 To update this distribution with changes you need to:
 
 * Build the solution for "Any CPU" and "x64"
-* Copy the 32 and 64 bit installers from the WIX project to Installation Support in the LabVIEW project. Adding the x86 or x64 suffix as the existing files have.
+* Copy the 32 and 64 bit installers from the WIX project to Installation Support in the LabVIEW project using MoveInstallers.bat
 * Redistribute the LabVIEW project.
 
 ## LabVIEW
