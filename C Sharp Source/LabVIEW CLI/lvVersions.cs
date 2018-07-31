@@ -178,7 +178,7 @@ namespace LabVIEW_CLI
     }
 
 
-    class lvVersion
+    public class lvVersion
     {
         public string Version { get; set; }
 
