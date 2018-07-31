@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <!-- Added for 64 bit support -->
+  <?define ProductName = "LabVIEW CLI" ?>
+  <?define ProductAuthor = "LabVIEW CLI Contributors" ?>
+  <?define ProductAppFolder = "InstallLocation" ?>
+
+  <?if $(var.Platform) = x64 ?>
+  <?define ProductDisplayName = "$(var.ProductName) 64-bit" ?>
+  <?define Win64 = "yes" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?define WindowsSystemFolder = "System64Folder" ?>
+  <?else ?>
+  <?define ProductDisplayName = "$(var.ProductName)" ?>
+  <?define Win64 = "no" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?define WindowsSystemFolder = "SystemFolder" ?>
+  <?endif ?>
   <?define LabVIEW CLI_TargetDir=$(var.LabVIEW CLI.TargetDir)?>
-  <Product Name="LabVIEW CLI" 
+  <Product Name="$(var.ProductDisplayName)" 
            Language="1033" 
            Version="!(bind.FileVersion.labview_cli.exe)"
-           Manufacturer="LabVIEW CLI Contributors"
+           Manufacturer="$(var.ProductAuthor)"
            Id="*"
            UpgradeCode="1EFDB3E4-2430-457E-AA06-F0C9866F9236">
-    <Package Id='*' Keywords='Installer' Description="LabVIEW CLI Installer" Manufacturer="LabVIEW CLI Contributors"
-             InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+    <Package Id='*' 
+             Keywords='Installer' 
+             Description="LabVIEW CLI Installer" 
+             Manufacturer="$(var.ProductAuthor)"
+             InstallerVersion="200" 
+             Compressed="yes" 
+             InstallScope="perMachine"
+             Platform="$(var.Platform)"/>
 
-    <MajorUpgrade AllowSameVersionUpgrades="yes" IgnoreRemoveFailure="no" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MajorUpgrade AllowSameVersionUpgrades="yes" 
+                  IgnoreRemoveFailure="no"
+                  DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    
     <MediaTemplate EmbedCab="yes"/>
 
     <Feature Id="ProductFeature" Title="LabVIEW-CLI" Level="1" ConfigurableDirectory='INSTALLFOLDER'>
@@ -25,7 +50,7 @@
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
+      <Directory Id="$(var.PlatformProgramFilesFolder)">
         <Directory Id="INSTALLFOLDER" Name="LabVIEW-CLI" />
       </Directory>
     </Directory>
