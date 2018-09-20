@@ -3,7 +3,8 @@ pipeline {
 	stages {
 		stage("VS Building") {
 			agent {label 'VS14'}
-			stages {	
+			stages {
+				stage ('Get VS Dependencies') {	
 					steps {
 						bat 'nuget restore \"C Sharp Source/LabVIEW CLI/LabVIEW CLI.sln\"'
 					}
