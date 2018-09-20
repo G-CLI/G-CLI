@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="0.6" Created_Date="2016-01-02 11:56:11" Modified_Date="2018-07-31 21:06:26" Creator="James McNally" Comments="" ID="23149baee4f493400aec8f1309558d08">
+<VI_Package_Builder_Settings Version="2017" Created_Date="2016-01-02 11:56:11" Modified_Date="2018-09-20 17:29:52" Creator="James McNally" Comments="" ID="5170be7853202e9762c1a5b7f4033a4f">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_LabVIEW_CLI</Package_File_Name>
-    <Library_Version>2.0.0.19</Library_Version>
+    <Library_Version>2.0.0.20</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -95,6 +95,11 @@ NOTE: Since the Windows application installs to path administrator access is req
         <Preserve_Hierarchy>true</Preserve_Hierarchy>
         <Path/>
       </Project_Provider>
+      <QuickDrop_Plugins>
+        <LLB>false</LLB>
+        <Preserve_Hierarchy>true</Preserve_Hierarchy>
+        <Path/>
+      </QuickDrop_Plugins>
     </Destinations>
     <Source_Files>
       <Destination_Overrides>
@@ -272,7 +277,7 @@ NOTE: Since the Windows application installs to path administrator access is req
         <Path>CLI Class\Write String.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>25AB6FA29151230ACC9BD8F87AF411E1</GUID>
+      <GUID>EF72FC1670EBED6DE2E801FE28BE66E2</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
