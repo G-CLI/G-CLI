@@ -37,15 +37,19 @@ pipeline {
 		}
 			
 		stage ('LabVIEW Builds') {
-			agent {label: LV2011}
+			agent {label 'LV2011'}
 			stages {
 				stage ('Get Dependencies') {
-					unstash 'installers'
+					steps {
+						unstash 'installers'
+					}
 				}
 				
 				stage ('LabVIEW Build') {
-					bat 'labview-cli -v \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\vipbBuild.vi\" -- \"LabVIEW Source\\LabVIEW CLI.vipb\" Builds  \"${env.WORKSPACE}\"'
-					archiveArtifacts artifacts:'Builds/*.vipb'
+					steps {
+						bat 'labview-cli -v \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\vipbBuild.vi\" -- \"LabVIEW Source\\LabVIEW CLI.vipb\" Builds  \"${env.WORKSPACE}\"'
+						archiveArtifacts artifacts:'Builds/*.vipb'
+					}
 				}
 			
 			}
