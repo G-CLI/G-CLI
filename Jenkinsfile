@@ -48,6 +48,8 @@ agent none
 				
 				stage ('LabVIEW Build') {
 					steps {
+						bat "labview-cli -v \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\setVipBuildNumber.vi\" -- \"LabVIEW Source\\LabVIEW CLI.vipb\" \"${env.WORKSPACE}\" ${env.BUILD_NUMBER}"
+						bat "mkdir Builds"
 						bat "labview-cli -v \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\vipbBuild.vi\" -- \"LabVIEW Source\\LabVIEW CLI.vipb\" Builds  \"${env.WORKSPACE}\""
 						archiveArtifacts artifacts:'Builds/*.vipb'
 					}
