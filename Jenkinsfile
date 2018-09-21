@@ -51,7 +51,7 @@ agent none
 						bat "labview-cli -v --kill \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\setVipBuildNumber.vi\" -- \"LabVIEW Source\\LabVIEW CLI.vipb\" \"${env.WORKSPACE}\" ${env.BUILD_NUMBER}"
 						bat "mkdir Builds"
 						//call direct as build fails if CLI toolkit is already loaded.
-						bat "\"C:\\Program Files (x86)\\National Instruments\\LabVIEW 2011\\LabVIEW.exe" \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\vipbBuild-nocli.vi\" -- \"LabVIEW Source\\LabVIEW CLI.vipb\" Builds  \"${env.WORKSPACE}\""
+						bat "\"C:\\Program Files (x86)\\National Instruments\\LabVIEW 2011\\LabVIEW.exe\" \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\vipbBuild-nocli.vi\" -- \"LabVIEW Source\\LabVIEW CLI.vipb\" Builds  \"${env.WORKSPACE}\""
 						archiveArtifacts artifacts:'Builds/*.vipb'
 					}
 				}
