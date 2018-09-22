@@ -89,7 +89,7 @@ namespace LabVIEW_CLI
             lvStarted.Set();
 
             //wait for once second to work out if the process has held the PID or connected to existing process.
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             lvProcess.Refresh();
 
             //If it has exited we will attempt to recover a different PID.
