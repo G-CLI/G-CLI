@@ -31,13 +31,13 @@ namespace LabVIEW_CLI
             }
             if (options.Version)
             {
-                output.writeMessage(Assembly.GetExecutingAssembly().GetName().Version.ToString());
+                output.writeMessage(getVersionString());
                 Environment.Exit(0);
             }
 
             output.setVerbose(options.Verbose);
             output.writeInfo("LabVIEW CLI Started - Verbose Mode");
-            output.writeInfo("Version " + Assembly.GetExecutingAssembly().GetName().Version + " " + Assembly.GetExecutingAssembly().GetName().ProcessorArchitecture);
+            output.writeInfo("Version " + getVersionString());
             output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
             output.writeInfo("Arguments passed to LabVIEW: " + String.Join(" ", lvArgs));
 
@@ -236,6 +236,22 @@ namespace LabVIEW_CLI
             {
                 return new lvVersion();
             }
+        }
+
+        private static String getVersionString()
+        {
+
+            String bitness;
+
+            if(Assembly.GetExecutingAssembly().GetName().ProcessorArchitecture.ToString() == "Amd64")
+            {
+                bitness = "64-Bit";
+            }
+            else
+            {
+                bitness = "32-Bit";
+            }
+            return Assembly.GetExecutingAssembly().GetName().Version + " " + bitness;
         }
 
     }

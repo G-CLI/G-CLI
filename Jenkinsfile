@@ -13,7 +13,7 @@ agent none
 
 				stage ('VS Build') {
 					steps {
-						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/LabVIEW CLI.sln\" /p:Configuration=Release /p:Platform=\"Any CPU\""
+						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/LabVIEW CLI.sln\" /p:Configuration=Release /p:Platform=\"x86\""
 						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/LabVIEW CLI.sln\" /p:Configuration=Release /p:Platform=\"x64\""
 						bat "MoveInstallers.bat"
 						stash name:"installers", includes:"LabVIEW Source/Installation Support/*.msi"
