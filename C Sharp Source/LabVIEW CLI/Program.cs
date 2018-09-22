@@ -41,6 +41,12 @@ namespace LabVIEW_CLI
             output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
             output.writeInfo("Arguments passed to LabVIEW: " + String.Join(" ", lvArgs));
 
+            //Warn about deprecated option.
+            if (options.lvExe != null)
+            {
+                output.writeError("--lv-exe option is deprecated. Alter the script to use --lv-ver. Default will be used this time.");
+            }
+
             //Force a rescan at this point to get an output - the constructor scan does not seem to write to output, possibly due to happening before we set verbose flag.
             LvVersions.Scan();
             
@@ -211,13 +217,6 @@ namespace LabVIEW_CLI
         }
         private static lvVersion lvPathFinder(CliOptions options)
         {
-            if (options.lvExe != null)
-            {
-                if (!File.Exists(options.lvExe))
-                    throw new FileNotFoundException("specified executable not found", options.lvExe);
-                lvVersion exeVersion = new lvVersion{ Path = options.lvExe };
-                return exeVersion;
-            }
             if (options.lvVer != null)
             {
                 try
