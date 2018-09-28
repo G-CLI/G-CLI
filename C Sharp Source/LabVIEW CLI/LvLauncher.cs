@@ -83,41 +83,16 @@ namespace LabVIEW_CLI
         /// Starts the LabVIEW process and keeps track of it.
         /// Must be run in a dedicated thread.
         /// </summary>
-        private async void _processTrackingThread()
+        private void _processTrackingThread()
         {
             lvProcess.Start();
             ProcessId = lvProcess.Id;
             output.writeInfo("LabVIEW/App started, process ID is " + lvProcess.Id.ToString());
-            output.writeInfo("Process Name " + lvProcess.ProcessName.ToString());
             lvStarted.Set();
-
-            //wait for once second to work out if the process has held the PID or connected to existing process.
-            await Task.Delay(1000);
-            lvProcess.Refresh();
-
-            //If it has exited we will attempt to recover a different PID.
-            if(lvProcess.HasExited)
-            {
-                output.writeInfo("LabVIEW process exited rapidly. Checking for process switch");
-
-                Process newProcess = findLabVIEWProcessByPath(lvProcess.StartInfo.FileName);
-                if(newProcess != null) //found a process.
-                {
-                    output.writeInfo("LabVIEW still found with PID " + newProcess.Id.ToString());
-                    lvProcess = newProcess;
-                    processSwitched = true;
-                }     
-                else
-                {
-                    //call process exited.
-                    Process_Exited(lvProcess, null); //fake event.
-                }     
-            }
-
 
             lvProcess.Exited += Process_Exited;
 
-            while (!lvProcess.HasExited && !cliExited)
+            while (!lvExited.IsSet && !cliExited)
             {
                 lvProcess.Refresh();
                 Thread.Sleep(500);
@@ -133,24 +108,38 @@ namespace LabVIEW_CLI
 
         private void Process_Exited(object sender, EventArgs e)
         {
-            output.writeInfo("LabVIEW/App exiting...");
+            output.writeInfo("LabVIEW process exited. Checking for process switch");
 
-            //check exit code if we havent switched processes. (If we have then this is unsupported.)
-            if (!processSwitched)
+            Process newProcess = findLabVIEWProcessByPath(lvProcess.StartInfo.FileName);
+            if (newProcess != null) //found a process.
             {
-                //notify if it looks like it wasn't a clean exit.
-                if (lvProcess.ExitCode != 0)
+                output.writeInfo("LabVIEW still found with PID " + newProcess.Id.ToString());
+                lvProcess = newProcess;
+                processSwitched = true;
+            }
+            else
+            {
+                output.writeInfo("LabVIEW/App exiting...");
+
+                //check exit code if we havent switched processes. (If we have then this is unsupported.)
+                if (!processSwitched)
                 {
-                    output.writeError("LabVIEW exited with code " + lvProcess.ExitCode.ToString());
+                    //notify if it looks like it wasn't a clean exit.
+                    if (lvProcess.ExitCode != 0)
+                    {
+                        output.writeError("LabVIEW exited with code " + lvProcess.ExitCode.ToString());
+                    }
+                    else
+                    {
+                        output.writeInfo("LabVIEW exited with code " + lvProcess.ExitCode.ToString());
+                    }
                 }
-                else
-                {
-                    output.writeInfo("LabVIEW exited with code " + lvProcess.ExitCode.ToString());
-                }
+
+                lvExited.Set();
+                Exited?.Invoke(sender, e);
             }
 
-            lvExited.Set();
-            Exited?.Invoke(sender, e);
+
         }
 
         private Process findLabVIEWProcessByPath(string path)
@@ -168,11 +157,6 @@ namespace LabVIEW_CLI
                     FullMatch = currentProcess;
                     return FullMatch;
                 }
-            }
-
-            if(FullMatch == null)
-            {
-                throw new System.Exception("Not Found");
             }
 
             return FullMatch;
