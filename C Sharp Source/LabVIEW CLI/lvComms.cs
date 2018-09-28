@@ -75,7 +75,7 @@ namespace LabVIEW_CLI
             get { return _port;  }
         }
 
-        public lvMsg readMessage()
+        public async Task<lvMsg> readMessage()
         {
 
             int bytesRead = 0, length = 0;
@@ -83,11 +83,12 @@ namespace LabVIEW_CLI
             string msgType = "", msgData = "";
 
             try {
-                bytesRead = _stream.Read(lengthBuff, 0, LENGTH_BYTES);
+                bytesRead = await _stream.ReadAsync(lengthBuff, 0, LENGTH_BYTES);
             }
             catch(Exception ex)
             {
-                Console.WriteLine("Exception Found");
+                msgData = "Read Length: Exception Found " + ex.ToString();
+                return new lvMsg("RDER", msgData);
             }
             if (bytesRead == LENGTH_BYTES)
             {
@@ -95,7 +96,16 @@ namespace LabVIEW_CLI
                 length = BitConverter.ToInt32(lengthBuff, 0);
                 if (length > 0 && length <= MAX_PAYLOAD_BYTES + TYPE_BYTES)
                 {
-                    _stream.Read(_dataBuffer, 0, length);
+                    try
+                    {
+                        await _stream.ReadAsync(_dataBuffer, 0, length);
+                    }
+                    catch (Exception ex)
+                    {
+                        msgData = "Read Message: Exception Found " + ex.ToString();
+                        return new lvMsg("RDER", msgData);
+                    }
+
                     msgType = Encoding.ASCII.GetString(_dataBuffer, 0, TYPE_BYTES);
 
                     //If we have length data to read.

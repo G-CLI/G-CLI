@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Threading;
 
 namespace LabVIEW_CLI
 {
@@ -126,9 +127,12 @@ namespace LabVIEW_CLI
             //Write the use arguments
             lvInterface.writeArguments(lvArgs);
 
-            do
+            Thread.Sleep(10000);
+
+            while (!stop)
             {
-                latestMessage = lvInterface.readMessage();
+                //strange call because it is async method.
+                latestMessage = lvInterface.readMessage().GetAwaiter().GetResult();
 
                 switch (latestMessage.messageType)
                 {
@@ -155,8 +159,7 @@ namespace LabVIEW_CLI
                         break;
                 }
 
-
-            } while (!stop);
+            };
 
             // close tcp listener
             lvInterface.Close();
@@ -186,7 +189,7 @@ namespace LabVIEW_CLI
             {
                 Output output = Output.Instance;
                 output.writeError("LabVIEW terminated unexpectedly!");
-                //Environment.Exit(1);
+                //stop = true; //in case the system is still waiting on the connection.
             }
         }
 

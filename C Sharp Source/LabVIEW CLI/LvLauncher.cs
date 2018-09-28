@@ -64,8 +64,11 @@ namespace LabVIEW_CLI
 
         public void Kill()
         {
-            output.writeInfo("killing LabVIEW process (" + ProcessId + ")");
-            lvProcess.Kill();
+            if (lvProcess.HasExited == false)
+            {
+                output.writeInfo("killing LabVIEW process (" + ProcessId + ")");
+                lvProcess.Kill();
+            }
         }
 
         //Closes the tracking thread to ensure we don't leave it active.
@@ -80,7 +83,7 @@ namespace LabVIEW_CLI
         /// Starts the LabVIEW process and keeps track of it.
         /// Must be run in a dedicated thread.
         /// </summary>
-        private void _processTrackingThread()
+        private async void _processTrackingThread()
         {
             lvProcess.Start();
             ProcessId = lvProcess.Id;
@@ -89,7 +92,7 @@ namespace LabVIEW_CLI
             lvStarted.Set();
 
             //wait for once second to work out if the process has held the PID or connected to existing process.
-            Thread.Sleep(1000);
+            await Task.Delay(1000);
             lvProcess.Refresh();
 
             //If it has exited we will attempt to recover a different PID.
