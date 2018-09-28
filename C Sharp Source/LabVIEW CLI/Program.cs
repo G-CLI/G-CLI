@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Threading;
 
 namespace LabVIEW_CLI
 {
@@ -114,6 +113,7 @@ namespace LabVIEW_CLI
             // wait for the LabVIEW application to connect to the cli
             connected = lvInterface.waitOnConnection(options.timeout);
             portRegistration.unRegister();
+            output.writeMessage("Client Connected");
 
             // if timed out, kill LabVIEW and exit with error code
             if (!connected && launcher!=null)
@@ -126,8 +126,6 @@ namespace LabVIEW_CLI
 
             //Write the use arguments
             lvInterface.writeArguments(lvArgs);
-
-            Thread.Sleep(10000);
 
             while (!stop)
             {
@@ -189,7 +187,7 @@ namespace LabVIEW_CLI
             {
                 Output output = Output.Instance;
                 output.writeError("LabVIEW terminated unexpectedly!");
-                //stop = true; //in case the system is still waiting on the connection.
+                stop = true; //in case the system is still waiting on the connection.
             }
         }
 

@@ -67,7 +67,6 @@ namespace LabVIEW_CLI
             _client = clientTask.Result;
             _clientConnected = true;
             _stream = _client.GetStream();
-            output.writeInfo("Client Connected");
             return true;
         }
 
@@ -90,6 +89,7 @@ namespace LabVIEW_CLI
                 msgData = "Read Length: Exception Found " + ex.ToString();
                 return new lvMsg("RDER", msgData);
             }
+
             if (bytesRead == LENGTH_BYTES)
             {
                 Array.Reverse(lengthBuff);
