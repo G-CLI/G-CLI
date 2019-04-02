@@ -10,7 +10,7 @@ namespace LabVIEW_CLI
     {
         private static Output instance;
         private bool verbose;
-		private bool quiet;
+        private bool quiet;
 
         private Output() { }
 
@@ -30,8 +30,8 @@ namespace LabVIEW_CLI
         {
             verbose = verboseIn;
         }
-		
-		public void setQuiet(bool quietIn)
+        
+        public void setQuiet(bool quietIn)
         {
             quiet = quietIn;
         }
@@ -43,10 +43,10 @@ namespace LabVIEW_CLI
 
         public void writeMessage(string message)
         {
-			if (!quiet)
-			{
-				Console.WriteLine(message);
-			}
+            if (!quiet)
+            {
+                Console.WriteLine(message);
+            }
         }
 
         public void writeInfo(string message)

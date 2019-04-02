@@ -15,8 +15,8 @@ namespace LabVIEW_CLI
         [Option('v', "verbose", DefaultValue = false,
         HelpText = "Prints all messages to standard output.")]
         public bool Verbose { get; set; }
-		
-		[Option('q', "quiet", DefaultValue = false,
+        
+        [Option('q', "quiet", DefaultValue = false,
         HelpText = "Suppresses all non-error messages to standard output from this CLI application.")]
         public bool Quiet { get; set; }
 
