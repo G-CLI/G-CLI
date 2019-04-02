@@ -34,8 +34,14 @@ namespace LabVIEW_CLI
                 output.writeMessage(getVersionString());
                 Environment.Exit(0);
             }
+			if (options.Verbose && options.Quiet)
+			{
+				output.writeError("LabVIEW CLI cannot be both quiet and verbose - ignoring the quiet flag")
+				options.Quiet = false;
+			}
 
-            output.setVerbose(options.Verbose);
+            output.setQuiet(options.Quiet);
+			output.setVerbose(options.Verbose);
             output.writeInfo("LabVIEW CLI Started - Verbose Mode");
             output.writeInfo("Version " + getVersionString());
             output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
