@@ -106,7 +106,7 @@ namespace LabVIEW_CLI
             //At this point LV should have launched so now we need to handle Ctrl+C to ensure LV is killed as well.
             Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs e)
             {
-                output.writeMessage("Cancel key recieved, closing LabVIEW.");
+                output.writeMessage("Cancel key received, closing LabVIEW.");
                 launcher.Kill();
             };
 
