@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using LabVIEW_CLI;
+using G_CLI;
 
 namespace LabVIEWCLI_Unit_tests
 {
@@ -8,7 +8,7 @@ namespace LabVIEWCLI_Unit_tests
     public class ExitCodeUnitTests
     {
 
-        private LabVIEW_CLI.lvComms lvCommsInstance;
+        private G_CLI.lvComms lvCommsInstance;
 
         [TestInitialize]
         public void setUp()
@@ -50,7 +50,7 @@ namespace LabVIEWCLI_Unit_tests
     [TestClass]
     public class ArgumentFormatingUnitTests
     {
-        private LabVIEW_CLI.lvComms lvCommsInstance;
+        private G_CLI.lvComms lvCommsInstance;
 
         [TestInitialize]
         public void setUp()

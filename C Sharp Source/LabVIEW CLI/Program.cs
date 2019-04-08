@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 
-namespace LabVIEW_CLI
+namespace G_CLI
 {
     class Program
     {
@@ -36,9 +36,9 @@ namespace LabVIEW_CLI
             }
 
             output.setVerbose(options.Verbose);
-            output.writeInfo("LabVIEW CLI Started - Verbose Mode");
+            output.writeInfo("G CLI Started - Verbose Mode");
             output.writeInfo("Version " + getVersionString());
-            output.writeInfo("LabVIEW CLI Arguments: " + String.Join(" ", cliArgs));
+            output.writeInfo("G CLI Arguments: " + String.Join(" ", cliArgs));
             output.writeInfo("Arguments passed to LabVIEW: " + String.Join(" ", lvArgs));
 
             //Warn about deprecated option.

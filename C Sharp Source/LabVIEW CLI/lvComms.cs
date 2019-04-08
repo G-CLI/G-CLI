@@ -7,7 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 
-namespace LabVIEW_CLI
+namespace G_CLI
 {
     public class lvComms
     {

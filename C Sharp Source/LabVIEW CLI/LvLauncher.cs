@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading;
 
-namespace LabVIEW_CLI
+namespace G_CLI
 {
     class LvLauncher
     {
@@ -19,7 +19,6 @@ namespace LabVIEW_CLI
         private Boolean cliExited = false;
         private Boolean processSwitched = false;
 
-        public int ProcessId { get; private set; }
         public ManualResetEventSlim lvExited = new ManualResetEventSlim();
 
 
@@ -66,7 +65,7 @@ namespace LabVIEW_CLI
         {
             if (lvProcess.HasExited == false)
             {
-                output.writeInfo("killing LabVIEW process (" + ProcessId + ")");
+                output.writeInfo("killing LabVIEW process (" + lvProcess.Id + ")");
                 lvProcess.Kill();
             }
         }
@@ -86,7 +85,6 @@ namespace LabVIEW_CLI
         private void _processTrackingThread()
         {
             lvProcess.Start();
-            ProcessId = lvProcess.Id;
             output.writeInfo("LabVIEW/App started, process ID is " + lvProcess.Id.ToString());
             lvStarted.Set();
 

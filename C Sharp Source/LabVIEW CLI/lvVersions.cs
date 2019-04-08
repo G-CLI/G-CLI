@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Win32;
 using System.Linq;
 
-namespace LabVIEW_CLI
+namespace G_CLI
 {
     static class LvVersions
     {

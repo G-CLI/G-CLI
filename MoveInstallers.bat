@@ -1,2 +1,2 @@
-copy /Y "C Sharp Source\LabVIEW CLI WIX Setup\bin\x86\Release\LabVIEW_CLI.msi" "LabVIEW Source\Installation Support\LabVIEW_CLI_x86.msi"
-copy /Y "C Sharp Source\LabVIEW CLI WIX Setup\bin\x64\Release\LabVIEW_CLI.msi" "LabVIEW Source\Installation Support\LabVIEW_CLI_x64.msi"
+copy /Y "C Sharp Source\LabVIEW CLI WIX Setup\bin\x86\Release\G_CLI.msi" "LabVIEW Source\Installation Support\G_CLI_x86.msi"
+copy /Y "C Sharp Source\LabVIEW CLI WIX Setup\bin\x64\Release\G_CLI.msi" "LabVIEW Source\Installation Support\G_CLI_x64.msi"

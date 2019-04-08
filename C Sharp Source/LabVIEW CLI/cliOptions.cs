@@ -4,7 +4,7 @@ using CommandLine;
 using System.Collections.Generic;
 using CommandLine.Text;
 
-namespace LabVIEW_CLI
+namespace G_CLI
 {
     public class CliOptions
     {

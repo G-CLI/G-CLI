@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 
-namespace LabVIEW_CLI
+namespace G_CLI
 {
     public class portRegistration
     {

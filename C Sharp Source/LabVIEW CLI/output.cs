@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LabVIEW_CLI
+namespace G_CLI
 {
     class Output
     {

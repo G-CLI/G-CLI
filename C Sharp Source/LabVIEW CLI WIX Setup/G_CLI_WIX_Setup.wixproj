@@ -6,8 +6,9 @@
     <ProductVersion>3.10</ProductVersion>
     <ProjectGuid>6693163a-16af-4de8-a21e-83340d211e66</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>LabVIEW_CLI</OutputName>
+    <OutputName>G_CLI</OutputName>
     <OutputType>Package</OutputType>
+    <Name>G_CLI_WIX_Setup</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
@@ -68,22 +69,23 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="LabVIEW CLI WIX Setup.wax" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LabVIEW CLI\LabVIEW CLI.csproj">
-      <Name>LabVIEW CLI</Name>
-      <Project>{f2b85133-5068-4cac-9cc3-c9c5b899bbe5}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
-    </ProjectReference>
+    <Content Include="labview-cli.bat" />
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="WixUIExtension">
       <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
       <Name>WixUIExtension</Name>
     </WixExtension>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LabVIEW CLI\G_CLI.csproj">
+      <Name>G_CLI</Name>
+      <Project>{f2b85133-5068-4cac-9cc3-c9c5b899bbe5}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />

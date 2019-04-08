@@ -7,15 +7,15 @@ agent none
 			stages {
 				stage ('Get VS Dependencies') {	
 					steps {
-						bat 'nuget restore \"C Sharp Source/LabVIEW CLI/LabVIEW CLI.sln\"'
+						bat 'nuget restore \"C Sharp Source/LabVIEW CLI/G CLI.sln\"'
 					}
 				}
 
 				stage ('VS Build') {
 					steps {
 						changeAsmVer versionPattern: "${env.BUILD_NUMBER}", regexPattern: "Assembly(\\w*)Version\\(\"(\\d+).(\\d+).(\\d+).(\\*)\"\\)", replacementPattern:"Assembly\$1Version(\"\$2.\$3.\$4.%s\")"
-						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/LabVIEW CLI.sln\" /p:Configuration=Release /p:Platform=\"x86\""
-						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/LabVIEW CLI.sln\" /p:Configuration=Release /p:Platform=\"x64\""
+						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/G CLI.sln\" /p:Configuration=Release /p:Platform=\"x86\""
+						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/G CLI.sln\" /p:Configuration=Release /p:Platform=\"x64\""
 						bat "MoveInstallers.bat"
 						stash name:"installers", includes:"LabVIEW Source/Installation Support/*.msi"
 					}
@@ -24,7 +24,7 @@ agent none
 				stage ('VS Test'){
 					steps{
 						bat "if exist VSTestResults.trx del VSTestResults.trx"
-						bat "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\mstest.exe\" /resultsfile:\"%WORKSPACE%/VSTestResults.trx\" /testcontainer:\"%WORKSPACE%/C Sharp Source/LabVIEWCLI_Unit_tests/bin/Release/LabVIEWCLI_Unit_tests.dll\" /nologo"
+						bat "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\mstest.exe\" /resultsfile:\"%WORKSPACE%/VSTestResults.trx\" /testcontainer:\"%WORKSPACE%/C Sharp Source/LabVIEWCLI_Unit_tests/bin/Release/GCLI_Unit_tests.dll\" /nologo"
 						step([$class: 'MSTestPublisher', testResultsFile:"VSTestResults.trx", failOnError: true, keepLongStdio: true])
 					}
 				}
@@ -49,10 +49,10 @@ agent none
 				
 				stage ('LabVIEW Build') {
 					steps {
-						bat "labview-cli -v --kill \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\setVipBuildNumber.vi\" -- \"LabVIEW Source\\LabVIEW CLI.vipb\" \"${env.WORKSPACE}\" ${env.BUILD_NUMBER}"
+						bat "labview-cli -v --kill \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\setVipBuildNumber.vi\" -- \"LabVIEW Source\\G CLI.vipb\" \"${env.WORKSPACE}\" ${env.BUILD_NUMBER}"
 						bat "if not exist Builds mkdir Builds"
 						//call direct as build fails if CLI toolkit is already loaded.
-						bat "\"C:\\Program Files (x86)\\National Instruments\\LabVIEW 2011\\LabVIEW.exe\" \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\vipbBuild-nocli.vi\" -- \"LabVIEW Source\\LabVIEW CLI.vipb\" Builds  \"${env.WORKSPACE}\""
+						bat "\"C:\\Program Files (x86)\\National Instruments\\LabVIEW 2011\\LabVIEW.exe\" \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\vipbBuild-nocli.vi\" -- \"LabVIEW Source\\G CLI.vipb\" Builds  \"${env.WORKSPACE}\""
 					}
 				}
 			

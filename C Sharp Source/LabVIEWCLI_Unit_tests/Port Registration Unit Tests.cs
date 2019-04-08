@@ -1,6 +1,6 @@
 ﻿
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using LabVIEW_CLI;
+using G_CLI;
 using System.IO;
 
 
@@ -9,14 +9,14 @@ namespace LabVIEWCLI_Unit_tests
     [TestClass]
     public class Port_Registration_Unit_Tests
     {
-        private LabVIEW_CLI.portRegistration portRegistrationInstance;
+        private G_CLI.portRegistration portRegistrationInstance;
         private lvVersion testVersion;
 
 
         [TestInitialize]
         public void setup()
         {
-            portRegistrationInstance = new LabVIEW_CLI.portRegistration();
+            portRegistrationInstance = new G_CLI.portRegistration();
             testVersion = new lvVersion();
 
         }

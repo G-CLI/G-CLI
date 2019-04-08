@@ -75,9 +75,9 @@
     <Compile Include="lvComms Unit Tests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LabVIEW CLI\LabVIEW CLI.csproj">
+    <ProjectReference Include="..\LabVIEW CLI\G_CLI.csproj">
       <Project>{f2b85133-5068-4cac-9cc3-c9c5b899bbe5}</Project>
-      <Name>LabVIEW CLI</Name>
+      <Name>G_CLI</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
