@@ -4,7 +4,7 @@ using G_CLI;
 using System.IO;
 
 
-namespace LabVIEWCLI_Unit_tests
+namespace GCLI_Unit_tests
 {
     [TestClass]
     public class Port_Registration_Unit_Tests

@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using G_CLI;
 
-namespace LabVIEWCLI_Unit_tests
+namespace GCLI_Unit_tests
 {
     [TestClass]
     public class ExitCodeUnitTests

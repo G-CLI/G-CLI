@@ -24,7 +24,7 @@ agent none
 				stage ('VS Test'){
 					steps{
 						bat "if exist VSTestResults.trx del VSTestResults.trx"
-						bat "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\mstest.exe\" /resultsfile:\"%WORKSPACE%/VSTestResults.trx\" /testcontainer:\"%WORKSPACE%/C Sharp Source/LabVIEWCLI_Unit_tests/bin/Release/GCLI_Unit_tests.dll\" /nologo"
+						bat "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\mstest.exe\" /resultsfile:\"%WORKSPACE%/VSTestResults.trx\" /testcontainer:\"%WORKSPACE%/C Sharp Source/LabVIEWCLI_Unit_tests/bin/x86/Release/GCLI_Unit_tests.dll\" /nologo"
 						step([$class: 'MSTestPublisher', testResultsFile:"VSTestResults.trx", failOnError: true, keepLongStdio: true])
 					}
 				}
