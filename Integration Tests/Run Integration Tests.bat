@@ -1,5 +1,5 @@
 @echo off
-REM call with path to LabVIEW-CLI. No parameter will run the installed CLI.
+REM call with path to G-CLI. No parameter will run the installed CLI.
 
 REM need to eliminate the ERRORLEVEL that might have been set before.
 SET ERRORLEVEL=
@@ -7,7 +7,7 @@ SET ERRORLEVEL=
 SET common_params=-v
 SET delay_between_tests=3000
 echo %1
-SET labview_cli_cmd=%~1labview-cli
+SET labview_cli_cmd=%~1g-cli
 
 SET test_name="Echo Parameters VI"
 "%labview_cli_cmd%" %common_params% "Echo Parameters.vi" -- "Param 1" "Param 2" | find "Param 1	Param 2" || goto :failed
