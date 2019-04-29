@@ -113,7 +113,7 @@ namespace G_CLI
             // wait for the LabVIEW application to connect to the cli
             connected = lvInterface.waitOnConnection(options.timeout);
             portRegistration.unRegister();
-            output.writeMessage("Client Connected");
+            output.writeInfo("Client Connected");
 
             // if timed out, kill LabVIEW and exit with error code
             if (!connected && launcher!=null)
@@ -139,7 +139,7 @@ namespace G_CLI
                         break;
                     case "EXIT":
                         exitCode = lvInterface.extractExitCode(latestMessage.messageData);
-                        output.writeMessage("Received Exit Code " + exitCode);
+                        output.writeInfo("Received Exit Code " + exitCode);
                         stop = true;
                         break;
                     case "RDER":
