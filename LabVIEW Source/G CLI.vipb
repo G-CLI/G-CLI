@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2019-04-08 19:46:29" Creator="James McNally" Comments="" ID="26da1eea61f9c8a17645169574d1c70a">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2019-04-29 13:48:39" Creator="James McNally" Comments="" ID="8e90e3c94070cdc85b7e9b76255f1d2f">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
-    <Library_Version>2.0.0.23</Library_Version>
+    <Library_Version>2.0.0.24</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -117,6 +117,12 @@ NOTE: Since the Windows application installs to path administrator access is req
       <Destination_Overrides>
         <Path>CLI Demo.vi</Path>
         <Destination>1</Destination>
+        <Additional_Destination>false</Additional_Destination>
+        <Additional_Destination_Index>0</Additional_Destination_Index>
+      </Destination_Overrides>
+      <Destination_Overrides>
+        <Path>Help/G CLI Getting Started.vi</Path>
+        <Destination>4</Destination>
         <Additional_Destination>false</Additional_Destination>
         <Additional_Destination_Index>0</Additional_Destination_Index>
       </Destination_Overrides>
@@ -274,7 +280,7 @@ NOTE: Since the Windows application installs to path administrator access is req
         <Path>CLI Class\Write String.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>3CB754603CF737A32D84609DA110E94C</GUID>
+      <GUID>513A8A7489E59126AFF31D67044EB4BA</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
