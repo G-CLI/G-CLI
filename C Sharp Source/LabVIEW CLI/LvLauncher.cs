@@ -84,19 +84,35 @@ namespace G_CLI
         /// </summary>
         private void _processTrackingThread()
         {
+            System.Threading.Timer refreshTimer;
+            AutoResetEvent endEvent = new AutoResetEvent(false);
+
+            lvProcess.EnableRaisingEvents = true;
             lvProcess.Start();
             output.writeInfo("LabVIEW/App started, process ID is " + lvProcess.Id.ToString());
             lvStarted.Set();
 
             lvProcess.Exited += Process_Exited;
 
-            while (!lvExited.IsSet && !cliExited)
-            {
-                lvProcess.Refresh();
-                Thread.Sleep(500);
-            }
+            refreshTimer = new System.Threading.Timer(refreshProcessState, endEvent, 0, 500);
 
+            //wait for end event from process state check.
+            endEvent.WaitOne();
+            refreshTimer.Dispose();
             output.writeInfo("Process Tracking Thread Finished.");
+        }
+
+        //Callback method for the timer. Sets the AutoResetEvent when the process should stop.
+        private void refreshProcessState(Object stateInfo) {
+
+            AutoResetEvent endEvent = (AutoResetEvent)stateInfo;
+
+            lvProcess.Refresh();
+
+            if(lvExited.IsSet || cliExited)
+            {
+                endEvent.Set();
+            }
         }
 
         private Boolean isExe(String launchPath)
@@ -113,6 +129,8 @@ namespace G_CLI
             {
                 output.writeInfo("LabVIEW still found with PID " + newProcess.Id.ToString());
                 lvProcess = newProcess;
+                lvProcess.EnableRaisingEvents = true;
+                lvProcess.Exited += Process_Exited; //re-attach this event call to the new process.
                 processSwitched = true;
             }
             else
