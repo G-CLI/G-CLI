@@ -3,7 +3,7 @@ A proxy mechanism allow LabVIEW programs to easily write out to the command line
 
 ## Installing
 
-The latest package is available via the [releases tab on Github](https://github.com/JamesMc86/LabVIEW-CLI/releases) and is also available on the [LabVIEW Tools Network feed on VI Package Manager](vipm://wiresmith_technology_lib_labview_cli?repo_url=http://ftp.ni.com/evaluation/labview/lvtn/vipm)
+The latest package is available via the [releases tab on Github](https://github.com/JamesMc86/LabVIEW-CLI/releases) and is also available on the [LabVIEW Tools Network feed on VI Package Manager](vipm://wiresmith_technology_lib_g_cli?repo_url=http://ftp.ni.com/evaluation/labview/lvtn/vipm)
 
 To install download the VI package (or search it on the tools network) and run. This will install the LabVIEW library and the required Windows application.
 
@@ -13,8 +13,8 @@ The VI package is built for LabVIEW 2011 and later. The Windows application has 
 
 ## Launching
 
-When installed with the supplied installer the application is added to Windows path variable so you can launch it from any command line using `labview-cli`
+When installed with the supplied installer the application is added to Windows path variable so you can launch it from any command line using `g-cli`
 
 ## Usage
 
-See https://github.com/JamesMc86/LabVIEW-CLI/wiki/Getting-Started-With-LabVIEW-CLI for instructions on using this tool.
+See https://github.com/JamesMc86/G-CLI/wiki/Getting-Started-With-G-CLI for instructions on using this tool.
