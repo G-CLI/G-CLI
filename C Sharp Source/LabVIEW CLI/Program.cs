@@ -113,7 +113,6 @@ namespace G_CLI
             // wait for the LabVIEW application to connect to the cli
             connected = lvInterface.waitOnConnection(options.timeout);
             portRegistration.unRegister();
-            output.writeInfo("Client Connected");
 
             // if timed out, kill LabVIEW and exit with error code
             if (!connected && launcher!=null)
@@ -122,6 +121,11 @@ namespace G_CLI
                 launcher.Kill();
                 launcher.Exited -= Launcher_Exited;
                 return 1;
+            }
+            else
+            {
+
+                output.writeInfo("Client Connected");
             }
 
             //Write the use arguments
