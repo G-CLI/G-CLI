@@ -1,9 +1,9 @@
-# LabVIEW-CLI
+# G-CLI
 A proxy mechanism allow LabVIEW programs to easily write out to the command line.
 
 ## Installing
 
-The latest package is available via the [releases tab on Github](https://github.com/JamesMc86/LabVIEW-CLI/releases) and is also available on the [LabVIEW Tools Network feed on VI Package Manager](vipm://wiresmith_technology_lib_g_cli?repo_url=http://ftp.ni.com/evaluation/labview/lvtn/vipm)
+The latest package is available via the [releases tab on Github](https://github.com/JamesMc86/G-CLI/releases) and is also available on the [NI Tools Network feed on VI Package Manager](vipm://wiresmith_technology_lib_g_cli?repo_url=http://ftp.ni.com/evaluation/labview/lvtn/vipm)
 
 To install download the VI package (or search it on the tools network) and run. This will install the LabVIEW library and the required Windows application.
 
