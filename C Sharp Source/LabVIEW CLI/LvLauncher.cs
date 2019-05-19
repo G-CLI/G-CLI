@@ -167,11 +167,20 @@ namespace G_CLI
 
             foreach(Process currentProcess in AllMatching)
             {
-                string modulePath = currentProcess.MainModule.FileName;
-                if(modulePath == path)
+                try
                 {
-                    FullMatch = currentProcess;
-                    return FullMatch;
+                    string modulePath = currentProcess.MainModule.FileName;
+                    if (modulePath == path)
+                    {
+                        FullMatch = currentProcess;
+                        return FullMatch;
+                    }
+                }
+                catch(System.ComponentModel.Win32Exception e)
+                {
+                    //Seen this exception in some cases. Catch and report so we can understand when it occurs. writeInf could be removed in future.
+                    output.writeInfo("Exception accessing " + currentProcess.ProcessName + " pid " + currentProcess.Id);
+                    output.writeInfo(e.Message);
                 }
             }
 
