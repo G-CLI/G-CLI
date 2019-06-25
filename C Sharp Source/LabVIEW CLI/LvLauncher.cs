@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading;
+using System.IO;
 
 namespace G_CLI
 {
@@ -43,6 +44,22 @@ namespace G_CLI
                 {
                     throw new System.IO.FileNotFoundException("No LabVIEW.exe found...", "LabVIEW.exe");
                 }
+
+
+                if(!File.Exists(launchPath))
+                {
+                    //The file doesn't exist. Check search directory.
+                    launchPath = substituteSearchPath(launchPath, lvVer);
+
+                    if(!File.Exists(launchPath))
+                    {
+                        //Still doesn't exists - throw exception.
+                        throw new FileNotFoundException("Launch path does not exist locally or in the the tools directory", launchPath);
+                    }
+                }
+
+
+
                 procInfo.FileName = lvVer.ExePath;
                 procInfo.Arguments = "\"" + launchPath + "\" " + arguments;
                 portRegistration.registerPort(launchPath, lvVer, port);
@@ -186,6 +203,18 @@ namespace G_CLI
 
             return FullMatch;
             
+
+        }
+
+        //This function will complete the launch path to a file in the search directory if it doesn't
+        //exist locally. If it exists locally it will do nothing.
+        private string substituteSearchPath(string launchPath, lvVersion labview) {
+
+            string searchPath;
+        
+            searchPath = Path.Combine(labview.ToolsPath, launchPath);
+            output.writeInfo(String.Format("Looks like the requested VI {0} Doesnt Exist. Checking In Search Path Instead: {1}", launchPath, searchPath));
+            return searchPath;
 
         }
 

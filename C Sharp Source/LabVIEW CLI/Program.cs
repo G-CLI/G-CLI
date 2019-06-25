@@ -64,10 +64,19 @@ namespace G_CLI
                     output.writeError("No launch VI supplied!");
                     return 1;
                 }
+                /*
                 if (!File.Exists(options.LaunchVI))
                 {
                     output.writeError("File \"" + options.LaunchVI + "\" does not exist!");
                     return 1;
+                }
+                */
+
+                //Add VI extension if none specified.
+                if(!Path.HasExtension(options.LaunchVI))
+                {
+                    output.writeInfo("No extension so assuming .vi");
+                    options.LaunchVI = options.LaunchVI + ".vi";
                 }
 
                 List<string> permittedExtensions = new List<string>{ ".vi", ".lvproj", ".exe" };
@@ -98,7 +107,7 @@ namespace G_CLI
                 }
                 catch(FileNotFoundException ex)
                 {
-                    output.writeError(ex.Message);
+                    output.writeError("ERROR: Missing File: " + ex.Message);
                     return 1;
                 }                    
             }

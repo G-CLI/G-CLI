@@ -196,6 +196,14 @@ namespace G_CLI
             }
         }
 
+        public string ToolsPath
+        {
+            get
+            {
+                return System.IO.Path.Combine(Path, "vi.lib\\G CLI Tools");
+            }
+        }
+
         public override string ToString()
         {
             return Version + ", " + Bitness; 
