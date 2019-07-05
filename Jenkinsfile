@@ -44,7 +44,7 @@ agent none
 				stage ('Get Dependencies') {
 					steps {
 						unstash 'installers'
-						bat "labview-cli -v \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\vipcApply.vi\" -- \"${env.WORKSPACE}\\LabVIEW Source\\Dependencies\\G CLI Dev Dependencies.vipc\" 2011
+						bat "labview-cli -v \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\vipcApply.vi\" -- \"${env.WORKSPACE}\\LabVIEW Source\\Dependencies\\G CLI Dev Dependencies.vipc\" 2011"
 					}
 				}
 				
