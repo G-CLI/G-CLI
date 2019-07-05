@@ -13,7 +13,7 @@ agent none
 
 				stage ('VS Build') {
 					steps {
-						changeAsmVer versionPattern: "${env.BUILD_NUMBER}", regexPattern: "Assembly(\\w*)Version\\(\"(\\d+).(\\d+).(\\d+).(\\*)\"\\)", replacementPattern:"Assembly\$1Version(\"\$2.\$3.\$4.%s\")"
+						changeAsmVer versionPattern: "${env.BUILD_NUMBER}", regexPattern: "Assembly(\\w*)Version\\(\"(\\d+).(\\d+).(\\d+).(\\d+)\"\\)", replacementPattern:"Assembly\$1Version(\"\$2.\$3.\$4.%s\")"
 						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/G CLI.sln\" /p:Configuration=Release /p:Platform=\"x86\""
 						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/G CLI.sln\" /p:Configuration=Release /p:Platform=\"x64\""
 						bat "MoveInstallers.bat"
