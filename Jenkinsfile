@@ -48,12 +48,14 @@ agent none
 					}
 				}
 				
+				/* removed due to lack of junit support in lv2011
 				stage ('Unit Testing') {
 					steps {
 						bat "labview-cli -v \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\run-vi-tester.vi\" -- \"LabVIEW Source\\G-CLI.lvproj\" \"lv-results.xml\" \"${env.WORKSPACE}\" "
 						junit "lv-results.xml"
 					}
 				}
+				*/
 				
 				stage ('LabVIEW Build') {
 					steps {
