@@ -196,8 +196,8 @@ namespace G_CLI
                 catch(System.ComponentModel.Win32Exception e)
                 {
                     //Seen this exception in some cases. Catch and report so we can understand when it occurs. writeInf could be removed in future.
-                    output.writeInfo("Exception accessing " + currentProcess.ProcessName + " pid " + currentProcess.Id);
-                    output.writeInfo(e.Message);
+                    output.writeDebug("Exception accessing " + currentProcess.ProcessName + " pid " + currentProcess.Id);
+                    output.writeDebug(e.Message);
                 }
             }
 
@@ -213,7 +213,7 @@ namespace G_CLI
             string searchPath;
         
             searchPath = Path.Combine(labview.ToolsPath, launchPath);
-            output.writeInfo(String.Format("Looks like the requested VI {0} Doesnt Exist. Checking In Search Path Instead: {1}", launchPath, searchPath));
+            output.writeDebug(String.Format("Looks like the requested VI {0} Doesnt Exist. Checking In Search Path Instead: {1}", launchPath, searchPath));
             return searchPath;
 
         }

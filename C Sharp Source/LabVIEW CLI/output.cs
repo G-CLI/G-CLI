@@ -47,5 +47,13 @@ namespace G_CLI
                 Console.WriteLine(message);
             }
         }
+
+        public void writeDebug(string message)
+        {
+            if (verbose)
+            {
+                Console.WriteLine(message);
+            }
+        }
     }
 }
