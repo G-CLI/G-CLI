@@ -24,12 +24,16 @@
 		</Item>
 		<Item Name="Tools" Type="Folder">
 			<Item Name="Echo.vi" Type="VI" URL="../Tools/Echo.vi"/>
+			<Item Name="QuitLabVIEW.vi" Type="VI" URL="../Tools/QuitLabVIEW.vi"/>
 		</Item>
 		<Item Name="Tests" Type="Folder">
 			<Item Name="Options Parsing Tests.lvclass" Type="LVClass" URL="../Tests/Options Parsing Tests/Options Parsing Tests.lvclass"/>
 			<Item Name="Working Path Expansion Tests.lvclass" Type="LVClass" URL="../Tests/Working Path Expansion Tests/Working Path Expansion Tests.lvclass"/>
 		</Item>
-		<Item Name="CLI Demo.vi" Type="VI" URL="../CLI Demo.vi"/>
+		<Item Name="Examples" Type="Folder">
+			<Item Name="CLI Demo.vi" Type="VI" URL="../CLI Demo.vi"/>
+			<Item Name="Options Parser Example.vi" Type="VI" URL="../Examples/Options Parser Example.vi"/>
+		</Item>
 		<Item Name="CLI.lvclass" Type="LVClass" URL="../CLI Class/CLI.lvclass"/>
 		<Item Name="Option Parser.lvlib" Type="Library" URL="../Argument Parser/Option Parser.lvlib"/>
 		<Item Name="Dependencies" Type="Dependencies">
@@ -348,7 +352,6 @@
 				<Item Name="Build Path - Traditional__ogtk__jki_vi_tester.vi" Type="VI" URL="/&lt;vilib&gt;/addons/_JKI Toolkits/VI Tester/_support/Support.llb/Build Path - Traditional__ogtk__jki_vi_tester.vi"/>
 				<Item Name="Build Path__ogtk__jki_vi_tester.vi" Type="VI" URL="/&lt;vilib&gt;/addons/_JKI Toolkits/VI Tester/_support/Support.llb/Build Path__ogtk__jki_vi_tester.vi"/>
 				<Item Name="Get LV Class Path.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/LVClass/Get LV Class Path.vi"/>
-				<Item Name="_TextTestResult.lvclass" Type="LVClass" URL="/&lt;vilib&gt;/addons/_JKI Toolkits/VI Tester/_TextTestResult.llb/_TextTestResult.lvclass"/>
 			</Item>
 		</Item>
 		<Item Name="Build Specifications" Type="Build"/>
