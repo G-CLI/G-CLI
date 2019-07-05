@@ -10,6 +10,7 @@
 		<Property Name="server.vi.callsEnabled" Type="Bool">true</Property>
 		<Property Name="server.vi.propertiesEnabled" Type="Bool">true</Property>
 		<Property Name="specify.custom.address" Type="Bool">false</Property>
+		<Item Name="Echo CWD.vi" Type="VI" URL="../Echo CWD.vi"/>
 		<Item Name="Echo Parameters.vi" Type="VI" URL="../Echo Parameters.vi"/>
 		<Item Name="Generate Large Output.vi" Type="VI" URL="../Generate Large Output.vi"/>
 		<Item Name="Quit With Parameter Code.vi" Type="VI" URL="../Quit With Parameter Code.vi"/>
@@ -18,7 +19,7 @@
 				<Item Name="BuildHelpPath.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/BuildHelpPath.vi"/>
 				<Item Name="Check Special Tags.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Check Special Tags.vi"/>
 				<Item Name="Clear Errors.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Clear Errors.vi"/>
-				<Item Name="CLI.lvclass" Type="LVClass" URL="/&lt;vilib&gt;/Wiresmith Technology/LabVIEW CLI/CLI Class/CLI.lvclass"/>
+				<Item Name="CLI.lvclass" Type="LVClass" URL="/&lt;vilib&gt;/Wiresmith Technology/G CLI/CLI Class/CLI.lvclass"/>
 				<Item Name="Convert property node font to graphics font.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Convert property node font to graphics font.vi"/>
 				<Item Name="Details Display Dialog.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Details Display Dialog.vi"/>
 				<Item Name="DialogType.ctl" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/DialogType.ctl"/>
@@ -50,6 +51,46 @@
 			</Item>
 		</Item>
 		<Item Name="Build Specifications" Type="Build">
+			<Item Name="CWD" Type="EXE">
+				<Property Name="AB_Class_Path" Type="Path">/C/Program Files (x86)/National Instruments/LabVIEW 2011/vi.lib/AppBuilder/AB_Classes/EXE/AB_EXE.lvclass</Property>
+				<Property Name="AB_UIClass_Path" Type="Path">/C/Program Files (x86)/National Instruments/LabVIEW 2011/vi.lib/AppBuilder/AB_Classes/Build/UI/AB_UI_Frmwk_Build.lvclass</Property>
+				<Property Name="App_copyErrors" Type="Bool">true</Property>
+				<Property Name="App_INI_aliasGUID" Type="Str">{2D8DBAA2-E6A5-4F52-9BC6-5A7629A6953F}</Property>
+				<Property Name="App_INI_GUID" Type="Str">{33E21490-37A7-468A-B5B9-4B2859467FF3}</Property>
+				<Property Name="Bld_buildCacheID" Type="Str">{1F630A7D-D94D-4CDA-A648-10EC5CA54687}</Property>
+				<Property Name="Bld_buildSpecName" Type="Str">CWD</Property>
+				<Property Name="Bld_excludeLibraryItems" Type="Bool">true</Property>
+				<Property Name="Bld_excludePolymorphicVIs" Type="Bool">true</Property>
+				<Property Name="Bld_localDestDir" Type="Path">../Integration Tests/exes</Property>
+				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
+				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
+				<Property Name="Bld_previewCacheID" Type="Str">{15371F17-DE20-4506-B1EC-37201A5CF17F}</Property>
+				<Property Name="Destination[0].destName" Type="Str">Echo CWD.exe</Property>
+				<Property Name="Destination[0].path" Type="Path">../Integration Tests/exes/Echo CWD.exe</Property>
+				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
+				<Property Name="Destination[0].type" Type="Str">App</Property>
+				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
+				<Property Name="Destination[1].path" Type="Path">../Integration Tests/exes/data</Property>
+				<Property Name="DestinationCount" Type="Int">2</Property>
+				<Property Name="Source[0].itemID" Type="Str">{B964C433-7256-4C15-961A-7722673825CE}</Property>
+				<Property Name="Source[0].type" Type="Str">Container</Property>
+				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
+				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Echo Parameters.vi</Property>
+				<Property Name="Source[1].type" Type="Str">VI</Property>
+				<Property Name="Source[2].destinationIndex" Type="Int">0</Property>
+				<Property Name="Source[2].itemID" Type="Ref">/My Computer/Echo CWD.vi</Property>
+				<Property Name="Source[2].sourceInclusion" Type="Str">TopLevel</Property>
+				<Property Name="Source[2].type" Type="Str">VI</Property>
+				<Property Name="SourceCount" Type="Int">3</Property>
+				<Property Name="TgtF_companyName" Type="Str">Wiresmith Technology</Property>
+				<Property Name="TgtF_fileDescription" Type="Str">Echo</Property>
+				<Property Name="TgtF_fileVersion.major" Type="Int">1</Property>
+				<Property Name="TgtF_internalName" Type="Str">Echo</Property>
+				<Property Name="TgtF_legalCopyright" Type="Str">Copyright © 2018 Wiresmith Technology</Property>
+				<Property Name="TgtF_productName" Type="Str">Echo</Property>
+				<Property Name="TgtF_targetfileGUID" Type="Str">{25AD2EBD-4913-43BE-B4F8-C961F3918EEE}</Property>
+				<Property Name="TgtF_targetfileName" Type="Str">Echo CWD.exe</Property>
+			</Item>
 			<Item Name="Echo" Type="EXE">
 				<Property Name="App_copyErrors" Type="Bool">true</Property>
 				<Property Name="App_INI_aliasGUID" Type="Str">{A1E337D9-0713-4F04-938F-1784BB7BC680}</Property>

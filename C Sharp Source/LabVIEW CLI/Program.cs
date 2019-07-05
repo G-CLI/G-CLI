@@ -138,7 +138,7 @@ namespace G_CLI
             }
 
             //Write the use arguments
-            lvInterface.writeArguments(lvArgs);
+            lvInterface.writeInitialMessages(lvArgs, Directory.GetCurrentDirectory());
 
             while (!stop)
             {

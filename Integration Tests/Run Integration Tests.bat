@@ -13,6 +13,10 @@ SET test_name="Echo Parameters VI"
 "%labview_cli_cmd%" %common_params% "Echo Parameters.vi" -- "Param 1" "Param 2" | find "Param 1	Param 2" || goto :failed
 ping 127.0.0.1 -n1 -w %delay_between_tests% >NUL 
 
+SET test_name="Echo CWD VI"
+"%labview_cli_cmd%" %common_params% "Echo CWD.vi" | find "%CD%" || goto :failed
+ping 127.0.0.1 -n1 -w %delay_between_tests% >NUL 
+
 SET test_name="Large Output VI"
 "%labview_cli_cmd%" %common_params% "Generate Large Output.vi" -- 10000 || goto :failed
 ping 127.0.0.1 -n1 -w %delay_between_tests% >NUL 
@@ -32,6 +36,10 @@ ping 127.0.0.1 -n1 -w %delay_between_tests% >NUL
 
 SET test_name="Echo Parameters EXE"
 "%labview_cli_cmd%" %common_params% ".\exes\Echo CLI.exe" -- "Param 1" "Param 2" | find "Param 1	Param 2" || goto :failed
+ping 127.0.0.1 -n1 -w %delay_between_tests% >NUL 
+
+SET test_name="Echo CWD EXE"
+"%labview_cli_cmd%" %common_params% ".\exes\Echo CWD.exe" | find "%CD%" || goto :failed
 ping 127.0.0.1 -n1 -w %delay_between_tests% >NUL 
 
 SET test_name="Large Output EXE"

@@ -48,7 +48,7 @@ namespace GCLI_Unit_tests
     }
 
     [TestClass]
-    public class ArgumentFormatingUnitTests
+    public class MessageFormattingUnitTests
     {
         private G_CLI.lvComms lvCommsInstance;
 
@@ -81,5 +81,6 @@ namespace GCLI_Unit_tests
             Assert.AreEqual(expectedMessage.messageType, messageToSend.messageType);
             Assert.AreEqual(expectedMessage.messageData, messageToSend.messageData);
         }
+
     }
 }

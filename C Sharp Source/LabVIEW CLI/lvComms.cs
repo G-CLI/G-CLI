@@ -134,9 +134,11 @@ namespace G_CLI
             }
         }
 
-        public void writeArguments(string[] lvArgs)
+        //Writes the messages required to start the CLI interface.
+        public void writeInitialMessages(string[] lvArgs, string currentDirectory)
         {
             writeMessage(generateArgumentsMessage(lvArgs));
+            writeMessage(new lvMsg("CCWD", currentDirectory));
         }
 
         private void writeMessage(lvMsg messageToWrite)
