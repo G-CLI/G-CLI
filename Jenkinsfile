@@ -50,7 +50,7 @@ agent none
 				
 				stage ('Unit Testing') {
 					steps {
-						bat "labview-cli -v \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\run-vi-tester.vi\" -- \"LabVIEW Source\G-CLI.lvproj\" \"lv-results.xml\" \"${env.WORKSPACE}\"
+						bat "labview-cli -v \"C:\\Users\\Public\\Documents\\National Instruments\\LV-CLI Common Steps\\steps\\run-vi-tester.vi\" -- \"LabVIEW Source\\G-CLI.lvproj\" \"lv-results.xml\" \"${env.WORKSPACE}\"
 						junit "lv-results.xml"
 					}
 				}
