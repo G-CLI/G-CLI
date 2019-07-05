@@ -22,6 +22,9 @@
 		<Item Name="Help" Type="Folder">
 			<Item Name="G CLI Getting Started.vi" Type="VI" URL="../Help/G CLI Getting Started.vi"/>
 		</Item>
+		<Item Name="Tools" Type="Folder">
+			<Item Name="Echo.vi" Type="VI" URL="../Tools/Echo.vi"/>
+		</Item>
 		<Item Name="CLI Demo.vi" Type="VI" URL="../CLI Demo.vi"/>
 		<Item Name="CLI.lvclass" Type="LVClass" URL="../CLI Class/CLI.lvclass"/>
 		<Item Name="Dependencies" Type="Dependencies">
