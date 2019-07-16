@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2019-07-05 21:41:25" Creator="James McNally" Comments="" ID="90a360bf4cf2e32175841a8a88d6071b">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2019-07-16 20:05:38" Creator="James McNally" Comments="" ID="5ed62f66b1a3cae92557526a365464e3">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
-    <Library_Version>2.1.0.30</Library_Version>
+    <Library_Version>2.1.1.1</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -382,7 +382,7 @@ Bug Fixes
         <Path>CLI Class\Path From Parameter.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>884C2E6BA20D0A884AACD5CC2174E2D4</GUID>
+      <GUID>8AE4CC964441143821FEEADC5A10DD78</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
