@@ -79,59 +79,94 @@ namespace G_CLI
 
             int bytesRead = 0, length = 0;
             Byte[] lengthBuff = new Byte[LENGTH_BYTES];
-            string msgType = "", msgData = "";
 
             try {
                 bytesRead = await _stream.ReadAsync(lengthBuff, 0, LENGTH_BYTES);
             }
             catch(Exception ex)
             {
-                msgData = "Read Length: Exception Found " + ex.ToString();
-                return new lvMsg("RDER", msgData);
+                return generateReadError("Read Length: Exception Found " + ex.ToString());
             }
 
-            if (bytesRead == LENGTH_BYTES)
+            switch (bytesRead)
             {
-                Array.Reverse(lengthBuff);
-                length = BitConverter.ToInt32(lengthBuff, 0);
-                if (length > 0 && length <= MAX_PAYLOAD_BYTES + TYPE_BYTES)
-                {
-                    try
+                case LENGTH_BYTES:
+                    Array.Reverse(lengthBuff);
+                    length = BitConverter.ToInt32(lengthBuff, 0);
+                    if(validLength(length))
                     {
-                        await _stream.ReadAsync(_dataBuffer, 0, length);
-                    }
-                    catch (Exception ex)
-                    {
-                        msgData = "Read Message: Exception Found " + ex.ToString();
-                        return new lvMsg("RDER", msgData);
-                    }
-
-                    msgType = Encoding.ASCII.GetString(_dataBuffer, 0, TYPE_BYTES);
-
-                    //If we have length data to read.
-                    if (length > TYPE_BYTES)
-                    {
-                        msgData = Encoding.ASCII.GetString(_dataBuffer, TYPE_BYTES, length - TYPE_BYTES);
+                        return await readMessageData(length);
                     }
                     else
                     {
-                        msgData = "";
+                        return generateReadError($"Bad Length Requested: {length}.");
                     }
+                    break;
+                case 0:
+                    return generateReadError("No bytes at port. Client probably closed the connection prematurely");
+                    break;
+                default:
+                    return generateReadError($"Only {bytesRead} bytes at port. Connection Error");
+                    break;
 
-                }
-                else
-                {
-                    msgType = "RDER";
-                    msgData = "Bad Length Read: " + length;
-                }
+            }
 
-                return new lvMsg(msgType, msgData);
+        }
 
+        private async Task<lvMsg> readMessageData(int length)
+        {
+
+            int bytesRead;
+
+            try
+            {
+                bytesRead = await _stream.ReadAsync(_dataBuffer, 0, length);
+            }
+            catch (Exception ex)
+            {
+                return generateReadError("Read Message: Exception Found " + ex.ToString());
+            }
+
+            switch(bytesRead)
+            {
+                case 0:
+                    return generateReadError("0 bytes read from port. Connection was probably closed prematurely");
+                default:
+                    return decodeMessage(_dataBuffer, length);
+            }
+
+
+            
+        }
+
+        //Check length is greater than TYPE BYTES and less than the max payload.
+        private bool validLength(int length)
+        {
+            return length >= TYPE_BYTES && length <= MAX_PAYLOAD_BYTES + TYPE_BYTES;
+        }
+
+        private lvMsg generateReadError(string errorMessage)
+        {
+            return new lvMsg("RDER", errorMessage);
+        }
+
+        private lvMsg decodeMessage(byte[] dataBuffer, int length)
+        {
+            string msgType = "", msgData = "";
+
+            msgType = Encoding.ASCII.GetString(dataBuffer, 0, TYPE_BYTES);
+
+            //If we have message data to read.
+            if (length > TYPE_BYTES)
+            {
+                msgData = Encoding.ASCII.GetString(_dataBuffer, TYPE_BYTES, length - TYPE_BYTES);
             }
             else
             {
-                return new lvMsg("RDER", "Incorrect Read of Length Bytes");
+                msgData = "";
             }
+
+            return new lvMsg(msgType, msgData);
         }
 
         //Writes the messages required to start the CLI interface.
