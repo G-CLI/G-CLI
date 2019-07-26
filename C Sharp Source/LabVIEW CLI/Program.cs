@@ -10,10 +10,11 @@ namespace G_CLI
     {
         static bool connected = false;
         static bool stop = false;
+        static int exitCode = 0;
 
         static int Main(string[] args)
         {
-            int exitCode = 0;
+            
             Output output = Output.Instance;
 
             string[] cliArgs, lvArgs;
@@ -156,7 +157,7 @@ namespace G_CLI
                         stop = true;
                         break;
                     case "RDER":
-                        //exitCode = 1;
+                        exitCode = 1;
                         output.writeError("Read Error");
                         if(latestMessage.messageData != "")
                         {
@@ -200,6 +201,7 @@ namespace G_CLI
             {
                 Output output = Output.Instance;
                 output.writeError("LabVIEW terminated unexpectedly!");
+                exitCode = 1;
                 stop = true; //in case the system is still waiting on the connection.
             }
         }
