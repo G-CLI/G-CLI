@@ -25,9 +25,15 @@ namespace G_CLI
             string baseResponse = "=HTTP/1.0 200 OK\r\nServer: Service Locator\r\nPragma: no-cache\r\nConnection: Close\r\nContent-Length: 12\r\nContent-Type: text/html\r\n\r\nPort=";
             string url = "http://localhost:3580/publish?" + _launchID + baseResponse + port + "\r\n";
 
-            HttpResponseMessage response = _httpClient.GetAsync(Uri.EscapeUriString(url)).Result;
-
-            _registered = true;
+            try
+            {
+                HttpResponseMessage response = _httpClient.GetAsync(Uri.EscapeUriString(url)).Result;
+                _registered = true;
+            }
+            catch (Exception ex)
+            {
+                throw new ServiceLocatorRegistrationException("Exception trying to register port. Is NI Service Locator Service running?", ex);
+            }
 
 
         }
@@ -51,6 +57,27 @@ namespace G_CLI
             {
                 _httpClient.GetAsync("http://localhost:3580/delete?" + _launchID);
             }
+
+        }
+    }
+
+    public class ServiceLocatorRegistrationException : Exception
+    {
+
+        public ServiceLocatorRegistrationException()
+        {
+
+        }
+
+        public ServiceLocatorRegistrationException(string message)
+            : base(message)
+        {
+
+        }
+
+        public ServiceLocatorRegistrationException(string message, Exception innerexception)
+            : base(message, innerexception)
+        {
 
         }
     }
