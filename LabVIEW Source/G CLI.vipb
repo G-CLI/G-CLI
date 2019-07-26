@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2019-07-16 20:05:38" Creator="James McNally" Comments="" ID="5ed62f66b1a3cae92557526a365464e3">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2019-07-26 14:38:03" Creator="James McNally" Comments="" ID="8af4f9077d4b043aa17e66ef90929dc5">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
-    <Library_Version>2.1.1.1</Library_Version>
+    <Library_Version>2.2.0.1</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -40,14 +40,12 @@ NOTE: Since the Windows application installs to path administrator access is req
       <Release_Notes>New Features
 ==========
 
-* Pass current working directory to the LabVIEW library.
-* Added VI to calculate absolute paths from path parameters.
-* Added command line parser.
+* Added the option to pass an exit code to exit code with error to be used in the no error case.
 
 Bug Fixes
 ==========
 
-* Fixed exception due to race condition accessing the same process we have closed.</Release_Notes>
+* Improved some error handling in the G CLI exe.</Release_Notes>
     </Description>
     <Destinations>
       <Toolkit_VIs>
@@ -382,7 +380,7 @@ Bug Fixes
         <Path>CLI Class\Path From Parameter.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>8AE4CC964441143821FEEADC5A10DD78</GUID>
+      <GUID>8FB9662458B312C7AE8EB5A310459746</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
