@@ -92,6 +92,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="lvComms Unit Tests.cs" />
     <Compile Include="LvVersion Unit Tests.cs" />
+    <Compile Include="LvLauncher Tests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LabVIEW CLI\G_CLI.csproj">

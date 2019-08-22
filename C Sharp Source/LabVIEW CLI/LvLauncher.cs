@@ -10,9 +10,9 @@ using System.IO;
 
 namespace G_CLI
 {
-    class LvLauncher
+    public class LvLauncher
     {
-        private ProcessStartInfo procInfo;
+        
         private Process lvProcess;
         private Output output = Output.Instance;
         private Thread LvTrackingThread;
@@ -20,6 +20,7 @@ namespace G_CLI
         private Boolean cliExited = false;
         private Boolean processSwitched = false;
 
+        public ProcessStartInfo procInfo { get; }
         public ManualResetEventSlim lvExited = new ManualResetEventSlim();
 
 
@@ -30,7 +31,7 @@ namespace G_CLI
 
             procInfo = new ProcessStartInfo();
 
-            string arguments = "-- -p:" + port;
+            string arguments = "-unattended -- -p:" + port;
 
             if (isExe(launchPath))
             {
