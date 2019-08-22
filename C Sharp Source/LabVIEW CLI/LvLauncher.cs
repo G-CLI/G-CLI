@@ -26,12 +26,12 @@ namespace G_CLI
 
         public event EventHandler Exited;
 
-        public LvLauncher(string launchPath, lvVersion lvVer, int port, portRegistration portRegistration)
+        public LvLauncher(string launchPath, lvVersion lvVer, int port, portRegistration portRegistration, Boolean suppressDialogs)
         {
 
             procInfo = new ProcessStartInfo();
 
-            string arguments = "-unattended -- -p:" + port;
+            string arguments = generateBaseArguments(port, suppressDialogs);
 
             if (isExe(launchPath))
             {
@@ -95,6 +95,29 @@ namespace G_CLI
             //block this call until the thread has stopped.
             LvTrackingThread.Join();
         }
+
+        // <summary>
+        // Generates the arguments for LabVIEW. Public only for testing (I know, it shouldnt!)
+        // </summary>
+        static public string generateBaseArguments(int port, Boolean suppressDialogs)
+        {
+
+            List<string> argumentArray = new List<string>();
+
+            if(suppressDialogs)
+            {
+                argumentArray.Add("-unattended");
+            }
+
+            //add standard arguments
+            argumentArray.Add("--");
+            argumentArray.Add("-p:" + port);
+
+            return string.Join(" ", argumentArray); //move to seperated by space string.
+
+            
+        }
+
 
         /// <summary>
         /// Starts the LabVIEW process and keeps track of it.
@@ -220,4 +243,6 @@ namespace G_CLI
         }
 
     }
+
+
 }

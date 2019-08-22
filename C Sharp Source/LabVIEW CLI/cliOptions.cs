@@ -40,9 +40,9 @@ namespace G_CLI
         HelpText = "Forces the LabVIEW process to exit after the CLI receives a return code/error")]
         public bool kill { get; set; }
 
-        [Option("suppressDialogs", DefaultValue = true,
-        HelpText = "Sets the unattended flag when launching LabVIEW to prevent certain LabVIEW dialogs from being shown. Default is true.")]
-        public bool supressDialogs { get; set; }
+        [Option("allowDialogs", DefaultValue = false,
+        HelpText = "By default G CLI will set the unattended flag to tell LabVIEW to prevent certain dialogs. Set this to remove this feature.")]
+        public bool allowDialogs { get; set; }
 
         [ValueOption(0)]
         public string LaunchVI { get; set; }

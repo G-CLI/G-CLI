@@ -8,9 +8,19 @@ namespace GCLI_Unit_tests
     public class LVLauncherTests
     {
         [TestMethod]
-        public void TestDialogSuppression()
+        public void TestLabVIEWArgumentsNoSuppression()
         {
-            //not sure on the best way to test this right now. Would need to mock out the registration process?
+            string arguments = LvLauncher.generateBaseArguments(1000, false);
+
+            Assert.AreEqual("-- -p:1000", arguments);
+        }
+
+        [TestMethod]
+        public void TestLabVIEWArgumentsWithDialogSuppression()
+        {
+            string arguments = LvLauncher.generateBaseArguments(1000, true);
+
+            Assert.AreEqual("-unattended -- -p:1000", arguments);
         }
     }
 }

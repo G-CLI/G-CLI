@@ -90,7 +90,7 @@ namespace G_CLI
 
                 try
                 {
-                    launcher = new LvLauncher(options.LaunchVI, lvPathFinder(options), lvInterface.port, portRegistration);
+                    launcher = new LvLauncher(options.LaunchVI, lvPathFinder(options), lvInterface.port, portRegistration, !options.allowDialogs);
                     launcher.Exited += Launcher_Exited;
                     launcher.Start();
                 }
