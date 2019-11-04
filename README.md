@@ -1,5 +1,5 @@
 # G-CLI
-A proxy mechanism allow LabVIEW programs to easily write out to the command line.
+A proxy mechanism allowing LabVIEW programs to easily write out to the command line.
 
 ## Installing
 
