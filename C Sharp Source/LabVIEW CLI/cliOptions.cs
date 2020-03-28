@@ -36,6 +36,10 @@ namespace G_CLI
         HelpText = "Maximum time (in ms) to wait for the LabVIEW program to connect to the cli. -1 = forever. Default is 60000 (60 seconds)")]
         public int timeout { get; set; }
 
+        [Option("kill-timeout", DefaultValue = 10000,
+        HelpText = "Maximum time (in ms) to wait for the LabVIEW process to exit on close. Use with kill to then force it to close. Default is 10000 (10 seconds)")]
+        public int killTimeout { get; set; }
+
         [Option("kill", DefaultValue = false,
         HelpText = "Forces the LabVIEW process to exit after the CLI receives a return code/error")]
         public bool kill { get; set; }
