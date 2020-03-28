@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2020-03-28 06:50:16" Creator="James McNally" Comments="" ID="e4e522ecac68e2bca5bd2d9061542bdf">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2020-03-28 07:05:34" Creator="James McNally" Comments="" ID="4b6684e763485c5cccc443c8651f1eb7">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
-    <Library_Version>2.3.0.1</Library_Version>
+    <Library_Version>2.3.0.2</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -392,7 +392,7 @@ NOTE: Since the Windows application installs to path administrator access is req
         <Path>CLI Class\Write Line.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>BF376BE1252D10EE2A051B30939ED9B7</GUID>
+      <GUID>0DD35C2BDFACECEB1B1B862FCF095D9C</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
