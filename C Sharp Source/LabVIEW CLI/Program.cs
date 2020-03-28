@@ -116,7 +116,7 @@ namespace G_CLI
             //At this point LV should have launched so now we need to handle Ctrl+C to ensure LV is killed as well.
             Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs e)
             {
-                output.writeMessage("Cancel key received, closing LabVIEW.");
+                output.writeInfo("Cancel key received, closing LabVIEW.");
                 launcher.Kill();
             };
 
@@ -182,7 +182,7 @@ namespace G_CLI
                 int timeout = options.timeout == -1 ? 10000 : options.timeout;
                 if (!launcher.lvExited.Wait(timeout))
                 {
-                    output.writeMessage("Forcing LabVIEW to terminate...");
+                    output.writeInfo("Forcing LabVIEW to terminate...");
                     launcher.Kill();
                 }
             }
