@@ -36,8 +36,8 @@
 			<Item Name="CLI Demo.vi" Type="VI" URL="../CLI Demo.vi"/>
 			<Item Name="Options Parser Example.vi" Type="VI" URL="../Examples/Options Parser Example.vi"/>
 		</Item>
-		<Item Name="CLI.lvclass" Type="LVClass" URL="../CLI Class/CLI.lvclass"/>
 		<Item Name="Option Parser.lvlib" Type="Library" URL="../Argument Parser/Option Parser.lvlib"/>
+		<Item Name="CLI.lvclass" Type="LVClass" URL="../CLI Class/CLI.lvclass"/>
 		<Item Name="Dependencies" Type="Dependencies">
 			<Item Name="vi.lib" Type="Folder">
 				<Item Name="BuildHelpPath.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/BuildHelpPath.vi"/>
@@ -354,6 +354,11 @@
 				<Item Name="Build Path - Traditional__ogtk__jki_vi_tester.vi" Type="VI" URL="/&lt;vilib&gt;/addons/_JKI Toolkits/VI Tester/_support/Support.llb/Build Path - Traditional__ogtk__jki_vi_tester.vi"/>
 				<Item Name="Build Path__ogtk__jki_vi_tester.vi" Type="VI" URL="/&lt;vilib&gt;/addons/_JKI Toolkits/VI Tester/_support/Support.llb/Build Path__ogtk__jki_vi_tester.vi"/>
 				<Item Name="Get LV Class Path.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/LVClass/Get LV Class Path.vi"/>
+				<Item Name="TCP Get Raw Net Object.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/tcp.llb/TCP Get Raw Net Object.vi"/>
+			</Item>
+			<Item Name="TCP_NoDelay_Windows.vi" Type="VI" URL="../Dependencies/TCP_NoDelay_Windows.vi"/>
+			<Item Name="wsock32.dll" Type="Document" URL="wsock32.dll">
+				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
 			</Item>
 		</Item>
 		<Item Name="Build Specifications" Type="Build"/>
