@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2019-07-26 14:38:03" Creator="James McNally" Comments="" ID="8af4f9077d4b043aa17e66ef90929dc5">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2020-03-28 06:50:16" Creator="James McNally" Comments="" ID="e4e522ecac68e2bca5bd2d9061542bdf">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
-    <Library_Version>2.2.0.1</Library_Version>
+    <Library_Version>2.3.0.1</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -40,12 +40,10 @@ NOTE: Since the Windows application installs to path administrator access is req
       <Release_Notes>New Features
 ==========
 
-* Added the option to pass an exit code to exit code with error to be used in the no error case.
-
-Bug Fixes
-==========
-
-* Improved some error handling in the G CLI exe.</Release_Notes>
+* Added --kill-timeout option to have seperate wait time before killing labVIEW process.
+* Now zero output if verbose mode isn't used.
+* Added write line function in library.
+* Mass compiles G-CLI tools after install.</Release_Notes>
     </Description>
     <Destinations>
       <Toolkit_VIs>
@@ -299,20 +297,6 @@ Bug Fixes
       <Items_Data>
         <Type>Item</Type>
         <Sub_Palette_Index>-1</Sub_Palette_Index>
-        <NameSub_Menu_Name>Write String.vi</NameSub_Menu_Name>
-        <Short_Name/>
-        <is_Merge_VI>false</is_Merge_VI>
-        <Position>
-          <Row>1</Row>
-          <Column>2</Column>
-        </Position>
-        <Icon>00000000</Icon>
-        <Path>CLI Class\Write String.vi</Path>
-        <VI_Title/>
-      </Items_Data>
-      <Items_Data>
-        <Type>Item</Type>
-        <Sub_Palette_Index>-1</Sub_Palette_Index>
         <NameSub_Menu_Name>Create Options Set.vi</NameSub_Menu_Name>
         <Short_Name/>
         <is_Merge_VI>false</is_Merge_VI>
@@ -380,7 +364,35 @@ Bug Fixes
         <Path>CLI Class\Path From Parameter.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>8FB9662458B312C7AE8EB5A310459746</GUID>
+      <Items_Data>
+        <Type>Item</Type>
+        <Sub_Palette_Index>-1</Sub_Palette_Index>
+        <NameSub_Menu_Name>Write String.vi</NameSub_Menu_Name>
+        <Short_Name/>
+        <is_Merge_VI>false</is_Merge_VI>
+        <Position>
+          <Row>2</Row>
+          <Column>2</Column>
+        </Position>
+        <Icon>00000000</Icon>
+        <Path>CLI Class\Write String.vi</Path>
+        <VI_Title/>
+      </Items_Data>
+      <Items_Data>
+        <Type>Item</Type>
+        <Sub_Palette_Index>-1</Sub_Palette_Index>
+        <NameSub_Menu_Name>Write Line.vi</NameSub_Menu_Name>
+        <Short_Name/>
+        <is_Merge_VI>false</is_Merge_VI>
+        <Position>
+          <Row>1</Row>
+          <Column>2</Column>
+        </Position>
+        <Icon>00000000</Icon>
+        <Path>CLI Class\Write Line.vi</Path>
+        <VI_Title/>
+      </Items_Data>
+      <GUID>BF376BE1252D10EE2A051B30939ED9B7</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
