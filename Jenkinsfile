@@ -23,9 +23,9 @@ agent none
 					
 				stage ('VS Test'){
 					steps{
-						bat "if exist VSTestResults.trx del VSTestResults.trx"
-						bat "\"${tool 'MSTest-16'}\" /resultsfile:\"%WORKSPACE%/VSTestResults.trx\" /testcontainer:\"%WORKSPACE%/C Sharp Source/LabVIEWCLI_Unit_tests/bin/x86/Release/GCLI_Unit_tests.dll\" /nologo"
-						step([$class: 'MSTestPublisher', testResultsFile:"VSTestResults.trx", failOnError: true, keepLongStdio: true])
+						bat "if exist TestResults/VSTestResults.trx del TestResults/VSTestResults.trx"
+						bat "\"${tool 'VSTest-16'}\" \"%WORKSPACE%/C Sharp Source/LabVIEWCLI_Unit_tests/bin/x86/Release/GCLI_Unit_tests.dll\" --logger:trx;LogFileName=VSTestResults.trx"
+						step([$class: 'MSTestPublisher', testResultsFile:"TestResults/VSTestResults.trx", failOnError: true, keepLongStdio: true])
 					}
 				}
 				
