@@ -3,7 +3,7 @@ agent none
 
 	stages {
 		stage("VS Building") {
-			agent {label 'VS14'}
+			agent {label 'VS16'}
 			stages {
 				stage ('Get VS Dependencies') {	
 					steps {
@@ -14,8 +14,8 @@ agent none
 				stage ('VS Build') {
 					steps {
 						changeAsmVer versionPattern: "${env.BUILD_NUMBER}", regexPattern: "Assembly(\\w*)Version\\(\"(\\d+).(\\d+).(\\d+).(\\d+)\"\\)", replacementPattern:"Assembly\$1Version(\"\$2.\$3.\$4.%s\")"
-						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/G CLI.sln\" /p:Configuration=Release /p:Platform=\"x86\""
-						bat "\"${tool 'MS Build'}\" \"C Sharp Source/LabVIEW CLI/G CLI.sln\" /p:Configuration=Release /p:Platform=\"x64\""
+						bat "\"${tool 'MSBuild-16'}\" \"C Sharp Source/LabVIEW CLI/G CLI.sln\" /p:Configuration=Release /p:Platform=\"x86\""
+						bat "\"${tool 'MSBuild-16'}\" \"C Sharp Source/LabVIEW CLI/G CLI.sln\" /p:Configuration=Release /p:Platform=\"x64\""
 						bat "MoveInstallers.bat"
 						stash name:"installers", includes:"LabVIEW Source/Installation Support/*.msi"
 					}
@@ -24,7 +24,7 @@ agent none
 				stage ('VS Test'){
 					steps{
 						bat "if exist VSTestResults.trx del VSTestResults.trx"
-						bat "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\mstest.exe\" /resultsfile:\"%WORKSPACE%/VSTestResults.trx\" /testcontainer:\"%WORKSPACE%/C Sharp Source/LabVIEWCLI_Unit_tests/bin/x86/Release/GCLI_Unit_tests.dll\" /nologo"
+						bat "\"${tool 'MSTest-16'}\" /resultsfile:\"%WORKSPACE%/VSTestResults.trx\" /testcontainer:\"%WORKSPACE%/C Sharp Source/LabVIEWCLI_Unit_tests/bin/x86/Release/GCLI_Unit_tests.dll\" /nologo"
 						step([$class: 'MSTestPublisher', testResultsFile:"VSTestResults.trx", failOnError: true, keepLongStdio: true])
 					}
 				}
