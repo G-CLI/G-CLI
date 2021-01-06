@@ -4,6 +4,7 @@ use sysinfo::{System, SystemExt, ProcessExt};
 
 
 
+
 const COMMAND: &str = "firefox";
 
 /// Launches the LabVIEW process.
