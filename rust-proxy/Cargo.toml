@@ -10,5 +10,7 @@ edition = "2018"
 sysinfo = "0.15"
 log = "0.4"
 simple_logger = "1.11"
-winreg = "0.8"
 thiserror = "1.0"
+
+[target.'cfg(windows)'.dependencies] 
+winreg = "0.8"

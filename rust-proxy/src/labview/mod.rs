@@ -8,7 +8,9 @@ pub mod process;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
+#[cfg(target_os = "windows")]
 use winreg::enums::*;
+#[cfg(target_os = "windows")]
 use winreg::RegKey;
 
 use thiserror::Error;
@@ -75,8 +77,14 @@ impl SystemLabviewInstalls {
     }
 }
 
+/// Scan the system for LabVIEW installs - Linux
+pub fn detect_installations() -> Result<SystemLabviewInstalls, LabviewInstallError> {
+    Ok(SystemLabviewInstalls::new())
+}
+
 
 /// Scan the system for LabVIEW installs and return their details.
+#[cfg(target_os = "windows")]
 pub fn detect_installations() -> Result<SystemLabviewInstalls, LabviewInstallError> {
     let mut system = SystemLabviewInstalls::new();
 
@@ -96,6 +104,7 @@ pub fn detect_installations() -> Result<SystemLabviewInstalls, LabviewInstallErr
 }
 
 /// When passed the LabVIEW registry key this function will extract all installs it can find.
+#[cfg(target_os = "windows")]
 fn installations_from_labview_registry(labview_key: RegKey, bitness: Bitness, system: &mut SystemLabviewInstalls) -> Result<(), LabviewInstallError> {
 
 
@@ -120,6 +129,7 @@ fn installations_from_labview_registry(labview_key: RegKey, bitness: Bitness, sy
 
 /// From the registry key, extract the install details.
 /// Sometimes an install key will be empty. Returns none in this case.
+#[cfg(target_os = "windows")]
 fn extract_install_details(install_key: RegKey, bitness: Bitness) -> Option<LabviewInstall> {
 
     // Use version string as a test. If it exists try and get the others.
