@@ -1,9 +1,11 @@
 //! Install detection code for the windows platform.
 //! 
+use std::path::PathBuf;
+
 use winreg::enums::*;
 use winreg::RegKey;
 
-use super::installs::{SystemLabviewInstalls, LabviewInstallError};
+use super::installs::{LabviewInstall, Bitness, SystemLabviewInstalls, LabviewInstallError};
 
 
 /// Scan the system for LabVIEW installs and return their details.
