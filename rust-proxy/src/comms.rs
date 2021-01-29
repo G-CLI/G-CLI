@@ -4,17 +4,63 @@
 //! Handles all TCP comms related functions.
 //!
 //!
-use std::path::PathBuf;
+use std::convert::TryInto;
+use std::{path::PathBuf, str::Utf8Error};
+use thiserror::Error;
+
+#[derive(Error, Debug, PartialEq)]
+pub enum CommsError {
+    #[error("The size parameter is not a valid size value.")]
+    SizeParameterInvalid,
+    #[error("Message ID Is Not Valid UTF8")]
+    MessageIdNotValidUTF8(#[source] Utf8Error),
+    #[error("Message contents cannot be read as UTF8")]
+    MessageContentsNotValidUTF8(#[source] Utf8Error),
+    #[error("Exit code string can't be parsed as an integer: \"{1}\"")]
+    ExitCodeStringNotParsable(#[source] std::num::ParseIntError, String),
+    #[error("Message ID is invalid \"{0}\"")]
+    UnknownMessageId(String),
+}
 
 /// All messages we can recieve from LabVIEW.
-pub enum MessageFromLV {
+#[derive(Clone, PartialEq, Debug)]
+pub enum MessageFromLV<'a> {
     /// Exit with the exit code provided.
     EXIT(i32),
     /// Output to the command line.
-    OUTP(String),
+    OUTP(&'a str),
+}
+
+impl<'a> MessageFromLV<'a> {
+    /// Get the message from the buffer.
+    pub fn from_buffer(buffer: &'a [u8; 9000]) -> Result<MessageFromLV<'a>, CommsError> {
+        let length = i32::from_be_bytes(
+            buffer[0..4]
+                .try_into()
+                .map_err(|_| CommsError::SizeParameterInvalid)?,
+        );
+
+        let id =
+            std::str::from_utf8(&buffer[4..8]).map_err(|e| CommsError::MessageIdNotValidUTF8(e))?;
+        let data_end: usize = 8 + (length as usize) - 4; // 8 = offset, 4 = already used for id
+        let contents = std::str::from_utf8(&buffer[8..data_end])
+            .map_err(|e| CommsError::MessageContentsNotValidUTF8(e))?;
+
+        match id {
+            "EXIT" => {
+                let code = contents.parse::<i32>().map_err(|e| {
+                    CommsError::ExitCodeStringNotParsable(e, String::from(contents))
+                })?;
+                Ok(MessageFromLV::EXIT(code))
+            }
+            "OUTP" => Ok(MessageFromLV::OUTP(contents)),
+            _ => Err(CommsError::UnknownMessageId(String::from(id))),
+        }
+    }
 }
 
 /// All messages we can send to LabVIEW
+#[derive(Clone, PartialEq, Debug)]
 pub enum MessageToLV<'a> {
     /// Arguments sent as a tab delimited list
     ARGS(&'a [String]),
@@ -99,5 +145,66 @@ mod tests {
 
         assert_eq!(size, 11 + 4); //9 plus the 4 for length.
         assert_eq!(&buffer[0..size], expected.as_bytes());
+    }
+
+    #[test]
+    fn exit_command_from_buffer() {
+        let mut buffer = [0u8; 9000];
+
+        let input = "\x00\x00\x00\x07EXIT123";
+
+        buffer[0..input.len()].copy_from_slice(input.as_bytes());
+
+        let message = MessageFromLV::from_buffer(&buffer);
+
+        assert_eq!(message.unwrap(), MessageFromLV::EXIT(123));
+    }
+
+    #[test]
+    fn exit_command_invalid_string_from_buffer() {
+        let mut buffer = [0u8; 9000];
+
+        let input = "\x00\x00\x00\x07EXIT1.3";
+
+        buffer[0..input.len()].copy_from_slice(input.as_bytes());
+
+        let message = MessageFromLV::from_buffer(&buffer);
+
+        match message {
+            Ok(_) => panic!("Fail"),
+            Err(CommsError::ExitCodeStringNotParsable(_, string)) => {
+                assert_eq!(string, String::from("1.3"))
+            }
+            Err(_) => panic!("Fail"),
+        }
+    }
+
+    #[test]
+    fn error_on_unknown_id() {
+        let mut buffer = [0u8; 9000];
+
+        let input = "\x00\x00\x00\x07EXTT123";
+
+        buffer[0..input.len()].copy_from_slice(input.as_bytes());
+
+        let message = MessageFromLV::from_buffer(&buffer);
+
+        assert_eq!(
+            message,
+            Err(CommsError::UnknownMessageId(String::from("EXTT")))
+        );
+    }
+
+    #[test]
+    fn output_from_buffer() {
+        let mut buffer = [0u8; 9000];
+
+        let input = "\x00\x00\x00\x11OUTPHello, World\n";
+
+        buffer[0..input.len()].copy_from_slice(input.as_bytes());
+
+        let message = MessageFromLV::from_buffer(&buffer);
+
+        assert_eq!(message.unwrap(), MessageFromLV::OUTP("Hello, World\n"));
     }
 }
