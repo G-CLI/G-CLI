@@ -1,4 +1,5 @@
 mod cli;
+mod comms;
 mod labview;
 
 use labview::detect_installations;

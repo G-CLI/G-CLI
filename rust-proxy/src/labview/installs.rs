@@ -6,10 +6,8 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum LabviewInstallError {
     #[error("Cannot Access Windows Registry for Detection: {1}")]
-    RegKeyError(#[source] std::io::Error, String)
+    RegKeyError(#[source] std::io::Error, String),
 }
-
-
 
 /// Defines if LabVIEW is 64 bit or 32 bit.
 #[derive(Copy, Clone, Debug, PartialEq, Hash, Eq)]
@@ -38,7 +36,6 @@ pub struct SystemLabviewInstalls {
 }
 
 impl SystemLabviewInstalls {
-
     /// Create a new instance to be populated.
     pub(in crate::labview) fn new() -> Self {
         Self {
@@ -48,7 +45,6 @@ impl SystemLabviewInstalls {
 
     /// Add the provided install to the system details.
     pub(in crate::labview) fn add_install(&mut self, install: LabviewInstall) {
-
         // Store with version minus SP1.
         // For current versions this just means taking everything before the space.
         // The unwrap is safe since even if there is no space, it will have a single return.
@@ -64,7 +60,6 @@ impl SystemLabviewInstalls {
         self.versions.get(&(bitness, version.to_string()))
     }
 }
-
 
 #[cfg(test)]
 mod test {
