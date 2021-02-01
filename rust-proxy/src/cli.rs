@@ -43,7 +43,7 @@ mod tests {
 
         let processed = get_app().get_matches_from_safe(args).unwrap();
 
-        assert_eq!(processed.value_of("app_to_run"), Some("test.vi"));
+        assert_eq!(processed.value_of("app to run"), Some("test.vi"));
     }
 
     #[test]
