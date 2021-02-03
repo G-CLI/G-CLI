@@ -5,10 +5,14 @@
 //!
 //!
 use std::convert::TryInto;
+use std::io::{Read, Write};
+use std::net::{TcpListener, TcpStream};
+use std::thread::sleep;
+use std::time::Duration;
 use std::{path::PathBuf, str::Utf8Error};
 use thiserror::Error;
 
-#[derive(Error, Debug, PartialEq)]
+#[derive(Error, Debug)]
 pub enum CommsError {
     #[error("The size parameter is not a valid size value.")]
     SizeParameterInvalid,
@@ -20,6 +24,109 @@ pub enum CommsError {
     ExitCodeStringNotParsable(#[source] std::num::ParseIntError, String),
     #[error("Message ID is invalid \"{0}\"")]
     UnknownMessageId(String),
+    #[error("IO Error While Listening for LabVIEW to Connect")]
+    WaitOnConnectionIoError(#[source] std::io::Error),
+    #[error("IO Error When Reading Messages From LabVIEW")]
+    ReadLvMessageError(#[source] std::io::Error),
+    #[error("IO Error When Writing Messages to LabVIEW")]
+    WriteLvMessageError(#[source] std::io::Error),
+    #[error("Timed out waiting for app to connect to g-cli")]
+    WaitOnConnectionTimeOut,
+}
+
+/// Provides the TCP Connection to the App
+pub struct AppListener {
+    listener: TcpListener,
+}
+
+impl AppListener {
+    /// Create the listener and reserve the port.
+    pub fn new() -> Self {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+
+        // So we can implement a timeout later.
+        listener.set_nonblocking(true).unwrap();
+
+        Self { listener }
+    }
+
+    /// Get a Connection
+    pub fn wait_on_app(&self, timeout_secs: f32) -> Result<AppConnection, CommsError> {
+        // The standard networking library doesn't contain a timeout based TCP listener.
+        // There maybe better methods than polling but this is where we can start.
+
+        // timeout to ms then divided by the wait time.
+        let wait_time = 10;
+        let iterations = (timeout_secs * 1000f32) as u64 / wait_time;
+        let mut count = 0;
+        loop {
+            match self.listener.accept() {
+                Ok((stream, _addr)) => {
+                    return Ok(AppConnection::new(stream));
+                }
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    count = count + 1;
+
+                    if count < iterations {
+                        //retry
+                        sleep(Duration::from_millis(wait_time));
+                    } else {
+                        return Err(CommsError::WaitOnConnectionTimeOut);
+                    }
+                }
+                Err(e) => {
+                    println!("{:?}", e);
+                    return Err(CommsError::WaitOnConnectionIoError(e));
+                }
+            }
+        }
+    }
+
+    /// Get the port for the listener.
+    pub fn port(&self) -> u16 {
+        let address = self.listener.local_addr().unwrap();
+        address.port()
+    }
+}
+
+///The operating connection on the app.AppConnection
+pub struct AppConnection {
+    stream: TcpStream,
+    buffer: [u8; 9000],
+}
+
+impl AppConnection {
+    pub fn new(stream: TcpStream) -> Self {
+        stream.set_nonblocking(false);
+        stream.set_nodelay(true);
+        Self {
+            stream,
+            buffer: [0u8; 9000],
+        }
+    }
+
+    pub fn write(&mut self, message: MessageToLV) -> Result<(), CommsError> {
+        let size = message.to_buffer(&mut self.buffer);
+        let result = self.stream.write(&self.buffer[0..size]);
+        //match return type.
+        result
+            .map_err(|e| CommsError::WriteLvMessageError(e))
+            .map(|_| ())
+    }
+
+    pub fn read(&mut self) -> Result<MessageFromLV, CommsError> {
+        self.stream
+            .read_exact(&mut self.buffer[0..4])
+            .map_err(|e| CommsError::ReadLvMessageError(e))?;
+
+        let size = u32::from_be_bytes(self.buffer[0..4].try_into().unwrap());
+
+        self.stream
+            .read_exact(&mut self.buffer[4..(size as usize) + 4])
+            .map_err(|e| CommsError::ReadLvMessageError(e))?;
+
+        MessageFromLV::from_buffer(&self.buffer)
+    }
 }
 
 /// All messages we can recieve from LabVIEW.
@@ -189,10 +296,10 @@ mod tests {
 
         let message = MessageFromLV::from_buffer(&buffer);
 
-        assert_eq!(
-            message,
-            Err(CommsError::UnknownMessageId(String::from("EXTT")))
-        );
+        match message {
+            Err(CommsError::UnknownMessageId(id)) => assert_eq!(id, String::from("EXTT")),
+            _ => panic!("Not ID Error"),
+        }
     }
 
     #[test]

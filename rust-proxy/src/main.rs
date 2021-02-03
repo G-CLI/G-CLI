@@ -2,18 +2,19 @@ mod cli;
 mod comms;
 mod labview;
 
-use labview::detect_installations;
-use log::{debug, LevelFilter};
+use comms::{AppConnection, AppListener, MessageFromLV, MessageToLV};
+use labview::{detect_installations, launch_exe};
+use log::{debug, error, LevelFilter};
 use simple_logger::SimpleLogger;
 use std::path::PathBuf;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn main() {
-    let args = cli::get_app().get_matches();
+    let config = cli::Configuration::from_env();
     let program_args = cli::program_arguments(std::env::args());
 
-    let log_level = if args.is_present("verbose mode") {
+    let log_level = if config.verbose {
         LevelFilter::Debug
     } else {
         LevelFilter::Info
@@ -28,14 +29,42 @@ fn main() {
 
     detect_installations();
 
-    let monitor = labview::process::MonitoredProcess::start(PathBuf::from(
-        "C:\\Program Files (x86)\\National Instruments\\LabVIEW 2011\\LabVIEW.exe",
-    ));
+    let app_listener = AppListener::new();
+    println!("{}", app_listener.port());
 
-    std::thread::sleep(std::time::Duration::from_millis(10000));
+    println!("Launch path: {:?}", config.to_launch);
 
-    print!("{}", monitor.check_process_stopped());
-    print!("{}", monitor.check_process_stopped());
+    //let monitor = labview::process::MonitoredProcess::start(PathBuf::from(
+    //    "C:\\Program Files (x86)\\National Instruments\\LabVIEW 2011\\LabVIEW.exe",
+    //));
+    launch_exe(config.to_launch, app_listener.port()).unwrap();
 
-    monitor.stop();
+    let mut connection = app_listener.wait_on_app(10.0).unwrap();
+
+    connection
+        .write(MessageToLV::ARGS(&program_args[..]))
+        .unwrap();
+    connection
+        .write(MessageToLV::CCWD(std::env::current_dir().unwrap()))
+        .unwrap();
+
+    loop {
+        match connection.read() {
+            Ok(MessageFromLV::OUTP(string)) => {
+                print!("{}", string);
+            }
+            Ok(MessageFromLV::EXIT(code)) => {
+                std::process::exit(code);
+            }
+            Err(e) => {
+                error!("{:?}", e);
+                break;
+            }
+        }
+    }
+
+    //print!("{}", monitor.check_process_stopped());
+    //print!("{}", monitor.check_process_stopped());
+
+    //monitor.stop();
 }

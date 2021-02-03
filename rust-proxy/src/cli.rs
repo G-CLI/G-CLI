@@ -1,11 +1,42 @@
 //! Contains the CLI API Defintion.
 //!
-use clap::{App, AppSettings, Arg};
+use clap::{App, AppSettings, Arg, ArgMatches};
 use std::iter::IntoIterator;
+use std::path::PathBuf;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-pub fn get_app() -> clap::App<'static, 'static> {
+pub struct Configuration {
+    pub to_launch: PathBuf,
+    pub verbose: bool,
+}
+
+impl Configuration {
+    /// Load configuration from an arguement array. Intended for testing.
+    #[allow(dead_code)]
+    pub fn from_arg_array(args: Vec<String>) -> Self {
+        let matches = clap_app().get_matches_from_safe(args).unwrap();
+        Self::args_to_configuration(matches)
+    }
+
+    /// Load the configuration from the program arguments.
+    /// Will exit the program if the arguments are invalid.
+    pub fn from_env() -> Self {
+        let matches = clap_app().get_matches();
+        Self::args_to_configuration(matches)
+    }
+
+    /// Private function to extract the common functionality of moving args to config.
+    fn args_to_configuration(args: ArgMatches) -> Self {
+        Self {
+            to_launch: PathBuf::from(args.value_of("app to run").unwrap().to_owned()),
+            verbose: args.is_present("verbose mode"),
+        }
+    }
+}
+
+/// Returns a fully configured clap app with all the parameters configured.
+fn clap_app() -> clap::App<'static, 'static> {
     App::new("G CLI")
         .version(VERSION)
         .about("Connects a LabVIEW app to the command line.")
@@ -19,6 +50,7 @@ pub fn get_app() -> clap::App<'static, 'static> {
         .arg(Arg::with_name("app to run").multiple(true).required(true))
 }
 
+/// Extract the arguments that are going to be passed to the VI/exe we will run.
 pub fn program_arguments<T: IntoIterator<Item = String>>(main_args: T) -> Vec<String> {
     let args_iter = main_args.into_iter();
 
@@ -41,9 +73,38 @@ mod tests {
             String::from("test2"),
         ];
 
-        let processed = get_app().get_matches_from_safe(args).unwrap();
+        let config = Configuration::from_arg_array(args);
 
-        assert_eq!(processed.value_of("app to run"), Some("test.vi"));
+        assert_eq!(config.to_launch, "test.vi");
+    }
+
+    #[test]
+    fn no_verbose_mode() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.verbose, false);
+    }
+
+    #[test]
+    fn verbose_mode() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("-v"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.verbose, true);
     }
 
     #[test]
