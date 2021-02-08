@@ -4,11 +4,16 @@ use clap::{App, AppSettings, Arg, ArgMatches};
 use std::iter::IntoIterator;
 use std::path::PathBuf;
 
+use crate::labview::installs::Bitness;
+
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 pub struct Configuration {
     pub to_launch: PathBuf,
     pub verbose: bool,
+    pub lv_version_string: Option<String>,
+    pub bitness: Bitness,
+    pub timeout_secs: Option<f32>,
 }
 
 impl Configuration {
@@ -28,9 +33,20 @@ impl Configuration {
 
     /// Private function to extract the common functionality of moving args to config.
     fn args_to_configuration(args: ArgMatches) -> Self {
+        println!("{:?}", args);
         Self {
             to_launch: PathBuf::from(args.value_of("app to run").unwrap().to_owned()),
             verbose: args.is_present("verbose mode"),
+            lv_version_string: args.value_of("labview version").map(|str| str.to_owned()),
+            bitness: if args.is_present("64bit") {
+                Bitness::X64
+            } else {
+                Bitness::X86
+            },
+            // todo: use clap validation to remove risk of panic in this unwrap.
+            timeout_secs: args
+                .value_of("timeout (ms)")
+                .map(|str| str.parse::<f32>().unwrap() / 1000.0), //to ms
         }
     }
 }
@@ -45,6 +61,23 @@ fn clap_app() -> clap::App<'static, 'static> {
                 .short("v")
                 .long("verbose")
                 .help("Prints additional details for debugging"),
+        )
+        .arg(
+            Arg::with_name("labview version")
+                .takes_value(true)
+                .long("lv-ver")
+                .help("The version of LabVIEW to launch e.g. 2020"),
+        )
+        .arg(
+            Arg::with_name("64bit")
+                .long("x64")
+                .help("Set this to launch the 64 bit version of LabVIEW."),
+        )
+        .arg(
+            Arg::with_name("timeout (ms)")
+                .takes_value(true)
+                .long("timeout")
+                .help("The time in ms to wait for the connection from LabVIEW"),
         )
         .setting(AppSettings::TrailingVarArg)
         .arg(Arg::with_name("app to run").multiple(true).required(true))
@@ -75,7 +108,7 @@ mod tests {
 
         let config = Configuration::from_arg_array(args);
 
-        assert_eq!(config.to_launch, "test.vi");
+        assert_eq!(config.to_launch.to_str().unwrap(), "test.vi");
     }
 
     #[test]
@@ -105,6 +138,71 @@ mod tests {
         let config = Configuration::from_arg_array(args);
 
         assert_eq!(config.verbose, true);
+    }
+
+    #[test]
+    fn lv_details_32bit() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--lv-ver"),
+            String::from("2015"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.lv_version_string.unwrap(), String::from("2015"));
+        assert_eq!(config.bitness, Bitness::X86);
+    }
+
+    #[test]
+    fn lv_details_64bit() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--lv-ver"),
+            String::from("2015"),
+            String::from("--x64"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.lv_version_string.unwrap(), String::from("2015"));
+        assert_eq!(config.bitness, Bitness::X64);
+    }
+
+    #[test]
+    fn timeout_not_set() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--lv-ver"),
+            String::from("2015"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+        assert_eq!(None, config.timeout_secs);
+    }
+
+    #[test]
+    fn timeout_set() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--timeout"),
+            String::from("10000"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+        assert_eq!(Some(10.0), config.timeout_secs);
     }
 
     #[test]

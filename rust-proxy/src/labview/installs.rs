@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
+use std::fmt;
 use std::path::PathBuf;
 
 use thiserror::Error;
@@ -10,10 +11,21 @@ pub enum LabviewInstallError {
 }
 
 /// Defines if LabVIEW is 64 bit or 32 bit.
-#[derive(Copy, Clone, Debug, PartialEq, Hash, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Hash, Eq, PartialOrd, Ord)]
 pub enum Bitness {
     X86,
     X64,
+}
+
+impl fmt::Display for Bitness {
+    /// Format the bitness to a human readable string.
+    /// I'm not mad about this format, but consistent with the original code.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Bitness::X64 => write!(f, "64bit"),
+            Bitness::X86 => write!(f, "32bit"),
+        }
+    }
 }
 
 /// Represents a single install of LabVIEW.
@@ -32,14 +44,15 @@ impl LabviewInstall {
 
 /// Stores the full system installation details for LabVIEW.
 pub struct SystemLabviewInstalls {
-    versions: HashMap<(Bitness, String), LabviewInstall>,
+    // as BTree so we get sorting for free.
+    versions: BTreeMap<(String, Bitness), LabviewInstall>,
 }
 
 impl SystemLabviewInstalls {
     /// Create a new instance to be populated.
     pub(in crate::labview) fn new() -> Self {
         Self {
-            versions: HashMap::new(),
+            versions: BTreeMap::new(),
         }
     }
 
@@ -50,14 +63,34 @@ impl SystemLabviewInstalls {
         // The unwrap is safe since even if there is no space, it will have a single return.
         let version = install.version.split(" ").nth(0).unwrap().to_owned();
 
-        self.versions.insert((install.bitness, version), install);
+        self.versions.insert((version, install.bitness), install);
     }
 
     /// Retrieve and installed version based on version and bitness.
     /// Matches to service packs of the same version.
     /// Returns None if nothing matches.
     pub fn get_version(&self, version: &str, bitness: Bitness) -> Option<&LabviewInstall> {
-        self.versions.get(&(bitness, version.to_string()))
+        self.versions.get(&(version.to_string(), bitness))
+    }
+
+    /// Provides a string output which can be printed to show the install details.
+    /// Format based on original version.
+    pub fn print_details(&self) -> String {
+        let mut output = String::from("Detected LabVIEW versions:\n");
+
+        for (_, install) in self.versions.iter() {
+            // Note unwrap on path to string. Confident this wont panic since path is generated
+            // by program so should be valid.
+            output = output
+                + &format!(
+                    "{}, {} ({})\n",
+                    install.version,
+                    install.bitness,
+                    install.path.to_str().unwrap()
+                );
+        }
+
+        output
     }
 }
 
@@ -125,5 +158,34 @@ mod test {
 
         // Non-existant version
         assert_eq!(installs.get_version("2012", Bitness::X64), None);
+    }
+
+    #[test]
+    fn prints_details_in_compatible_format() {
+        let mut installs = SystemLabviewInstalls::new();
+
+        let install = LabviewInstall {
+            version: String::from("2011 SP1"),
+            bitness: Bitness::X64,
+            path: PathBuf::from("C:\\LV2011_64\\labview.exe"),
+        };
+
+        installs.add_install(install);
+
+        let install = LabviewInstall {
+            version: String::from("2012"),
+            bitness: Bitness::X86,
+            path: PathBuf::from("C:\\LV2012\\labview.exe"),
+        };
+
+        installs.add_install(install);
+
+        let printed = installs.print_details();
+
+        let expected = "Detected LabVIEW versions:\n\
+            2011 SP1, 64bit (C:\\LV2011_64\\labview.exe)\n\
+            2012, 32bit (C:\\LV2012\\labview.exe)\n";
+
+        assert_eq!(printed, expected);
     }
 }

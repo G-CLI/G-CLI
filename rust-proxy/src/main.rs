@@ -2,11 +2,10 @@ mod cli;
 mod comms;
 mod labview;
 
-use comms::{AppConnection, AppListener, MessageFromLV, MessageToLV};
-use labview::{detect_installations, launch_exe};
+use comms::{AppListener, MessageFromLV, MessageToLV};
+use labview::{detect_installations, launch_exe, launch_lv};
 use log::{debug, error, LevelFilter};
 use simple_logger::SimpleLogger;
-use std::path::PathBuf;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
@@ -27,19 +26,39 @@ fn main() {
     debug!("G CLI Arguments: TBC");
     debug!("Arguments passed to LabVIEW: {}", program_args.join(" "));
 
-    detect_installations();
+    let system_installs = detect_installations().unwrap();
+    debug!("{}", system_installs.print_details());
+
+    //Todo: need to handle unwrap here with a default version or failure.
+    let active_install = system_installs
+        .get_version(&config.lv_version_string.unwrap(), config.bitness)
+        .unwrap();
 
     let app_listener = AppListener::new();
     println!("{}", app_listener.port());
 
     println!("Launch path: {:?}", config.to_launch);
 
-    //let monitor = labview::process::MonitoredProcess::start(PathBuf::from(
-    //    "C:\\Program Files (x86)\\National Instruments\\LabVIEW 2011\\LabVIEW.exe",
-    //));
-    launch_exe(config.to_launch, app_listener.port()).unwrap();
+    match config
+        .to_launch
+        .extension()
+        .map(|ext| ext.to_str().unwrap())
+    {
+        Some("vi") => {
+            launch_lv(active_install, config.to_launch, app_listener.port()).unwrap();
+        }
+        Some("exe") => {
+            launch_exe(config.to_launch, app_listener.port()).unwrap();
+        }
+        None => {
+            launch_exe(config.to_launch, app_listener.port()).unwrap();
+        }
+        Some(extension) => panic!("Unknown extension {:?}", extension),
+    }
 
-    let mut connection = app_listener.wait_on_app(10.0).unwrap();
+    let mut connection = app_listener
+        .wait_on_app(config.timeout_secs.unwrap_or(6000.0))
+        .unwrap();
 
     connection
         .write(MessageToLV::ARGS(&program_args[..]))
