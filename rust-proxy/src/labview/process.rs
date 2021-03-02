@@ -16,8 +16,8 @@ pub struct MonitoredProcess {
 }
 
 impl MonitoredProcess {
-    pub fn start(path: PathBuf) -> Self {
-        let original_pid = launch(&path);
+    pub fn start(path: PathBuf, args: &[String]) -> Result<Self, std::io::Error> {
+        let original_pid = launch(&path, args)?;
 
         //setup a channel for passing stop messages/
         let (stop_tx, stop_rx) = mpsc::channel();
@@ -49,15 +49,15 @@ impl MonitoredProcess {
             }
         });
 
-        Self {
+        Ok(Self {
             path,
             stop_channel: stop_tx,
             process_lost_channel: lost_rx,
-        }
+        })
     }
 
     /// Send a stop command to the monitoring thread.
-    pub fn stop(&self) {
+    pub fn stop_monitor(&self) {
         self.stop_channel.send(true);
     }
 
@@ -70,12 +70,18 @@ impl MonitoredProcess {
 
 /// Launches the LabVIEW process.
 /// Returns the process ID.
-fn launch(path: &PathBuf) -> Pid {
-    let output = Command::new(path).spawn().expect("Failed to launch");
+fn launch(path: &PathBuf, args: &[String]) -> Result<Pid, std::io::Error> {
+    let launch_result = Command::new(path).args(args).spawn();
 
-    debug!("Process launched with PID {}", output.id());
-
-    output.id() as i32
+    match launch_result {
+        Ok(output) => {
+            debug!("Process launched with PID {}", output.id());
+            return Ok(output.id() as Pid);
+        }
+        Err(e) => {
+            return Err(e);
+        }
+    }
 }
 
 /// Returns a list of all instances running of LabVIEW

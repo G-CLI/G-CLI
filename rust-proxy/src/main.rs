@@ -39,22 +39,27 @@ fn main() {
 
     println!("Launch path: {:?}", config.to_launch);
 
-    match config
+    let process = match config
         .to_launch
         .extension()
         .map(|ext| ext.to_str().unwrap())
     {
         Some("vi") => {
-            launch_lv(active_install, config.to_launch, app_listener.port()).unwrap();
+            Some(launch_lv(active_install, config.to_launch, app_listener.port()).unwrap())
         }
         Some("exe") => {
-            launch_exe(config.to_launch, app_listener.port()).unwrap();
+            Some(launch_exe(config.to_launch, app_listener.port()).unwrap())
         }
         None => {
-            launch_exe(config.to_launch, app_listener.port()).unwrap();
+            Some(launch_exe(config.to_launch, app_listener.port()).unwrap())
         }
-        Some(extension) => panic!("Unknown extension {:?}", extension),
-    }
+        Some(extension) => {
+            panic!("Unknown extension {:?}", extension); 
+        },
+    };
+
+    //placeholder for better error handling.
+    let process = process.unwrap();
 
     let mut connection = app_listener
         .wait_on_app(config.timeout_secs.unwrap_or(6000.0))
@@ -82,8 +87,5 @@ fn main() {
         }
     }
 
-    //print!("{}", monitor.check_process_stopped());
-    //print!("{}", monitor.check_process_stopped());
-
-    //monitor.stop();
+    process.stop_monitor();
 }

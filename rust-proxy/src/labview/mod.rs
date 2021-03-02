@@ -18,21 +18,20 @@ pub use install_detection_win::*;
 
 use log::debug;
 use std::path::PathBuf;
-use std::process::{Child, Command};
 
 fn create_args(port: u16) -> Vec<String> {
     vec![String::from("--"), format!("-p:{}", port)]
 }
 
-pub fn launch_exe(path: PathBuf, port: u16) -> Result<Child, std::io::Error> {
-    Command::new(path).args(create_args(port)).spawn()
+pub fn launch_exe(path: PathBuf, port: u16) -> Result<process::MonitoredProcess, std::io::Error> {
+    process::MonitoredProcess::start(path, &create_args(port))
 }
 
 pub fn launch_lv(
     install: &installs::LabviewInstall,
     vi: PathBuf,
     port: u16,
-) -> Result<Child, std::io::Error> {
+) -> Result<process::MonitoredProcess, std::io::Error> {
     //todo: unwrap could fail here, can we validate it?
     let mut lv_args = vec![
         String::from("-unattended"),
@@ -45,7 +44,9 @@ pub fn launch_lv(
 
     debug!("Launching: {:?} {}", path, lv_args.join(" "));
 
-    Command::new(path).args(lv_args).spawn()
+    process::MonitoredProcess::start(path, &lv_args)
+
+    //Command::new(path).args(lv_args).spawn()
 }
 
 #[cfg(test)]
