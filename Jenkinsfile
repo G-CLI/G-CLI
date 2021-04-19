@@ -70,6 +70,7 @@ agent none
 			
 			post {
 				always {
+					archiveArtifacts artifacts:"LabVIEW Source/Installation Support/*.msi", fingerprint: true
 					dir ("Builds") {
 						archiveArtifacts artifacts: '*.vip', fingerprint: true
 						deleteDir()

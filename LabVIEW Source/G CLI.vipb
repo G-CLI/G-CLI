@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2021-01-23 06:56:39" Creator="James McNally" Comments="" ID="8fdc0fc04dc425b664a39b7076b565be">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2021-04-07 10:25:51" Creator="James McNally" Comments="" ID="f0c72419467683ccf87305388068e550">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
-    <Library_Version>2.3.0.2</Library_Version>
+    <Library_Version>2.4.0.2</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -34,16 +34,13 @@
 * A LabVIEW library that allows you to communicate with the application to pass data to the command line.
 
 NOTE: Since the Windows application installs to path administrator access is required to install it.</Description>
-      <Copyright>Copyright (c) 2019, G CLI Contributors</Copyright>
-      <Packager/>
+      <Copyright>Copyright (c) 2021, G CLI Contributors</Copyright>
+      <Packager>James McNally</Packager>
       <URL>https://github.com/JamesMc86/LabVIEW-CLI</URL>
       <Release_Notes>New Features
 ==========
 
-* Added --kill-timeout option to have seperate wait time before killing labVIEW process.
-* Now zero output if verbose mode isn't used.
-* Added write line function in library.
-* Mass compiles G-CLI tools after install.</Release_Notes>
+* Detect if LabVIEW allows multiple instances and allow multiple runs of the same VI if it does. (#96, thanks Zieleslaw)</Release_Notes>
     </Description>
     <Destinations>
       <Toolkit_VIs>
@@ -395,7 +392,7 @@ NOTE: Since the Windows application installs to path administrator access is req
         <Path>CLI Class\Write Line.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>AF23A2DAAF4AE29803D0FAC0C5BB7F39</GUID>
+      <GUID>A9057D5441BFB0334902BE1125F48748</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
