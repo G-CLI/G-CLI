@@ -59,11 +59,13 @@ fn main() {
     };
 
     //placeholder for better error handling.
-    let process = process.unwrap();
+    let mut process = process.unwrap();
 
     let mut connection = app_listener
         .wait_on_app(config.timeout_secs.unwrap_or(6000.0))
         .unwrap();
+
+    process.set_connected().unwrap();
 
     connection
         .write(MessageToLV::ARGS(&program_args[..]))

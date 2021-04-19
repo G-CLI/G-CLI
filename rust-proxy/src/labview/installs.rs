@@ -40,6 +40,12 @@ impl LabviewInstall {
     pub fn launch(&self) {
         //TBD: use the process sub module to launch from here.
     }
+
+    pub fn major_version(&self) -> String {
+        // For current versions this just means taking everything before the space.
+        // The unwrap is safe since even if there is no space, it will have a single return.
+        self.version.split(" ").nth(0).unwrap().to_owned()
+    }
 }
 
 /// Stores the full system installation details for LabVIEW.
@@ -59,10 +65,7 @@ impl SystemLabviewInstalls {
     /// Add the provided install to the system details.
     pub(in crate::labview) fn add_install(&mut self, install: LabviewInstall) {
         // Store with version minus SP1.
-        // For current versions this just means taking everything before the space.
-        // The unwrap is safe since even if there is no space, it will have a single return.
-        let version = install.version.split(" ").nth(0).unwrap().to_owned();
-
+        let version = install.major_version();
         self.versions.insert((version, install.bitness), install);
     }
 
@@ -187,5 +190,18 @@ mod test {
             2012, 32bit (C:\\LV2012\\labview.exe)\n";
 
         assert_eq!(printed, expected);
+    }
+
+    #[test]
+    fn get_short_version_from_install() {
+        let mut installs = SystemLabviewInstalls::new();
+
+        let install = LabviewInstall {
+            version: String::from("2011 SP1"),
+            bitness: Bitness::X64,
+            path: PathBuf::from("C:\\LV2011_64\\labview.exe"),
+        };
+
+        assert_eq!(install.major_version(), "2011")
     }
 }

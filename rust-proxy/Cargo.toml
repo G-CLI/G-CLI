@@ -7,11 +7,13 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sysinfo = "0.15"
+sysinfo = "0.17"
 log = "0.4"
 simple_logger = "1.11"
 thiserror = "1.0"
 clap = "2.33"
+# minimal library - remove the features we aren't using.
+ureq = { version = "2.*", default-features = false }
 
 [target.'cfg(windows)'.dependencies] 
 winreg = "0.8"
