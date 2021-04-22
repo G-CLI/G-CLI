@@ -33,9 +33,23 @@ pub fn launch_exe(path: PathBuf, port: u16) -> Result<process::MonitoredProcess,
 
 pub fn launch_lv(
     install: &installs::LabviewInstall,
-    vi: PathBuf,
+    mut vi: PathBuf,
     port: u16,
 ) -> Result<process::MonitoredProcess, std::io::Error> {
+
+    if !vi.exists() {
+        debug!("Looks like VI \"{}\" doesn't exist - Checking in vi.lib/G CLI Tools instead.", vi.to_string_lossy());
+        let relative_path = install.relative_path(&vi);
+        if relative_path.exists() {
+            vi = relative_path;
+        }
+    }
+
+    // Non-existant launch path
+    if !vi.exists() {
+        //TODO: Proper handling.
+        panic!("Launch File Doesn't Exist: \"{}\"", vi.to_string_lossy());
+    }
 
     let registration = Registration::register(&vi, install, &port).unwrap();
 
@@ -46,8 +60,7 @@ pub fn launch_lv(
     ];
     lv_args.append(&mut create_args(port));
 
-    let mut path = install.path.clone();
-    path.push("LabVIEW.exe");
+    let mut path = install.application_path();
 
     debug!("Launching: {:?} {}", path, lv_args.join(" "));
 

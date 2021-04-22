@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 use std::fmt;
-use std::path::PathBuf;
+use std::path::{ PathBuf, Path };
 
 use thiserror::Error;
 
@@ -31,20 +31,34 @@ impl fmt::Display for Bitness {
 /// Represents a single install of LabVIEW.
 #[derive(Clone, Debug, PartialEq)]
 pub struct LabviewInstall {
+    /// The install directory path.
     pub path: PathBuf,
     pub version: String,
     pub bitness: Bitness,
 }
 
 impl LabviewInstall {
-    pub fn launch(&self) {
-        //TBD: use the process sub module to launch from here.
-    }
 
     pub fn major_version(&self) -> String {
         // For current versions this just means taking everything before the space.
         // The unwrap is safe since even if there is no space, it will have a single return.
         self.version.split(" ").nth(0).unwrap().to_owned()
+    }
+
+    /// Checks the path for links relative to the install.
+    /// This is against vi.lib G CLI tools.
+    /// This could be a future expansion point for things like <vi.lib>
+    pub fn relative_path(&self, vi: &Path) -> PathBuf {
+        let mut actual_path = self.path.clone();
+        actual_path.push("./vi.lib/G CLI Tools");
+        actual_path.push(vi);
+        return actual_path;
+
+    }
+
+    /// Get the LabVIEW application path.
+    pub fn application_path(&self) -> PathBuf {
+        self.path.join("labview.exe")
     }
 }
 
@@ -109,7 +123,7 @@ mod test {
         let install = LabviewInstall {
             version: String::from("2011"),
             bitness: Bitness::X86,
-            path: PathBuf::from("C:\\LV2011\\labview.exe"),
+            path: PathBuf::from("C:\\LV2011"),
         };
 
         installs.add_install(install.clone());
@@ -124,7 +138,7 @@ mod test {
         let install = LabviewInstall {
             version: String::from("2011"),
             bitness: Bitness::X64,
-            path: PathBuf::from("C:\\LV2011_64\\labview.exe"),
+            path: PathBuf::from("C:\\LV2011_64"),
         };
 
         installs.add_install(install.clone());
@@ -139,7 +153,7 @@ mod test {
         let install = LabviewInstall {
             version: String::from("2011 SP1"),
             bitness: Bitness::X64,
-            path: PathBuf::from("C:\\LV2011_64\\labview.exe"),
+            path: PathBuf::from("C:\\LV2011_64"),
         };
 
         installs.add_install(install.clone());
@@ -154,7 +168,7 @@ mod test {
         let install = LabviewInstall {
             version: String::from("2011"),
             bitness: Bitness::X64,
-            path: PathBuf::from("C:\\LV2011_64\\labview.exe"),
+            path: PathBuf::from("C:\\LV2011_64"),
         };
 
         installs.add_install(install);
@@ -170,7 +184,7 @@ mod test {
         let install = LabviewInstall {
             version: String::from("2011 SP1"),
             bitness: Bitness::X64,
-            path: PathBuf::from("C:\\LV2011_64\\labview.exe"),
+            path: PathBuf::from("C:\\LV2011_64"),
         };
 
         installs.add_install(install);
@@ -178,7 +192,7 @@ mod test {
         let install = LabviewInstall {
             version: String::from("2012"),
             bitness: Bitness::X86,
-            path: PathBuf::from("C:\\LV2012\\labview.exe"),
+            path: PathBuf::from("C:\\LV2012"),
         };
 
         installs.add_install(install);
@@ -186,22 +200,35 @@ mod test {
         let printed = installs.print_details();
 
         let expected = "Detected LabVIEW versions:\n\
-            2011 SP1, 64bit (C:\\LV2011_64\\labview.exe)\n\
-            2012, 32bit (C:\\LV2012\\labview.exe)\n";
+            2011 SP1, 64bit (C:\\LV2011_64)\n\
+            2012, 32bit (C:\\LV2012)\n";
 
         assert_eq!(printed, expected);
     }
 
     #[test]
     fn get_short_version_from_install() {
-        let mut installs = SystemLabviewInstalls::new();
 
         let install = LabviewInstall {
             version: String::from("2011 SP1"),
             bitness: Bitness::X64,
-            path: PathBuf::from("C:\\LV2011_64\\labview.exe"),
+            path: PathBuf::from("C:\\LV2011_64"),
         };
 
         assert_eq!(install.major_version(), "2011")
+    }
+
+    #[test]
+    fn get_install_relative_path() {
+
+        let install = LabviewInstall {
+            version: String::from("2011 SP1"),
+            bitness: Bitness::X64,
+            path: PathBuf::from("C:\\LV2011_64\\"),
+        };
+
+        let relative_path = install.relative_path(&PathBuf::from("test.vi"));
+
+        assert_eq!(relative_path, PathBuf::from("C:\\LV2011_64\\vi.lib\\G CLI Tools\\test.vi"));
     }
 }

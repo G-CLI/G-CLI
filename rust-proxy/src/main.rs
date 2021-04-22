@@ -2,7 +2,7 @@ mod cli;
 mod comms;
 mod labview;
 
-use comms::{AppListener, MessageFromLV, MessageToLV};
+use comms::{AppListener, MessageFromLV, MessageToLV, CommsError};
 use labview::{detect_installations, launch_exe, launch_lv};
 use log::{debug, error, LevelFilter};
 use simple_logger::SimpleLogger;
@@ -12,6 +12,7 @@ const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 fn main() {
     let config = cli::Configuration::from_env();
     let program_args = cli::program_arguments(std::env::args());
+    let cwd = std::env::current_dir().unwrap();
 
     let log_level = if config.verbose {
         LevelFilter::Debug
@@ -37,21 +38,22 @@ fn main() {
     let app_listener = AppListener::new();
     println!("{}", app_listener.port());
 
-    println!("Launch path: {:?}", config.to_launch);
+    let launch_path = config.to_launch;
 
-    let process = match config
-        .to_launch
+    println!("Launch path: {:?}", launch_path);
+
+    let process = match launch_path
         .extension()
         .map(|ext| ext.to_str().unwrap())
     {
         Some("vi") => {
-            Some(launch_lv(active_install, config.to_launch, app_listener.port()).unwrap())
+            Some(launch_lv(active_install, launch_path, app_listener.port()).unwrap())
         }
         Some("exe") => {
-            Some(launch_exe(config.to_launch, app_listener.port()).unwrap())
+            Some(launch_exe(launch_path, app_listener.port()).unwrap())
         }
         None => {
-            Some(launch_exe(config.to_launch, app_listener.port()).unwrap())
+            Some(launch_exe(launch_path, app_listener.port()).unwrap())
         }
         Some(extension) => {
             panic!("Unknown extension {:?}", extension); 
@@ -71,7 +73,7 @@ fn main() {
         .write(MessageToLV::ARGS(&program_args[..]))
         .unwrap();
     connection
-        .write(MessageToLV::CCWD(std::env::current_dir().unwrap()))
+        .write(MessageToLV::CCWD(cwd))
         .unwrap();
 
     loop {
@@ -81,7 +83,10 @@ fn main() {
             }
             Ok(MessageFromLV::EXIT(code)) => {
                 std::process::exit(code);
-            }
+            },
+            Err(CommsError::ReadLvMessageError(e)) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                //no new messages
+            },
             Err(e) => {
                 error!("{:?}", e);
                 break;
@@ -90,4 +95,10 @@ fn main() {
     }
 
     process.stop_monitor();
+}
+
+
+#[cfg(test)]
+mod test {
+
 }
