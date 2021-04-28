@@ -22,32 +22,17 @@ namespace G_CLI
         private const int TYPE_BYTES = 4;
         private const int MAX_PAYLOAD_BYTES = 1032 - LENGTH_BYTES - TYPE_BYTES; // 9000 is multiple of default MTU of 1500.
 
-        // Returns available port number or zero if no port is available
-        public static int GetFirstAvailableRandomPort(int startPort, int stopPort)
-        {
-            Random r = new Random();
-
-            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-            TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
-
-            var busyPorts = tcpConnInfoArray.Select(t => t.LocalEndPoint.Port).Where(v => v >= startPort && v <= stopPort).ToArray();
-
-            var firstAvailableRandomPort = Enumerable.Range(startPort, stopPort - startPort).OrderBy(v => r.Next()).FirstOrDefault(p => !busyPorts.Contains(p));
-        
-            return firstAvailableRandomPort;
-        }
-
         public lvComms()
         {
-            //Get first available dynamic port
-            _port = GetFirstAvailableRandomPort(49152, 65535);
-
             //Assign a buffer for incoming data.
             _dataBuffer = new Byte[MAX_PAYLOAD_BYTES + TYPE_BYTES];
 
             //Start up the server
-            _listener = new TcpListener(IPAddress.Parse("127.0.0.1"), _port);
+            //Use the "0" port value to hve .NET allocate the port
+            _listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 0);
             _listener.Start();
+            //The port can only be read after the Start() call in this case
+            _port = ((IPEndPoint)_listener.LocalEndpoint).Port;
         }
 
         /// <summary>
