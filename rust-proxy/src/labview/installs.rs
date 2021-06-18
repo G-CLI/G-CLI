@@ -109,6 +109,11 @@ impl SystemLabviewInstalls {
 
         output
     }
+
+    /// Get a default version which is just the latest.
+    pub fn get_default(&self) -> Option<&LabviewInstall> {
+        self.versions.values().last()
+    }
 }
 
 #[cfg(test)]

@@ -15,5 +15,6 @@ clap = "2.33"
 # minimal library - remove the features we aren't using.
 ureq = { version = "2.*", default-features = false }
 
+
 [target.'cfg(windows)'.dependencies] 
 winreg = "0.8"

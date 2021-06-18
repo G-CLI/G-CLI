@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::fs::canonicalize;
 use ureq::get;
 use super::installs::LabviewInstall;
 use super::error::LabVIEWError;
@@ -11,7 +12,10 @@ impl Registration {
 
     pub fn register(vi_path: &Path, install: &LabviewInstall, port: &u16) -> Result<Registration, LabVIEWError> {
 
-        let id = generate_registration_id(vi_path, install);
+        //Need to make this a full path here.
+        let full_path = canonicalize(vi_path).unwrap(); 
+        
+        let id = generate_registration_id(&full_path, install);
         // The response we want the discovery service to give. I'm not sure if these need further escaping but so far it works
         let base_response = "HTTP/1.0 200 OK\r\nServer: Service Locator\r\nPragma: no-cache\r\nConnection: Close\r\nContent-Length: 12\r\nContent-Type: text/html\r\n\r\n";
         let url = format!("http://localhost:3580/publish?{}={}Port={}\r\n", id, base_response, port);
@@ -55,7 +59,7 @@ fn generate_registration_id(vi_path: &Path, install: &LabviewInstall) -> String 
 
     let path_string = vi_path.to_string_lossy();
     // The extra [..] is required on the pattern array to get the format correct. 
-    let reg_name = path_string.replace(&[':','\\','.',' ', '/'][..], "");
+    let reg_name = path_string.replace(&[':','\\','.',' ', '/','?'][..], "");
 
     format!("cli/{}/{}/{}", install.major_version(), install.bitness, reg_name)
 }
@@ -109,6 +113,23 @@ mod tests {
         };
 
         let result = generate_registration_id(Path::new("/C/myVI.vi"), &install);
+
+        assert_eq!(String::from("cli/2011/64bit/CmyVIvi"), result);
+
+    }
+
+    #[test]
+    /// Question marks can appear with UNC paths on windows \\?\C:\test.vi for example.
+    /// This ensures they arent formated.
+    fn test_builds_the_correct_registration_id_removes_question_marks()
+    {
+        let install = LabviewInstall{
+            path: PathBuf::from("C:\\LabVIEW.exe"),
+            version: String::from("2011 SP1"),
+            bitness: Bitness::X64
+        };
+
+        let result = generate_registration_id(Path::new("\\\\?\\C:\\myVI.vi"), &install);
 
         assert_eq!(String::from("cli/2011/64bit/CmyVIvi"), result);
 

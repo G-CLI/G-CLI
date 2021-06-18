@@ -31,9 +31,18 @@ fn main() {
     debug!("{}", system_installs.print_details());
 
     //Todo: need to handle unwrap here with a default version or failure.
-    let active_install = system_installs
-        .get_version(&config.lv_version_string.unwrap(), config.bitness)
-        .unwrap();
+    //And handle if no installs are detected.
+    let active_install = match config.lv_version_string {
+        Some(version) => {
+            system_installs
+                .get_version(&version, config.bitness)
+                .or_else(|| system_installs.get_default())
+        },
+        None => {
+            system_installs.get_default()
+        }
+    };
+    let active_install = active_install.unwrap();
 
     let app_listener = AppListener::new();
     println!("{}", app_listener.port());
