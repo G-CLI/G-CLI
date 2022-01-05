@@ -41,7 +41,7 @@ jobs:
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
-      run: dotnet test --arch $env:Platform $env:Test_Project_Path
+      run: dotnet test $env:Test_Project_Path
       env:
         Platform: ${{ matrix.platform }}
 
