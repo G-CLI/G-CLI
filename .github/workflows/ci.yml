@@ -45,6 +45,13 @@ jobs:
       
     - name: Restore NuGet Packages
       run: nuget restore $env:Solution_Name
+      
+      
+    - name: Build
+      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:Platform=$env:Platform
+      env:
+        Configuration: ${{ matrix.configuration }}
+        Platform: ${{ matrix.platform }}
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
@@ -52,10 +59,4 @@ jobs:
       env:
         Platform: ${{ matrix.platform }}
 
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
-    - name: Restore the application
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:Platform=$env:Platform
-      env:
-        Configuration: ${{ matrix.configuration }}
-        Platform: ${{ matrix.platform }}
 
