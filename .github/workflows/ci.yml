@@ -41,7 +41,9 @@ jobs:
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
-      run: dotnet test
+      run: dotnet test --arch $env:Platform $env:Test_Project_Path
+      env:
+        Platform: ${{ matrix.platform }}
 
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
