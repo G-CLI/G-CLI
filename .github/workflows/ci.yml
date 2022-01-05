@@ -55,7 +55,7 @@ jobs:
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
-      run: vstest.console.exe "C Sharp Source/LabVIEWCLI_Unit_tests/bin/${matrix.platform}/Release/GCLI_Unit_tests.dll"
+      run: vstest.console.exe "C Sharp Source/LabVIEWCLI_Unit_tests/bin/${{matrix.platform}}/Release/GCLI_Unit_tests.dll"
       env:
         Platform: ${{ matrix.platform }}
 
