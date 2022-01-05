@@ -74,7 +74,7 @@ jobs:
         # Artifact name
         name: Exe_${{ matrix.platform }}
         # A file, directory or wildcard pattern that describes what to upload
-        path: C Sharp Source\LabVIEW CLI\bin\${{ matrix.platform}}\Release\g-cli.exe
+        path: C Sharp Source\LabVIEW CLI\bin\${{ matrix.platform}}\Release\**
         if-no-files-found: error
         
   build-lv:
@@ -106,7 +106,7 @@ jobs:
           # Artifact name
           name: Exe_x64
           # Destination path
-          path: Integration Tests\g-cli.exe
+          path: Integration Tests\g-cli
     
       - name: LabVIEW Dependencies
         run: labview-cli -v "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\vipcApply.vi" -- "${{github.workspace}}\LabVIEW Source\Dependencies\G CLI Dev Dependencies.vipc" 2011
@@ -117,7 +117,7 @@ jobs:
      
       - name: Integration Tests
         working-directory: Integration Tests
-        run: run_integration_tests.bat ./
+        run: .\run_integration_tests.bat .\g-cli
      
      #note the direct call as the build fails if the files are loaded.
       - name: LabVIEW Build
