@@ -117,7 +117,8 @@ jobs:
      
       - name: Integration Tests
         working-directory: Integration Tests
-        run: "\"Run Integration Tests.bat\" ./"
+        run: |
+          & '.\Run Integration Tests.bat' ./
      
      #note the direct call as the build fails if the files are loaded.
       - name: LabVIEW Build
