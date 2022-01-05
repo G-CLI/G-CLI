@@ -59,13 +59,22 @@ jobs:
       env:
         Platform: ${{ matrix.platform }}
         
-    - name: Upload a Build Artifact
+    - name: Upload MSI
       uses: actions/upload-artifact@v2.3.1
       with:
         # Artifact name
         name: Installer_${{ matrix.platform }}
         # A file, directory or wildcard pattern that describes what to upload
         path: C Sharp Source\LabVIEW CLI WIX Setup\bin\${{ matrix.platform}}\Release\G_CLI.msi
+        if-no-files-found: error
+        
+    - name: Upload EXE
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        # Artifact name
+        name: Exe_${{ matrix.platform }}
+        # A file, directory or wildcard pattern that describes what to upload
+        path: C Sharp Source\LabVIEW CLI\bin\${{ matrix.platform}}\Release\g-cli.exe
         if-no-files-found: error
         
   build-lv:
@@ -90,6 +99,14 @@ jobs:
           name: Installer_x64
           # Destination path
           path: LabVIEW Source\Installation Support\G_CLI_x64.msi
+          
+      - name: Get x64 EXE for Integration Test
+        uses: actions/download-artifact@v2.1.0
+        with:
+          # Artifact name
+          name: Exe_x64
+          # Destination path
+          path: Integration Tests\g-cli.exe
     
       - name: LabVIEW Dependencies
         run: labview-cli -v "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\vipcApply.vi" -- "${{github.workspace}}\LabVIEW Source\Dependencies\G CLI Dev Dependencies.vipc" 2011
@@ -97,6 +114,10 @@ jobs:
      #unit tests disabled due to lack of reporting support in lv2011. To be enabled when min LV version is bumped.
      # - name: Unit Tests
      #   run: labview-cli -v "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\run-vi-tester.vi" -- "LabVIEW Source\G-CLI.lvproj" "lv-results.xml" "${{github.workspace}}" 
+     
+      - name: Integration Tests
+        working-directory: Integration Tests
+        run: "\"Run Integration Tests.bat\" ./"
      
      #note the direct call as the build fails if the files are loaded.
       - name: LabVIEW Build
