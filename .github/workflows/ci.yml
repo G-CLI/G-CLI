@@ -84,6 +84,11 @@ jobs:
     
     steps:
     
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+    
       - name: Get x86 MSI
         uses: actions/download-artifact@v2.1.0
         with:
