@@ -116,7 +116,7 @@ jobs:
      #   run: labview-cli -v "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\run-vi-tester.vi" -- "LabVIEW Source\G-CLI.lvproj" "lv-results.xml" "${{github.workspace}}" 
      
       - name: Integration Tests
-        working-directory: Integration Tests
+        working-directory: "Integration Tests"
         run: .\run_integration_tests.bat .\g-cli
      
      #note the direct call as the build fails if the files are loaded.
