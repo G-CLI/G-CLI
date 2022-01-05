@@ -58,5 +58,14 @@ jobs:
       run: vstest.console.exe "C Sharp Source/LabVIEWCLI_Unit_tests/bin/${{matrix.platform}}/Release/GCLI_Unit_tests.dll"
       env:
         Platform: ${{ matrix.platform }}
+        
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        # Artifact name
+        name: Installer_${{ matrix.platform }}# optional, default is artifact
+        # A file, directory or wildcard pattern that describes what to upload
+        path: C Sharp Source\LabVIEW CLI WIX Setup\bin\${{ matrix.platform}}\Release\G_CLI.msi
+        if-no-files-found: error
 
 
