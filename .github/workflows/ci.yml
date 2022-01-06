@@ -28,6 +28,11 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
+        
+    - name: Set Vars
+      run: |
+        VER=$(cat VERSION)
+        echo "VERSION=$VER" >> $GITHUB_ENV
 
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
@@ -48,10 +53,11 @@ jobs:
       
       
     - name: Build
-      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform
+      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:
       env:
         Configuration: ${{ matrix.configuration }}
         Platform: ${{ matrix.platform }}
+        Full_Version: '${{ env.VERSION }}.${{ env.build }}
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
@@ -83,6 +89,9 @@ jobs:
     needs: build-cli
     
     steps:
+    
+      - name: Clean Workspace
+        run: rm -rf "${{ github.workspace }}"
     
       - name: Checkout
         uses: actions/checkout@v2
