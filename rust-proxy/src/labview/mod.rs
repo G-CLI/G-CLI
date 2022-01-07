@@ -59,7 +59,7 @@ pub fn launch_lv(
     //todo: unwrap could fail here, can we validate it?
     let mut lv_args = vec![
         String::from("-unattended"),
-        String::from(vi.to_str().unwrap()),
+        format!("\"{}\"",vi.to_str().unwrap()),
     ];
     lv_args.append(&mut create_args(port));
 

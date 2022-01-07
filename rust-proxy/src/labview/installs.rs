@@ -58,7 +58,7 @@ impl LabviewInstall {
 
     /// Get the LabVIEW application path.
     pub fn application_path(&self) -> PathBuf {
-        self.path.join("labview.exe")
+        self.path.join("LabVIEW.exe")
     }
 }
 
@@ -221,6 +221,18 @@ mod test {
         };
 
         assert_eq!(install.major_version(), "2011")
+    }
+
+        #[test]
+    fn properly_cased_app_path() {
+
+        let install = LabviewInstall {
+            version: String::from("2011 SP1"),
+            bitness: Bitness::X64,
+            path: PathBuf::from("C:\\LV2011_64"),
+        };
+
+        assert_eq!(install.application_path(), PathBuf::from("C:\\LV2011_64\\LabVIEW.exe"))
     }
 
     #[test]

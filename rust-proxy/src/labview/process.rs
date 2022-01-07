@@ -23,7 +23,7 @@ impl MonitoredProcess {
     pub fn start(path: PathBuf, args: &[String], port_registration: Option<Registration>) -> Result<Self, LabVIEWError> {
         let original_pid = launch(&path, args)?;
 
-        //setup a channel for passing stop messages/
+        //setup a channel for passing stop messages//
         let (stop_tx, stop_rx) = mpsc::channel();
 
         //setup a channel for sending a notification that the process is lost.
