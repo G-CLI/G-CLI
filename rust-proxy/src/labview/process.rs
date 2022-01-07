@@ -20,7 +20,7 @@ pub struct MonitoredProcess {
 }
 
 impl MonitoredProcess {
-    pub fn start(path: PathBuf, args: &[String], port_registration: Option<Registration>) -> Result<Self, std::io::Error> {
+    pub fn start(path: PathBuf, args: &[String], port_registration: Option<Registration>) -> Result<Self, LabVIEWError> {
         let original_pid = launch(&path, args)?;
 
         //setup a channel for passing stop messages/
@@ -88,7 +88,7 @@ impl MonitoredProcess {
 
 /// Launches the LabVIEW process.
 /// Returns the process ID.
-fn launch(path: &PathBuf, args: &[String]) -> Result<Pid, std::io::Error> {
+fn launch(path: &PathBuf, args: &[String]) -> Result<Pid, LabVIEWError> {
     let launch_result = Command::new(path).args(args).spawn();
 
     match launch_result {
@@ -97,7 +97,7 @@ fn launch(path: &PathBuf, args: &[String]) -> Result<Pid, std::io::Error> {
             return Ok(output.id() as Pid);
         }
         Err(e) => {
-            return Err(e);
+            return Err(LabVIEWError::ProcessLaunchFailed(e));
         }
     }
 }

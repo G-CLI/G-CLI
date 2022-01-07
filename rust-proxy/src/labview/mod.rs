@@ -23,19 +23,23 @@ use std::path::PathBuf;
 
 use port_discovery::Registration;
 
+use self::error::LabVIEWError;
+
 fn create_args(port: u16) -> Vec<String> {
     vec![String::from("--"), format!("-p:{}", port)]
 }
 
-pub fn launch_exe(path: PathBuf, port: u16) -> Result<process::MonitoredProcess, std::io::Error> {
+pub fn launch_exe(path: PathBuf, port: u16) -> Result<process::MonitoredProcess, LabVIEWError> {
     process::MonitoredProcess::start(path, &create_args(port), None)
 }
 
 pub fn launch_lv(
     install: &installs::LabviewInstall,
-    mut vi: PathBuf,
+    launch_vi: PathBuf,
     port: u16,
-) -> Result<process::MonitoredProcess, std::io::Error> {
+) -> Result<process::MonitoredProcess, LabVIEWError> {
+
+    let mut vi = launch_vi.clone();
 
     if !vi.exists() {
         debug!("Looks like VI \"{}\" doesn't exist - Checking in vi.lib/G CLI Tools instead.", vi.to_string_lossy());
@@ -47,11 +51,10 @@ pub fn launch_lv(
 
     // Non-existant launch path
     if !vi.exists() {
-        //TODO: Proper handling.
-        panic!("Launch File Doesn't Exist: \"{}\"", vi.to_string_lossy());
+        return Err(LabVIEWError::ViDoesNotExist(launch_vi));
     }
 
-    let registration = Registration::register(&vi, install, &port).unwrap();
+    let registration = Registration::register(&vi, install, &port)?;
 
     //todo: unwrap could fail here, can we validate it?
     let mut lv_args = vec![
@@ -60,7 +63,7 @@ pub fn launch_lv(
     ];
     lv_args.append(&mut create_args(port));
 
-    let mut path = install.application_path();
+    let path = install.application_path();
 
     debug!("Launching: {:?} {}", path, lv_args.join(" "));
 
