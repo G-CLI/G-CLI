@@ -28,11 +28,6 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-        
-    - name: Set Vars
-      run: |
-        VER=$(cat VERSION)
-        echo "VERSION=$VER" >> $GITHUB_ENV
 
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
