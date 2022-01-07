@@ -1,0 +1,151 @@
+
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build-cli:
+
+    strategy:
+      matrix:
+        configuration: [Release]
+        platform: [x86, x64]
+
+    runs-on: windows-latest  # For a list of available runner types, refer to
+                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+
+    env:
+      Solution_Name: "C Sharp Source/LabVIEW CLI/G CLI.sln"
+      Test_Project_Path: "C Sharp Source/LabVIEWCLI_Unit_tests/GCLI_Unit_tests.csproj"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+      
+    - name: Setup VSTest.console.exe
+      # You may pin to the exact commit or the version.
+      # uses: darenm/Setup-VSTest@fbb574e849d6225ce9702f86e64eb6cdc4b4e561
+      uses: darenm/Setup-VSTest@v1
+      
+    - name: Setup NuGet.exe for use with actions
+      # You may pin to the exact commit or the version.
+      # uses: NuGet/setup-nuget@04b0c2b8d1b97922f67eca497d7cf0bf17b8ffe1
+      uses: NuGet/setup-nuget@v1.0.5
+      
+    - name: Restore NuGet Packages
+      run: nuget restore $env:Solution_Name
+      
+      
+    - name: Build
+      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform
+      env:
+        Configuration: ${{ matrix.configuration }}
+        Platform: ${{ matrix.platform }}
+
+    # Execute all unit tests in the solution
+    - name: Execute unit tests
+      run: vstest.console.exe "C Sharp Source/LabVIEWCLI_Unit_tests/bin/${{matrix.platform}}/Release/GCLI_Unit_tests.dll"
+      env:
+        Platform: ${{ matrix.platform }}
+        
+    - name: Upload MSI
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        # Artifact name
+        name: Installer_${{ matrix.platform }}
+        # A file, directory or wildcard pattern that describes what to upload
+        path: C Sharp Source\LabVIEW CLI WIX Setup\bin\${{ matrix.platform}}\Release\G_CLI.msi
+        if-no-files-found: error
+        
+    - name: Upload EXE
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        # Artifact name
+        name: Exe_${{ matrix.platform }}
+        # A file, directory or wildcard pattern that describes what to upload
+        path: C Sharp Source\LabVIEW CLI\bin\${{ matrix.platform}}\Release\**
+        if-no-files-found: error
+        
+  build-lv:
+  
+    runs-on: labview
+    needs: build-cli
+    
+    steps:
+    
+    
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          clean: true
+          
+      - name: Clear Artifacts
+        run: |
+          rm 'LabVIEW Source\Installation Support\G_CLI_x86.msi' -ErrorAction Ignore
+          rm 'LabVIEW Source\Installation Support\G_CLI_x64.msi' -ErrorAction Ignore
+          rm -r 'Integration Tests\g-cli' -ErrorAction Ignore
+    
+      - name: Get x86 MSI
+        uses: actions/download-artifact@v2.1.0
+        with:
+          # Artifact name
+          name: Installer_x86
+          # Destination path
+          path: LabVIEW Source\Installation Support\G_CLI_x86.msi
+          
+      - name: Get x64 MSI
+        uses: actions/download-artifact@v2.1.0
+        with:
+          # Artifact name
+          name: Installer_x64
+          # Destination path
+          path: LabVIEW Source\Installation Support\G_CLI_x64.msi
+          
+      - name: Get x64 EXE for Integration Test
+        uses: actions/download-artifact@v2.1.0
+        with:
+          # Artifact name
+          name: Exe_x64
+          # Destination path
+          path: Integration Tests\g-cli
+    
+      - name: LabVIEW Dependencies
+        run: labview-cli -v "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\vipcApply.vi" -- "${{github.workspace}}\LabVIEW Source\Dependencies\G CLI Dev Dependencies.vipc" 2011
+     
+     #unit tests disabled due to lack of reporting support in lv2011. To be enabled when min LV version is bumped.
+     # - name: Unit Tests
+     #   run: labview-cli -v "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\run-vi-tester.vi" -- "LabVIEW Source\G-CLI.lvproj" "lv-results.xml" "${{github.workspace}}" 
+     
+      - name: Integration Tests
+        working-directory: "Integration Tests"
+        run: |
+          dir
+          .\run_integration_tests.bat .\g-cli\
+     
+     #note the direct call as the build fails if the files are loaded.
+      - name: LabVIEW Build
+        run: |
+          labview-cli -v --kill "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\setVipBuildNumber.vi" -- "LabVIEW Source\G CLI.vipb" "${{github.workspace}}" ${{github.run_number}}
+          New-Item -ItemType Directory -Force -Path Builds
+          cmd /c """C:\Program Files `(x86`)\National Instruments\LabVIEW 2011\LabVIEW.exe"" ""C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\vipbBuild-nocli.vi"" -- ""LabVIEW Source\G CLI.vipb"" Builds  ""${{github.workspace}}"""
+      
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.3.1
+        with:
+         name: vipackage
+         path: Builds/**.vip
+         if-no-files-found: error
+
+
