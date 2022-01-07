@@ -139,7 +139,7 @@ jobs:
         run: |
           labview-cli -v --kill "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\setVipBuildNumber.vi" -- "LabVIEW Source\G CLI.vipb" "${{github.workspace}}" ${{github.run_id}}
           New-Item -ItemType Directory -Force -Path Builds
-          Start-Process -FilePath "C:\Program Files (x86)\National Instruments\LabVIEW 2011\LabVIEW.exe" -ArgumentList "-unattended","C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\vipbBuild-nocli.vi","--","LabVIEW Source\G CLI.vipb","Builds","${{github.workspace}}"
+          cmd /c """C:\Program Files `(x86`)\National Instruments\LabVIEW 2011\LabVIEW.exe"" ""C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\vipbBuild-nocli.vi"" -- ""LabVIEW Source\G CLI.vipb"" Builds  ""${{github.workspace}}"""
       
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.3.1
