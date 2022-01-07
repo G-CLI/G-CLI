@@ -57,7 +57,6 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
         Platform: ${{ matrix.platform }}
-        Full_Version: '${{ env.VERSION }}.${{ env.build }}
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
@@ -90,13 +89,12 @@ jobs:
     
     steps:
     
-      - name: Clean Workspace
-        run: rm -rf "${{ github.workspace }}"
     
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          clean: true
           
       - name: Clear Artifacts
         run: |
