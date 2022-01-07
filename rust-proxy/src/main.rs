@@ -3,7 +3,7 @@ mod comms;
 mod labview;
 
 use comms::{AppListener, MessageFromLV, MessageToLV, CommsError};
-use labview::{detect_installations, launch_exe, launch_lv};
+use labview::{detect_installations, launch_exe, launch_lv, installs::Bitness};
 use log::{debug, error, LevelFilter};
 use simple_logger::SimpleLogger;
 
@@ -27,50 +27,14 @@ fn main() {
     debug!("G CLI Arguments: TBC");
     debug!("Arguments passed to LabVIEW: {}", program_args.join(" "));
 
-    let system_installs = detect_installations().unwrap();
-    debug!("{}", system_installs.print_details());
-
-    //Todo: need to handle unwrap here with a default version or failure.
-    //And handle if no installs are detected.
-    let active_install = match config.lv_version_string {
-        Some(version) => {
-            system_installs
-                .get_version(&version, config.bitness)
-                .or_else(|| system_installs.get_default())
-        },
-        None => {
-            system_installs.get_default()
-        }
-    };
-    let active_install = active_install.unwrap();
-
     let app_listener = AppListener::new();
     println!("{}", app_listener.port());
 
-    let launch_path = config.to_launch;
+    let launch_path = &config.to_launch;
 
     println!("Launch path: {:?}", launch_path);
 
-    let process = match launch_path
-        .extension()
-        .map(|ext| ext.to_str().unwrap())
-    {
-        Some("vi") => {
-            Some(launch_lv(active_install, launch_path, app_listener.port()).unwrap())
-        }
-        Some("exe") => {
-            Some(launch_exe(launch_path, app_listener.port()).unwrap())
-        }
-        None => {
-            Some(launch_exe(launch_path, app_listener.port()).unwrap())
-        }
-        Some(extension) => {
-            panic!("Unknown extension {:?}", extension); 
-        },
-    };
-
-    //placeholder for better error handling.
-    let mut process = process.unwrap();
+    let mut process = launch_process(&config, &app_listener);
 
     let mut connection = app_listener
         .wait_on_app(config.timeout_secs.unwrap_or(6000.0))
@@ -104,6 +68,47 @@ fn main() {
     }
 
     process.stop_monitor();
+}
+
+//todo: Error handling
+fn launch_process(config: &cli::Configuration, app_listener: &AppListener) -> labview::process::MonitoredProcess {
+    let launch_path = config.to_launch.clone();
+    let process = match launch_path
+        .extension()
+        .map(|ext| ext.to_str().unwrap())
+    {
+        Some("vi") => {    
+            let active_install = find_install(&config.lv_version_string, config.bitness);
+            Some(launch_lv(&active_install, launch_path, app_listener.port()).unwrap())
+        }
+        Some("exe") => {
+            Some(launch_exe(launch_path, app_listener.port()).unwrap())
+        }
+        None => {
+            Some(launch_exe(launch_path, app_listener.port()).unwrap())
+        }
+        Some(extension) => {
+            panic!("Unknown extension {:?}", extension); 
+        },
+    };
+    process.unwrap()
+}
+
+fn find_install(version_string: &Option<String>, bitness: Bitness) -> labview::installs::LabviewInstall {
+    let system_installs = detect_installations().unwrap();
+    debug!("{}", system_installs.print_details());
+    let active_install = match version_string {
+        Some(version) => {
+            system_installs
+                .get_version(version, bitness)
+                .or_else(|| system_installs.get_default())
+        },
+        None => {
+            system_installs.get_default()
+        }
+    };
+    let active_install = active_install.unwrap();
+    active_install.clone()
 }
 
 
