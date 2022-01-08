@@ -59,15 +59,16 @@ pub fn launch_lv(
     let registration = Registration::register(&vi, install, &port)?;
 
     //todo: unwrap could fail here, can we validate it?
-    let mut lv_args = vec![
-        String::from("-unattended"),
-        format!("\"{}\"", vi.to_str().unwrap()),
-    ];
+    let mut lv_args = vec![vi.to_str().unwrap().to_owned(), String::from("-unattended")];
     lv_args.append(&mut create_args(port));
 
     let path = install.application_path();
 
-    debug!("Launching: {:?} {}", path, lv_args.join(" "));
+    debug!(
+        "Launching: {} {}",
+        path.to_string_lossy(),
+        lv_args.join(" ")
+    );
 
     process::MonitoredProcess::start(path, &lv_args, Some(registration))
 }

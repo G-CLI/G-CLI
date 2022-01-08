@@ -49,7 +49,7 @@ impl LabviewInstall {
     /// This could be a future expansion point for things like <vi.lib>
     pub fn relative_path(&self, vi: &Path) -> PathBuf {
         let mut actual_path = self.path.clone();
-        actual_path.push("./vi.lib/G CLI Tools");
+        actual_path.push("vi.lib\\G CLI Tools");
         actual_path.push(vi);
         return actual_path;
     }
@@ -245,8 +245,8 @@ mod test {
         let relative_path = install.relative_path(&PathBuf::from("test.vi"));
 
         assert_eq!(
-            relative_path,
-            PathBuf::from("C:\\LV2011_64\\vi.lib\\G CLI Tools\\test.vi")
+            relative_path.to_str().unwrap(),
+            "C:\\LV2011_64\\vi.lib\\G CLI Tools\\test.vi"
         );
     }
 }
