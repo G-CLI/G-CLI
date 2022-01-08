@@ -17,8 +17,8 @@ impl Registration {
         
         let id = generate_registration_id(&full_path, install);
         // The response we want the discovery service to give. I'm not sure if these need further escaping but so far it works
-        let base_response = "HTTP/1.0 200 OK\r\nServer: Service Locator\r\nPragma: no-cache\r\nConnection: Close\r\nContent-Length: 12\r\nContent-Type: text/html\r\n\r\n";
-        let url = format!("http://localhost:3580/publish?{}={}Port={}\r\n", id, base_response, port);
+        let base_response = "HTTP/1.0 200 OK%0D%0AServer: Service Locator%0D%0APragma: no-cache%0D%0AConnection: Close%0D%0AContent-Length: 12%0D%0AContent-Type: text/html%0D%0A%0D%0A";
+        let url = format!("http://localhost:3580/publish?{}={}Port={}%0D%0A", id, base_response, port);
 
         let response = get(&url).call().map_err(|e| LabVIEWError::ServiceLocatorCommsError(e))?;
 
