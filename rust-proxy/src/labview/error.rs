@@ -10,6 +10,5 @@ pub enum LabVIEWError {
     #[error("Process launch failed")]
     ProcessLaunchFailed(#[source] std::io::Error),
     #[error("VI to launch does not exist: \"{0}\"")]
-    ViDoesNotExist(PathBuf)
-
+    ViDoesNotExist(PathBuf),
 }

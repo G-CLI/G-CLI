@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 use std::fmt;
-use std::path::{ PathBuf, Path };
+use std::path::{Path, PathBuf};
 
 use thiserror::Error;
 
@@ -38,7 +38,6 @@ pub struct LabviewInstall {
 }
 
 impl LabviewInstall {
-
     pub fn major_version(&self) -> String {
         // For current versions this just means taking everything before the space.
         // The unwrap is safe since even if there is no space, it will have a single return.
@@ -53,7 +52,6 @@ impl LabviewInstall {
         actual_path.push("./vi.lib/G CLI Tools");
         actual_path.push(vi);
         return actual_path;
-
     }
 
     /// Get the LabVIEW application path.
@@ -213,7 +211,6 @@ mod test {
 
     #[test]
     fn get_short_version_from_install() {
-
         let install = LabviewInstall {
             version: String::from("2011 SP1"),
             bitness: Bitness::X64,
@@ -223,21 +220,22 @@ mod test {
         assert_eq!(install.major_version(), "2011")
     }
 
-        #[test]
+    #[test]
     fn properly_cased_app_path() {
-
         let install = LabviewInstall {
             version: String::from("2011 SP1"),
             bitness: Bitness::X64,
             path: PathBuf::from("C:\\LV2011_64"),
         };
 
-        assert_eq!(install.application_path(), PathBuf::from("C:\\LV2011_64\\LabVIEW.exe"))
+        assert_eq!(
+            install.application_path(),
+            PathBuf::from("C:\\LV2011_64\\LabVIEW.exe")
+        )
     }
 
     #[test]
     fn get_install_relative_path() {
-
         let install = LabviewInstall {
             version: String::from("2011 SP1"),
             bitness: Bitness::X64,
@@ -246,6 +244,9 @@ mod test {
 
         let relative_path = install.relative_path(&PathBuf::from("test.vi"));
 
-        assert_eq!(relative_path, PathBuf::from("C:\\LV2011_64\\vi.lib\\G CLI Tools\\test.vi"));
+        assert_eq!(
+            relative_path,
+            PathBuf::from("C:\\LV2011_64\\vi.lib\\G CLI Tools\\test.vi")
+        );
     }
 }

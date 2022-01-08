@@ -3,10 +3,10 @@
 //! `labview` contains functionality for finding, launching
 //! and monitoring the labview process.
 
-pub mod installs;
-pub mod process;
 pub mod error;
+pub mod installs;
 mod port_discovery;
+pub mod process;
 
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 pub mod install_detection_linux;
@@ -38,11 +38,13 @@ pub fn launch_lv(
     launch_vi: PathBuf,
     port: u16,
 ) -> Result<process::MonitoredProcess, LabVIEWError> {
-
     let mut vi = launch_vi.clone();
 
     if !vi.exists() {
-        debug!("Looks like VI \"{}\" doesn't exist - Checking in vi.lib/G CLI Tools instead.", vi.to_string_lossy());
+        debug!(
+            "Looks like VI \"{}\" doesn't exist - Checking in vi.lib/G CLI Tools instead.",
+            vi.to_string_lossy()
+        );
         let relative_path = install.relative_path(&vi);
         if relative_path.exists() {
             vi = relative_path;
@@ -59,7 +61,7 @@ pub fn launch_lv(
     //todo: unwrap could fail here, can we validate it?
     let mut lv_args = vec![
         String::from("-unattended"),
-        format!("\"{}\"",vi.to_str().unwrap()),
+        format!("\"{}\"", vi.to_str().unwrap()),
     ];
     lv_args.append(&mut create_args(port));
 

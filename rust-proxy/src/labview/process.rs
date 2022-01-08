@@ -1,3 +1,4 @@
+use super::{error::LabVIEWError, Registration};
 use log::{debug, info};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -6,7 +7,6 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 use sysinfo::{ProcessExt, System, SystemExt};
-use super::{Registration, error::LabVIEWError};
 
 type Pid = i32;
 
@@ -14,11 +14,15 @@ pub struct MonitoredProcess {
     stop_channel: mpsc::Sender<bool>,
     /// Port registration for management
     /// Im not totally convinced this is the right place for it.
-    port_registration: Option<Registration>
+    port_registration: Option<Registration>,
 }
 
 impl MonitoredProcess {
-    pub fn start(path: PathBuf, args: &[String], port_registration: Option<Registration>) -> Result<Self, LabVIEWError> {
+    pub fn start(
+        path: PathBuf,
+        args: &[String],
+        port_registration: Option<Registration>,
+    ) -> Result<Self, LabVIEWError> {
         let original_pid = launch(&path, args)?;
 
         //setup a channel for passing stop messages//
@@ -48,7 +52,7 @@ impl MonitoredProcess {
 
         Ok(Self {
             stop_channel: stop_tx,
-            port_registration
+            port_registration,
         })
     }
 
@@ -59,7 +63,6 @@ impl MonitoredProcess {
 
     /// Registers that the comms are connected so any action required can be taken like cancelling service discovery.
     pub fn set_connected(&mut self) -> Result<(), LabVIEWError> {
-
         // We will consume the registration so take it out of the monitor.
         let port_registration = self.port_registration.take();
 

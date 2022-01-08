@@ -2,8 +2,8 @@ mod cli;
 mod comms;
 mod labview;
 
-use comms::{AppListener, MessageFromLV, MessageToLV, CommsError};
-use labview::{detect_installations, launch_exe, launch_lv, installs::Bitness};
+use comms::{AppListener, CommsError, MessageFromLV, MessageToLV};
+use labview::{detect_installations, installs::Bitness, launch_exe, launch_lv};
 use log::{debug, error, LevelFilter};
 use simple_logger::SimpleLogger;
 
@@ -45,9 +45,7 @@ fn main() {
     connection
         .write(MessageToLV::ARGS(&program_args[..]))
         .unwrap();
-    connection
-        .write(MessageToLV::CCWD(cwd))
-        .unwrap();
+    connection.write(MessageToLV::CCWD(cwd)).unwrap();
 
     loop {
         match connection.read() {
@@ -56,10 +54,12 @@ fn main() {
             }
             Ok(MessageFromLV::EXIT(code)) => {
                 std::process::exit(code);
-            },
-            Err(CommsError::ReadLvMessageError(e)) if e.kind() == std::io::ErrorKind::WouldBlock => {
+            }
+            Err(CommsError::ReadLvMessageError(e))
+                if e.kind() == std::io::ErrorKind::WouldBlock =>
+            {
                 //no new messages
-            },
+            }
             Err(e) => {
                 error!("{:?}", e);
                 break;
@@ -71,48 +71,40 @@ fn main() {
 }
 
 //todo: Error handling
-fn launch_process(config: &cli::Configuration, app_listener: &AppListener) -> labview::process::MonitoredProcess {
+fn launch_process(
+    config: &cli::Configuration,
+    app_listener: &AppListener,
+) -> labview::process::MonitoredProcess {
     let launch_path = config.to_launch.clone();
-    let process = match launch_path
-        .extension()
-        .map(|ext| ext.to_str().unwrap())
-    {
-        Some("vi") => {    
+    let process = match launch_path.extension().map(|ext| ext.to_str().unwrap()) {
+        Some("vi") => {
             let active_install = find_install(&config.lv_version_string, config.bitness);
             Some(launch_lv(&active_install, launch_path, app_listener.port()).unwrap())
         }
-        Some("exe") => {
-            Some(launch_exe(launch_path, app_listener.port()).unwrap())
-        }
-        None => {
-            Some(launch_exe(launch_path, app_listener.port()).unwrap())
-        }
+        Some("exe") => Some(launch_exe(launch_path, app_listener.port()).unwrap()),
+        None => Some(launch_exe(launch_path, app_listener.port()).unwrap()),
         Some(extension) => {
-            panic!("Unknown extension {:?}", extension); 
-        },
+            panic!("Unknown extension {:?}", extension);
+        }
     };
     process.unwrap()
 }
 
-fn find_install(version_string: &Option<String>, bitness: Bitness) -> labview::installs::LabviewInstall {
+fn find_install(
+    version_string: &Option<String>,
+    bitness: Bitness,
+) -> labview::installs::LabviewInstall {
     let system_installs = detect_installations().unwrap();
     debug!("{}", system_installs.print_details());
     let active_install = match version_string {
-        Some(version) => {
-            system_installs
-                .get_version(version, bitness)
-                .or_else(|| system_installs.get_default())
-        },
-        None => {
-            system_installs.get_default()
-        }
+        Some(version) => system_installs
+            .get_version(version, bitness)
+            .or_else(|| system_installs.get_default()),
+        None => system_installs.get_default(),
     };
     let active_install = active_install.unwrap();
     active_install.clone()
 }
 
-
 #[cfg(test)]
-mod test {
-
-}
+mod test {}
