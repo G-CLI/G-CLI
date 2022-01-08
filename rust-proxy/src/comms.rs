@@ -32,6 +32,10 @@ pub enum CommsError {
     WriteLvMessageError(#[source] std::io::Error),
     #[error("Timed out waiting for app to connect to g-cli")]
     WaitOnConnectionTimeOut,
+    #[error("System error setting up app connection")]
+    ErrorCreatingConnection(#[source] std::io::Error),
+    #[error("System error setting up app listener")]
+    ErrorCreatingListener(#[source] std::io::Error)
 }
 
 /// Provides the TCP Connection to the App
@@ -41,13 +45,15 @@ pub struct AppListener {
 
 impl AppListener {
     /// Create the listener and reserve the port.
-    pub fn new() -> Self {
-        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    pub fn new() -> Result<Self,CommsError> {
+        let listener = TcpListener::bind("127.0.0.1:0")
+          .map_err(|e| CommsError::ErrorCreatingListener(e))?;
 
         // So we can implement a timeout later.
-        listener.set_nonblocking(true).unwrap();
+        listener.set_nonblocking(true)
+          .map_err(|e| CommsError::ErrorCreatingListener(e))?;
 
-        Self { listener }
+        Ok(Self { listener })
     }
 
     /// Get a Connection
@@ -62,7 +68,7 @@ impl AppListener {
         loop {
             match self.listener.accept() {
                 Ok((stream, _addr)) => {
-                    return Ok(AppConnection::new(stream));
+                    return AppConnection::new(stream);
                 }
                 Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                     count = count + 1;
@@ -96,13 +102,13 @@ pub struct AppConnection {
 }
 
 impl AppConnection {
-    pub fn new(stream: TcpStream) -> Self {
-        stream.set_nonblocking(false);
-        stream.set_nodelay(true);
-        Self {
+    pub fn new(stream: TcpStream) -> Result<Self, CommsError> {
+        stream.set_nonblocking(false).map_err(|e| CommsError::ErrorCreatingConnection(e))?;
+        stream.set_nodelay(true).map_err(|e| CommsError::ErrorCreatingConnection(e))?;
+        Ok(Self {
             stream,
             buffer: [0u8; 9000],
-        }
+        })
     }
 
     pub fn write(&mut self, message: MessageToLV) -> Result<(), CommsError> {

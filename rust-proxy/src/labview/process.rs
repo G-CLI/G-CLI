@@ -11,9 +11,7 @@ use super::{Registration, error::LabVIEWError};
 type Pid = i32;
 
 pub struct MonitoredProcess {
-    path: PathBuf,
     stop_channel: mpsc::Sender<bool>,
-    process_lost_channel: mpsc::Receiver<bool>,
     /// Port registration for management
     /// Im not totally convinced this is the right place for it.
     port_registration: Option<Registration>
@@ -25,9 +23,6 @@ impl MonitoredProcess {
 
         //setup a channel for passing stop messages//
         let (stop_tx, stop_rx) = mpsc::channel();
-
-        //setup a channel for sending a notification that the process is lost.
-        let (lost_tx, lost_rx) = mpsc::channel();
 
         let thread_path = path.clone();
 
@@ -44,8 +39,6 @@ impl MonitoredProcess {
                     }
                 } else {
                     info!("Process Lost");
-                    //send the warning - don't care if this errors.
-                    let _ = lost_tx.send(true);
                     break;
                 }
 
@@ -54,9 +47,7 @@ impl MonitoredProcess {
         });
 
         Ok(Self {
-            path,
             stop_channel: stop_tx,
-            process_lost_channel: lost_rx,
             port_registration
         })
     }
@@ -64,12 +55,6 @@ impl MonitoredProcess {
     /// Send a stop command to the monitoring thread.
     pub fn stop_monitor(&self) {
         self.stop_channel.send(true).unwrap();
-    }
-
-    /// Check on the process lost signal.
-    /// TODO: This only returns true once. It should be changed to always return true after process lost.
-    pub fn check_process_stopped(&self) -> bool {
-        self.process_lost_channel.try_recv().is_ok()
     }
 
     /// Registers that the comms are connected so any action required can be taken like cancelling service discovery.

@@ -27,7 +27,7 @@ fn main() {
     debug!("G CLI Arguments: TBC");
     debug!("Arguments passed to LabVIEW: {}", program_args.join(" "));
 
-    let app_listener = AppListener::new();
+    let app_listener = AppListener::new().unwrap();
     println!("{}", app_listener.port());
 
     let launch_path = &config.to_launch;
