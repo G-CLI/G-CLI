@@ -48,8 +48,11 @@ jobs:
           override: true
           components: rustfmt
 
-      - name: cargo fmt --check
-        run: cargo fmt --all -- check
+      - name: Formatting Check
+        run: cargo fmt --all -- --check
+
+      - name: Cargo Check
+        run: cargo check
 
   build-cli:
     name: Test & Build on ${{ matrix.os }}
