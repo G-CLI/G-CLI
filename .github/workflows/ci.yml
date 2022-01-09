@@ -9,10 +9,33 @@ on:
 
 jobs:
 
+  # Get the versions from Rust as the canonical values.
+  # To use in other jobs "needs" this job and use ${{needs.get-version.outputs.version}}
+  get-version:
+    name: Get Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    defaults:
+      run:
+        working-directory: rust-proxy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Install Tool for Version from Cargo
+        run: cargo install cargo-get
+
+      - name: Get Major.Minor.Patch
+        id: version
+        run: echo "::set-output name=version::$(cargo get version --major --minor --patch --delimiter=.)"
+
   rust-style:
     name: Check Style
     runs-on: ubuntu-latest
-    working-directory: rust-proxy
+    defaults:
+      run:
+        working-directory: rust-proxy
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -26,25 +49,26 @@ jobs:
           components: rustfmt
 
       - name: cargo fmt --check
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- check
 
   build-cli:
     name: Test & Build on ${{ matrix.os }}
-    needs: [style]
+    needs: [get-version,style]
+    env:
+      version: ${{needs.get-version.outputs.version}}
     strategy:
       matrix:
         os:
-          - ubuntu-latest
+        #  - ubuntu-latest
           - windows-latest
-          - macOS-latest
+        #  - macOS-latest
 
 
     runs-on: ${{ matrix.os }}
 
-    working-directory: rust-proxy
+    defaults:
+      run:
+        working-directory: rust-proxy
 
     steps:
       - name: Checkout
@@ -57,10 +81,17 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Install Build Tooling.
+        run: cargo install cargo-wix
+          
+
       - name: Test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
+        run: cargo test
+      
+      - name: Build
+        run: |
+          cargo build --release
+          cargo wix -i ${{ env.version }}
 
       - name: Upload EXE
         uses: actions/upload-artifact@v2.3.1
@@ -69,6 +100,15 @@ jobs:
           name: Exe_${{ matrix.os }}
           # A file, directory or wildcard pattern that describes what to upload
           path: target/release/g-cli.exe
+          if-no-files-found: error
+
+      - name: Upload MSI
+        uses: actions/upload-artifact@v2.3.1
+        with:
+          # Artifact name
+          name: MSI_Installer
+          # A file, directory or wildcard pattern that describes what to upload
+          path: target/wix/*.msi
           if-no-files-found: error
 
         
@@ -85,6 +125,14 @@ jobs:
         with:
           fetch-depth: 0
           clean: true
+
+      - name: Get MSI
+        uses: actions/download-artifact@v2.1.0
+        with:
+          # Artifact name
+          name: MSI_Installer
+          # Destination path
+          path: LabVIEW Source\Installation Support\G_CLI.msi
 
           
       - name: Get x64 EXE for Integration Test
