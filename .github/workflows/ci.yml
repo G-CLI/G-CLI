@@ -53,7 +53,7 @@ jobs:
 
   build-cli:
     name: Test & Build on ${{ matrix.os }}
-    needs: [get-version,style]
+    needs: [get-version]
     env:
       version: ${{needs.get-version.outputs.version}}
     strategy:
