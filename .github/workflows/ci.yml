@@ -23,6 +23,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
+      - name: Cargo Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+            ${{ runner.os }}-cargo
+
+
       - name: Install Tool for Version from Cargo
         run: cargo install cargo-get
 
@@ -39,6 +49,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+
+      - name: Cargo Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+            ${{ runner.os }}-cargo
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -77,6 +96,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
+      - name: Cargo Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+            ${{ runner.os }}-cargo
+
+      - name: Cargo Target Cache
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
+            ${{ runner.os }}-cargo-target
+
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -102,7 +139,7 @@ jobs:
           # Artifact name
           name: Exe_${{ matrix.os }}
           # A file, directory or wildcard pattern that describes what to upload
-          path: target/release/g-cli.exe
+          path: rust-proxy/target/release/g-cli.exe
           if-no-files-found: error
 
       - name: Upload MSI
@@ -111,7 +148,7 @@ jobs:
           # Artifact name
           name: MSI_Installer
           # A file, directory or wildcard pattern that describes what to upload
-          path: target/wix/*.msi
+          path: rust-proxy/target/wix/*.msi
           if-no-files-found: error
 
         
