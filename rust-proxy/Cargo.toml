@@ -1,8 +1,9 @@
 [package]
 name = "g-cli"
-version = "3.0.0"
+version = "3.0.0-alpha.1"
 authors = ["James McNally <james@wiresmithtech.com>"]
-edition = "2018"
+edition = "2021"
+license = "BSD-2-Clause"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
