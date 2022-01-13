@@ -3,6 +3,7 @@
 use clap::{App, AppSettings, Arg, ArgMatches};
 use std::iter::IntoIterator;
 use std::path::PathBuf;
+use std::time::Duration;
 
 use crate::labview::installs::Bitness;
 
@@ -14,6 +15,8 @@ pub struct Configuration {
     pub lv_version_string: Option<String>,
     pub bitness: Bitness,
     pub timeout_secs: Option<f32>,
+    /// If kill is Some then the value is a timeout to kill LabVIEW if it isn't already killed.
+    pub kill: Option<Duration>,
 }
 
 impl Configuration {
@@ -33,7 +36,6 @@ impl Configuration {
 
     /// Private function to extract the common functionality of moving args to config.
     fn args_to_configuration(args: ArgMatches) -> Self {
-        println!("{:?}", args);
         Self {
             to_launch: PathBuf::from(args.value_of("app to run").unwrap().to_owned()),
             verbose: args.is_present("verbose mode"),
@@ -47,6 +49,14 @@ impl Configuration {
             timeout_secs: args
                 .value_of("timeout (ms)")
                 .map(|str| str.parse::<f32>().unwrap() / 1000.0), //to ms
+            kill: if args.is_present("kill") {
+                //todo handle unwraps. The first should not fail due to default. The second could.
+                Some(Duration::from_millis(
+                    args.value_of("kill timeout (ms)").unwrap().parse().unwrap(),
+                ))
+            } else {
+                None
+            },
         }
     }
 }
@@ -79,6 +89,18 @@ fn clap_app() -> clap::App<'static, 'static> {
                 .long("timeout")
                 .help("The time in ms to wait for the connection from LabVIEW"),
         )
+        .arg(
+            Arg::with_name("kill")
+            .long("kill")
+            .help("Forces LabVIEW to exit when the program sends the exit code if set. Use kill-timeout to set a delay before this occurs.")
+        )
+        .arg(
+            Arg::with_name("kill timeout (ms)")
+                .takes_value(true)
+                .long("kill-timeout")
+                .help("The delay before the LabVIEW process is killed if the kill flag is set.")
+                .default_value("10000")
+        )
         .setting(AppSettings::TrailingVarArg)
         .arg(Arg::with_name("app to run").multiple(true).required(true))
 }
@@ -92,6 +114,8 @@ pub fn program_arguments<T: IntoIterator<Item = String>>(main_args: T) -> Vec<St
 
 #[cfg(test)]
 mod tests {
+
+    use std::time::Duration;
 
     use super::*;
 
@@ -203,6 +227,68 @@ mod tests {
 
         let config = Configuration::from_arg_array(args);
         assert_eq!(Some(10.0), config.timeout_secs);
+    }
+
+    #[test]
+    /// Kill is set with no timeout uses default 10 seconds.
+    fn kill_set() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--kill"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+        assert_eq!(Some(Duration::from_secs(10)), config.kill);
+    }
+
+    #[test]
+    /// Kill is not set.
+    fn kill_not_set() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+        assert_eq!(None, config.kill);
+    }
+
+    #[test]
+    /// Kill is set with a timeout in seconds.
+    fn kill_set_with_timeout() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--kill"),
+            String::from("--kill-timeout"),
+            String::from("5000"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+        assert_eq!(Some(Duration::from_millis(5000)), config.kill);
+    }
+
+    #[test]
+    /// Kill timeout is ignored if kill isnt set.
+    fn kill_timeout_but_kill_not_set() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--kill-timeout"),
+            String::from("5000"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+        assert_eq!(None, config.kill);
     }
 
     #[test]

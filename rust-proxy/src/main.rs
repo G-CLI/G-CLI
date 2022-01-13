@@ -47,13 +47,16 @@ fn main() {
         .unwrap();
     connection.write(MessageToLV::CCWD(cwd)).unwrap();
 
+    let mut exit_code = 0;
+
     loop {
         match connection.read() {
             Ok(MessageFromLV::OUTP(string)) => {
                 print!("{}", string);
             }
             Ok(MessageFromLV::EXIT(code)) => {
-                std::process::exit(code);
+                debug!("Recieved exit code {}", code);
+                exit_code = code;
             }
             Err(CommsError::ReadLvMessageError(e))
                 if e.kind() == std::io::ErrorKind::WouldBlock =>
@@ -67,7 +70,8 @@ fn main() {
         }
     }
 
-    process.stop_monitor();
+    process.stop(config.kill);
+    std::process::exit(exit_code);
 }
 
 //todo: Error handling

@@ -1,20 +1,24 @@
 use super::{error::LabVIEWError, Registration};
-use log::{debug, info};
+use log::{debug, error, info};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::mpsc;
-use std::thread;
-use std::time::Duration;
+use std::thread::{sleep, spawn, JoinHandle};
+use std::time::{Duration, Instant};
 use sysinfo::{ProcessExt, System, SystemExt};
 
 type Pid = i32;
+const POLL_INTERVAL: Duration = Duration::from_millis(100);
+
+// TODO: There are definately improvements to the process monitoring. For example reusing the system item.
 
 pub struct MonitoredProcess {
-    stop_channel: mpsc::Sender<bool>,
+    stop_channel: mpsc::Sender<Option<Duration>>,
     /// Port registration for management
     /// Im not totally convinced this is the right place for it.
     port_registration: Option<Registration>,
+    monitor_thread: JoinHandle<()>,
 }
 
 impl MonitoredProcess {
@@ -26,39 +30,77 @@ impl MonitoredProcess {
         let original_pid = launch(&path, args)?;
 
         //setup a channel for passing stop messages//
-        let (stop_tx, stop_rx) = mpsc::channel();
+        let (stop_tx, stop_rx) = mpsc::channel::<Option<Duration>>();
 
         let thread_path = path.clone();
 
-        thread::spawn(move || {
+        let monitor_thread = spawn(move || {
             let mut current_pid = original_pid;
+            let mut kill_option = None;
 
-            while stop_rx.try_recv().is_err() {
-                let matching_processes = find_instances(&thread_path);
-
-                if let Some(id) = find_process(&matching_processes, current_pid) {
-                    if id != current_pid {
-                        current_pid = id;
-                        info!("Process lost + found at PID {}", id);
+            // First loop is wait for stop.
+            loop {
+                match stop_rx.try_recv() {
+                    Ok(kill) => {
+                        //stop requested. See if we have been asked to kill the proces.
+                        kill_option = kill;
+                        debug!("Stopping monitoring due to stop command from application");
+                        break;
                     }
-                } else {
-                    info!("Process Lost");
-                    break;
+
+                    Err(_) => {
+                        //no stop command. Validate processes.
+                        if let Some(id) = check_process(&thread_path, current_pid) {
+                            current_pid = id;
+                        } else {
+                            debug!("Ending monitoring due to no process found.");
+                            break;
+                        }
+                    }
                 }
 
-                thread::sleep(Duration::from_millis(100));
+                sleep(POLL_INTERVAL);
+            }
+
+            if let Some(timeout) = kill_option {
+                info!(
+                    "Process Kill Requested - Monitoring for Timeout {}ms",
+                    timeout.as_millis()
+                );
+                let end_time = Instant::now() + timeout;
+
+                loop {
+                    let process_closed = check_process(&thread_path, current_pid).is_none();
+                    let timeout_passed = Instant::now() > end_time;
+                    if process_closed {
+                        break;
+                    } else if timeout_passed {
+                        //kill the process.
+                        kill(current_pid);
+                        break;
+                    } else {
+                        sleep(POLL_INTERVAL);
+                    }
+                }
+            } else {
+                debug!("Monitoring complete and kill not requested.");
             }
         });
 
         Ok(Self {
             stop_channel: stop_tx,
             port_registration,
+            monitor_thread,
         })
     }
 
-    /// Send a stop command to the monitoring thread.
-    pub fn stop_monitor(&self) {
-        self.stop_channel.send(true).unwrap();
+    /// Send a stop command to the monitoring thread and blocks until complete.
+    ///
+    /// * `kill_process` - Set to None to leave the process running or provide a timeout for when the process should be killed if it is still active.
+    pub fn stop(self, kill_process: Option<Duration>) {
+        //todo: error handling
+        self.stop_channel.send(kill_process).unwrap();
+        self.monitor_thread.join().unwrap();
     }
 
     /// Registers that the comms are connected so any action required can be taken like cancelling service discovery.
@@ -72,6 +114,20 @@ impl MonitoredProcess {
 
         Ok(())
     }
+}
+
+/// Checks if the process is still running and returns the new PID if it is.
+fn check_process(thread_path: &PathBuf, current_pid: Pid) -> Option<Pid> {
+    let matching_processes = find_instances(thread_path);
+    let process_result = find_process(&matching_processes, current_pid);
+    if let Some(id) = process_result {
+        if id != current_pid {
+            info!("Process lost + found at PID {}", id);
+        }
+    } else {
+        info!("Process Lost");
+    }
+    return process_result;
 }
 
 /// Launches the LabVIEW process.
@@ -95,7 +151,7 @@ fn find_instances(path: &PathBuf) -> HashMap<Pid, String> {
     let sys = System::new_all();
     let mut processes = HashMap::new();
 
-    for (pid, process) in sys.get_processes() {
+    for (pid, process) in sys.processes() {
         let process_path = process.exe();
         if process_path == path {
             processes.insert(pid.clone() as Pid, process.name().to_owned());
@@ -103,6 +159,17 @@ fn find_instances(path: &PathBuf) -> HashMap<Pid, String> {
     }
 
     processes
+}
+
+/// Kill the process by PID
+fn kill(pid: Pid) {
+    info!("Killing process {}", pid);
+    let sys = System::new_all();
+    if let Some(process) = sys.process(pid as usize) {
+        process.kill();
+    } else {
+        error!("Process ID Not Found to Kill");
+    }
 }
 
 /// Find the process in the list.
