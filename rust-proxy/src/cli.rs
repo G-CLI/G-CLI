@@ -23,7 +23,7 @@ impl Configuration {
     /// Load configuration from an arguement array. Intended for testing.
     #[allow(dead_code)]
     pub fn from_arg_array(args: Vec<String>) -> Self {
-        let matches = clap_app().get_matches_from_safe(args).unwrap();
+        let matches = clap_app().try_get_matches_from(args).unwrap();
         Self::args_to_configuration(matches)
     }
 
@@ -62,47 +62,47 @@ impl Configuration {
 }
 
 /// Returns a fully configured clap app with all the parameters configured.
-fn clap_app() -> clap::App<'static, 'static> {
+fn clap_app() -> clap::App<'static> {
     App::new("G CLI")
         .version(VERSION)
         .about("Connects a LabVIEW app to the command line.")
         .arg(
-            Arg::with_name("verbose mode")
-                .short("v")
+            Arg::new("verbose mode")
+                .short('v')
                 .long("verbose")
                 .help("Prints additional details for debugging"),
         )
         .arg(
-            Arg::with_name("labview version")
+            Arg::new("labview version")
                 .takes_value(true)
                 .long("lv-ver")
                 .help("The version of LabVIEW to launch e.g. 2020"),
         )
         .arg(
-            Arg::with_name("64bit")
+            Arg::new("64bit")
                 .long("x64")
                 .help("Set this to launch the 64 bit version of LabVIEW."),
         )
         .arg(
-            Arg::with_name("timeout (ms)")
+            Arg::new("timeout (ms)")
                 .takes_value(true)
                 .long("timeout")
                 .help("The time in ms to wait for the connection from LabVIEW"),
         )
         .arg(
-            Arg::with_name("kill")
+            Arg::new("kill")
             .long("kill")
             .help("Forces LabVIEW to exit when the program sends the exit code if set. Use kill-timeout to set a delay before this occurs.")
         )
         .arg(
-            Arg::with_name("kill timeout (ms)")
+            Arg::new("kill timeout (ms)")
                 .takes_value(true)
                 .long("kill-timeout")
                 .help("The delay before the LabVIEW process is killed if the kill flag is set.")
                 .default_value("10000")
         )
         .setting(AppSettings::TrailingVarArg)
-        .arg(Arg::with_name("app to run").multiple(true).required(true))
+        .arg(Arg::new("app to run").multiple_occurrences(true).required(true))
 }
 
 /// Extract the arguments that are going to be passed to the VI/exe we will run.
