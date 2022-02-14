@@ -10,7 +10,8 @@ license = "BSD-2-Clause"
 [dependencies]
 sysinfo = "0.22"
 log = "0.4"
-simple_logger = "1.11"
+log4rs = { version = "1.*", features = ["console_appender"]}
+simplelog = "0.11"
 thiserror = "1.0"
 clap = "2.33"
 # minimal library - remove the features we aren't using.

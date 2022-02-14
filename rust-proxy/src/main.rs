@@ -5,7 +5,7 @@ mod labview;
 use comms::{AppListener, CommsError, MessageFromLV, MessageToLV};
 use labview::{detect_installations, installs::Bitness, launch_exe, launch_lv};
 use log::{debug, error, LevelFilter};
-use simple_logger::SimpleLogger;
+use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
@@ -17,10 +17,24 @@ fn main() {
     let log_level = if config.verbose {
         LevelFilter::Debug
     } else {
-        LevelFilter::Info
+        LevelFilter::Warn
     };
 
-    SimpleLogger::new().with_level(log_level).init().unwrap();
+    let mut logger_config = ConfigBuilder::new();
+
+    logger_config
+        .add_filter_allow_str("g_cli")
+        .set_thread_level(LevelFilter::Off)
+        .set_target_level(LevelFilter::Off)
+        .set_time_format_str("%H:%M:%S%.3f");
+
+    TermLogger::init(
+        log_level,
+        logger_config.build(),
+        TerminalMode::Mixed,
+        ColorChoice::Auto,
+    )
+    .expect("Logger failed to start");
 
     debug!("G CLI Started - Verbose Mode");
     debug!("Version {}", VERSION);
@@ -28,11 +42,8 @@ fn main() {
     debug!("Arguments passed to LabVIEW: {}", program_args.join(" "));
 
     let app_listener = AppListener::new().unwrap();
-    println!("{}", app_listener.port());
 
     let launch_path = &config.to_launch;
-
-    println!("Launch path: {:?}", launch_path);
 
     let mut process = launch_process(&config, &app_listener);
 
@@ -57,6 +68,7 @@ fn main() {
             Ok(MessageFromLV::EXIT(code)) => {
                 debug!("Recieved exit code {}", code);
                 exit_code = code;
+                break;
             }
             Err(CommsError::ReadLvMessageError(e))
                 if e.kind() == std::io::ErrorKind::WouldBlock =>
