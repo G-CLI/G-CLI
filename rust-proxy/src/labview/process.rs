@@ -6,9 +6,8 @@ use std::process::Command;
 use std::sync::mpsc;
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration, Instant};
-use sysinfo::{ProcessExt, System, SystemExt};
+use sysinfo::{Pid, PidExt, ProcessExt, System, SystemExt};
 
-type Pid = i32;
 const POLL_INTERVAL: Duration = Duration::from_millis(100);
 
 // TODO: There are definately improvements to the process monitoring. For example reusing the system item.
@@ -35,7 +34,7 @@ impl MonitoredProcess {
         let thread_path = path.clone();
 
         let monitor_thread = spawn(move || {
-            let mut current_pid = original_pid;
+            let mut current_pid = Pid::from_u32(original_pid);
             let mut kill_option = None;
 
             // First loop is wait for stop.
@@ -132,13 +131,13 @@ fn check_process(thread_path: &PathBuf, current_pid: Pid) -> Option<Pid> {
 
 /// Launches the LabVIEW process.
 /// Returns the process ID.
-fn launch(path: &PathBuf, args: &[String]) -> Result<Pid, LabVIEWError> {
+fn launch(path: &PathBuf, args: &[String]) -> Result<u32, LabVIEWError> {
     let launch_result = Command::new(path).args(args).spawn();
 
     match launch_result {
         Ok(output) => {
             debug!("Process launched with PID {}", output.id());
-            return Ok(output.id() as Pid);
+            return Ok(output.id());
         }
         Err(e) => {
             return Err(LabVIEWError::ProcessLaunchFailed(e));
@@ -154,7 +153,7 @@ fn find_instances(path: &PathBuf) -> HashMap<Pid, String> {
     for (pid, process) in sys.processes() {
         let process_path = process.exe();
         if process_path == path {
-            processes.insert(pid.clone() as Pid, process.name().to_owned());
+            processes.insert(pid.clone(), process.name().to_owned());
         }
     }
 
@@ -165,7 +164,7 @@ fn find_instances(path: &PathBuf) -> HashMap<Pid, String> {
 fn kill(pid: Pid) {
     info!("Killing process {}", pid);
     let sys = System::new_all();
-    if let Some(process) = sys.process(pid as usize) {
+    if let Some(process) = sys.process(pid) {
         process.kill();
     } else {
         error!("Process ID Not Found to Kill");
@@ -197,7 +196,7 @@ mod test {
 
     fn test_process_list() -> HashMap<Pid, String> {
         let mut processes = HashMap::new();
-        processes.insert(1, String::from("Process"));
+        processes.insert(Pid::from(1), String::from("Process"));
         return processes;
     }
 
@@ -205,21 +204,21 @@ mod test {
     fn find_processes_same_process() {
         let processes = test_process_list();
 
-        assert_eq!(find_process(&processes, 1), Some(1));
+        assert_eq!(find_process(&processes, Pid::from(1)), Some(Pid::from(1)));
     }
 
     #[test]
     fn find_processes_new_process() {
         let processes = test_process_list();
 
-        assert_eq!(find_process(&processes, 2), Some(1));
+        assert_eq!(find_process(&processes, Pid::from(2)), Some(Pid::from(1)));
     }
 
     #[test]
     fn find_processes_none() {
         let mut processes = test_process_list();
-        processes.remove(&1); //remove the only entry.
+        processes.remove(&Pid::from(1)); //remove the only entry.
 
-        assert_eq!(find_process(&processes, 1), None);
+        assert_eq!(find_process(&processes, Pid::from(1)), None);
     }
 }
