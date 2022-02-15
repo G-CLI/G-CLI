@@ -56,7 +56,7 @@ set ERRORLEVEL=0
 goto :end
 
 :failed
-echo "Test Failed: %test_name%"
+echo "Test Failed: %test_name%" >&2
 set ERRORLEVEL=1
 
 :end
