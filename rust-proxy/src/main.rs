@@ -109,7 +109,23 @@ fn launch_process(
             )
         }
         Some("exe") => Some(launch_exe(launch_path, app_listener.port()).unwrap()),
-        None => Some(launch_exe(launch_path, app_listener.port()).unwrap()),
+        None => {
+            debug!("No extension in path. Assume it is a .vi");
+            //Modify the path to include the .vi. Alias as mutable for this case.
+            let mut launch_path = launch_path;
+            launch_path.set_extension("vi");
+
+            let active_install = find_install(&config.lv_version_string, config.bitness);
+            Some(
+                launch_lv(
+                    &active_install,
+                    launch_path,
+                    app_listener.port(),
+                    config.allow_dialogs,
+                )
+                .unwrap(),
+            )
+        }
         Some(extension) => {
             panic!("Unknown extension {:?}", extension);
         }
