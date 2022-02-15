@@ -17,6 +17,8 @@ pub struct Configuration {
     pub timeout_secs: Option<f32>,
     /// If kill is Some then the value is a timeout to kill LabVIEW if it isn't already killed.
     pub kill: Option<Duration>,
+    /// allows LabVIEW to show dialogs by removing the unattended flag.
+    pub allow_dialogs: bool,
 }
 
 impl Configuration {
@@ -57,6 +59,7 @@ impl Configuration {
             } else {
                 None
             },
+            allow_dialogs: args.is_present("allow dialogs"),
         }
     }
 }
@@ -100,6 +103,12 @@ fn clap_app() -> clap::App<'static> {
                 .long("kill-timeout")
                 .help("The delay before the LabVIEW process is killed if the kill flag is set.")
                 .default_value("10000")
+        )
+        .arg(
+            Arg::new("allow dialogs")
+            .long("allow-dialogs")
+            .alias("allowDialogs")
+            .help("Add this flag to allow LabVIEW to show user dialogs by removing the --unattended flag. Generally not recommended")
         )
         .setting(AppSettings::TrailingVarArg)
         .arg(Arg::new("app to run").multiple_occurrences(true).required(true))
@@ -162,6 +171,50 @@ mod tests {
         let config = Configuration::from_arg_array(args);
 
         assert_eq!(config.verbose, true);
+    }
+
+    #[test]
+    fn allow_dialogs_default() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.allow_dialogs, false);
+    }
+
+    #[test]
+    fn allow_dialogs_camelcase() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--allowDialogs"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.allow_dialogs, true);
+    }
+
+    #[test]
+    fn allow_dialogs_hyphenated() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--allow-dialogs"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.allow_dialogs, true);
     }
 
     #[test]

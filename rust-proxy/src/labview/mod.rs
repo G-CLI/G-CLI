@@ -25,18 +25,26 @@ use port_discovery::Registration;
 
 use self::error::LabVIEWError;
 
-fn create_args(port: u16) -> Vec<String> {
-    vec![String::from("--"), format!("-p:{}", port)]
+fn create_args(port: u16, allow_dialogs: bool) -> Vec<String> {
+    let mut args = vec![];
+    if !allow_dialogs {
+        args.push(String::from("-unattended"));
+    }
+
+    args.push(String::from("--"));
+    args.push(format!("-p:{}", port));
+    return args;
 }
 
 pub fn launch_exe(path: PathBuf, port: u16) -> Result<process::MonitoredProcess, LabVIEWError> {
-    process::MonitoredProcess::start(path, &create_args(port), None)
+    process::MonitoredProcess::start(path, &create_args(port, true), None)
 }
 
 pub fn launch_lv(
     install: &installs::LabviewInstall,
     launch_vi: PathBuf,
     port: u16,
+    allow_dialogs: bool,
 ) -> Result<process::MonitoredProcess, LabVIEWError> {
     let mut vi = launch_vi.clone();
 
@@ -59,8 +67,8 @@ pub fn launch_lv(
     let registration = Registration::register(&vi, install, &port)?;
 
     //todo: unwrap could fail here, can we validate it?
-    let mut lv_args = vec![vi.to_str().unwrap().to_owned(), String::from("-unattended")];
-    lv_args.append(&mut create_args(port));
+    let mut lv_args = vec![vi.to_str().unwrap().to_owned()];
+    lv_args.append(&mut create_args(port, allow_dialogs));
 
     let path = install.application_path();
 
@@ -80,7 +88,20 @@ mod tests {
 
     #[test]
     fn test_args_with_port() {
-        let args = create_args(1234);
+        let args = create_args(1234, false);
+
+        let expected = vec![
+            String::from("-unattended"),
+            String::from("--"),
+            String::from("-p:1234"),
+        ];
+
+        assert_eq!(args, expected);
+    }
+
+    #[test]
+    fn test_args_no_dialog() {
+        let args = create_args(1234, true);
 
         let expected = vec![String::from("--"), String::from("-p:1234")];
 

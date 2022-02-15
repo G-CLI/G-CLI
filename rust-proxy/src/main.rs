@@ -43,8 +43,6 @@ fn main() {
 
     let app_listener = AppListener::new().unwrap();
 
-    let launch_path = &config.to_launch;
-
     let mut process = launch_process(&config, &app_listener);
 
     let mut connection = app_listener
@@ -95,7 +93,15 @@ fn launch_process(
     let process = match launch_path.extension().map(|ext| ext.to_str().unwrap()) {
         Some("vi") => {
             let active_install = find_install(&config.lv_version_string, config.bitness);
-            Some(launch_lv(&active_install, launch_path, app_listener.port()).unwrap())
+            Some(
+                launch_lv(
+                    &active_install,
+                    launch_path,
+                    app_listener.port(),
+                    config.allow_dialogs,
+                )
+                .unwrap(),
+            )
         }
         Some("exe") => Some(launch_exe(launch_path, app_listener.port()).unwrap()),
         None => Some(launch_exe(launch_path, app_listener.port()).unwrap()),
