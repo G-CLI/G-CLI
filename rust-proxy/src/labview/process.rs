@@ -34,55 +34,37 @@ impl MonitoredProcess {
         let thread_path = path.clone();
 
         let monitor_thread = spawn(move || {
-            let mut current_pid = Pid::from_u32(original_pid);
-            let mut kill_option = None;
+            let mut current_pid = Some(Pid::from_u32(original_pid));
 
-            // First loop is wait for stop.
+            // Loop until we recieve a stop. The only way to leave is when the main thread has sent stop.
+            // if we stop independently we get a race condition where the main loop will send stop to an invalid channel.
+            // Wrap the PID in the option where None means we have lost the process to gate on the kill process.
             loop {
                 match stop_rx.try_recv() {
                     Ok(kill) => {
-                        //stop requested. See if we have been asked to kill the proces.
-                        kill_option = kill;
+                        //stop requested. See if we have been asked to kill the process.
+                        //disable if we aren't tracking a process though.
+                        if let Some(pid) = current_pid {
+                            kill_process_with_timeout(kill, &thread_path, pid)
+                        };
                         debug!("Stopping monitoring due to stop command from application");
                         break;
                     }
 
                     Err(_) => {
-                        //no stop command. Validate processes.
-                        if let Some(id) = check_process(&thread_path, current_pid) {
-                            current_pid = id;
-                        } else {
-                            debug!("Ending monitoring due to no process found.");
-                            break;
+                        //no stop command. Validate processes if we are still monitoring a pid.
+                        if let Some(pid) = current_pid {
+                            if let Some(id) = check_process(&thread_path, pid) {
+                                current_pid = Some(id);
+                            } else {
+                                debug!("The process appears to have closed down.");
+                                current_pid = None;
+                            }
                         }
                     }
                 }
 
                 sleep(POLL_INTERVAL);
-            }
-
-            if let Some(timeout) = kill_option {
-                info!(
-                    "Process Kill Requested - Monitoring for Timeout {}ms",
-                    timeout.as_millis()
-                );
-                let end_time = Instant::now() + timeout;
-
-                loop {
-                    let process_closed = check_process(&thread_path, current_pid).is_none();
-                    let timeout_passed = Instant::now() > end_time;
-                    if process_closed {
-                        break;
-                    } else if timeout_passed {
-                        //kill the process.
-                        kill(current_pid);
-                        break;
-                    } else {
-                        sleep(POLL_INTERVAL);
-                    }
-                }
-            } else {
-                debug!("Monitoring complete and kill not requested.");
             }
         });
 
@@ -112,6 +94,34 @@ impl MonitoredProcess {
         }
 
         Ok(())
+    }
+}
+
+/// If the kill option is set then it will give the process that duration to stop on it's own.
+/// After that timeout, it will use the kill command.
+fn kill_process_with_timeout(kill_option: Option<Duration>, thread_path: &PathBuf, pid: Pid) {
+    if let Some(timeout) = kill_option {
+        info!(
+            "Process Kill Requested - Monitoring for Timeout {}ms",
+            timeout.as_millis()
+        );
+        let end_time = Instant::now() + timeout;
+
+        loop {
+            let process_closed = check_process(thread_path, pid).is_none();
+            let timeout_passed = Instant::now() > end_time;
+            if process_closed {
+                break;
+            } else if timeout_passed {
+                //kill the process.
+                kill(pid);
+                break;
+            } else {
+                sleep(POLL_INTERVAL);
+            }
+        }
+    } else {
+        debug!("Monitoring complete and kill not requested.");
     }
 }
 
