@@ -11,25 +11,14 @@ Then fork the repo and put in a pull request for your changes. Before including 
 
 Don't worry about including a final build - we have a Jenkins server configured to automate the build so we can include that in the next release.
 
-## C Sharp Source
+## Proxy Code - Rust 
 
-The C# source includes a solution under C Sharp Source/LabVIEW CLI which consists of 3 projects.
+The rust code is held under the rust-proxy folder. It consists of a single binary crate and wix configuration for the installer.
 
-* LabVIEW CLI is the main project.
-* LabVIEW CLI WIX Setup contains the installer builder.
-* LabVIEWCLI_Unit_tests contains unit testing for the project.
+The usual `cargo test` and `cargo build` commands will work for development.
 
-The solution is currently maintained in VS 2015.
+To build the installer you must install cargo wix. This is done as part of the CI system though and isn't necessary for general development.
 
-Please include unit tests where appropriate for testing.
-
-### Distributing
-
-To update this distribution with changes you need to:
-
-* Build the solution for "Any CPU" and "x64"
-* Copy the 32 and 64 bit installers from the WIX project to Installation Support in the LabVIEW project using MoveInstallers.bat
-* Redistribute the LabVIEW project.
 
 ## LabVIEW
 

@@ -1,0 +1,21 @@
+[package]
+name = "g-cli"
+version = "3.0.0-alpha.1"
+authors = ["James McNally <james@wiresmithtech.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sysinfo = "0.23"
+log = "0.4"
+simplelog = "0.11"
+thiserror = "1.0"
+clap = "3.0"
+# minimal library - remove the features we aren't using.
+ureq = { version = "2.*", default-features = false }
+
+
+[target.'cfg(windows)'.dependencies] 
+winreg = "0.10"

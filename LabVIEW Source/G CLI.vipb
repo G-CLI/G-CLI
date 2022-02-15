@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2021-04-07 10:25:51" Creator="James McNally" Comments="" ID="f0c72419467683ccf87305388068e550">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2022-01-09 14:36:48" Creator="James McNally" Comments="" ID="811246aa91969fe7cc7ff13b839d782e">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
-    <Library_Version>2.4.0.2</Library_Version>
+    <Library_Version>3.0.0.2</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -214,7 +214,7 @@ NOTE: Since the Windows application installs to path administrator access is req
       <Built_LV_Version>false</Built_LV_Version>
       <Built_LV_Version_or_greater>true</Built_LV_Version_or_greater>
       <Windows_8>true</Windows_8>
-      <OS_32-Bit>true</OS_32-Bit>
+      <OS_32-Bit>false</OS_32-Bit>
       <OS_64-Bit>true</OS_64-Bit>
       <LV_32-Bit>true</LV_32-Bit>
       <LV_64-Bit>true</LV_64-Bit>
@@ -392,7 +392,7 @@ NOTE: Since the Windows application installs to path administrator access is req
         <Path>CLI Class\Write Line.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>A9057D5441BFB0334902BE1125F48748</GUID>
+      <GUID>F5D63AE54F720A4B6113DDE3CC932F0E</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
