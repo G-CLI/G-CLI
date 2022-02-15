@@ -41,6 +41,11 @@ fn main() {
     debug!("G CLI Arguments: TBC");
     debug!("Arguments passed to LabVIEW: {}", program_args.join(" "));
 
+    //give deprecated warning for no-launch
+    if config.no_launch {
+        error!("No launch was deprecated for v3.0.0")
+    }
+
     let app_listener = AppListener::new().unwrap();
 
     let mut process = launch_process(&config, &app_listener);

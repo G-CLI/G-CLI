@@ -19,6 +19,8 @@ pub struct Configuration {
     pub kill: Option<Duration>,
     /// allows LabVIEW to show dialogs by removing the unattended flag.
     pub allow_dialogs: bool,
+    /// Dont launch anything if this is true.
+    pub no_launch: bool,
 }
 
 impl Configuration {
@@ -60,6 +62,7 @@ impl Configuration {
                 None
             },
             allow_dialogs: args.is_present("allow dialogs"),
+            no_launch: args.is_present("no launch"),
         }
     }
 }
@@ -109,6 +112,11 @@ fn clap_app() -> clap::App<'static> {
             .long("allow-dialogs")
             .alias("allowDialogs")
             .help("Add this flag to allow LabVIEW to show user dialogs by removing the --unattended flag. Generally not recommended")
+        )
+        .arg(
+            Arg::new("no launch")
+            .long("no-launch")
+            .help("Don't launch your VI or application automatically. You must start it manually.")
         )
         .setting(AppSettings::TrailingVarArg)
         .arg(Arg::new("app to run").multiple_occurrences(true).required(true))
@@ -215,6 +223,35 @@ mod tests {
         let config = Configuration::from_arg_array(args);
 
         assert_eq!(config.allow_dialogs, true);
+    }
+
+    #[test]
+    fn no_launch_default() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.no_launch, false);
+    }
+
+    #[test]
+    fn no_launch_present() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--no-launch"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.no_launch, true);
     }
 
     #[test]
