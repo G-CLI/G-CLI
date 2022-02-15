@@ -58,13 +58,13 @@ impl AppListener {
     }
 
     /// Get a Connection
-    pub fn wait_on_app(&self, timeout_secs: f32) -> Result<AppConnection, CommsError> {
+    pub fn wait_on_app(&self, timeout: Duration) -> Result<AppConnection, CommsError> {
         // The standard networking library doesn't contain a timeout based TCP listener.
         // There maybe better methods than polling but this is where we can start.
 
         // timeout to ms then divided by the wait time.
-        let wait_time = 10;
-        let iterations = (timeout_secs * 1000f32) as u64 / wait_time;
+        let wait_time = Duration::from_millis(10);
+        let iterations = timeout.as_millis() / wait_time.as_millis();
         let mut count = 0;
         loop {
             match self.listener.accept() {
@@ -76,7 +76,7 @@ impl AppListener {
 
                     if count < iterations {
                         //retry
-                        sleep(Duration::from_millis(wait_time));
+                        sleep(wait_time);
                     } else {
                         return Err(CommsError::WaitOnConnectionTimeOut);
                     }

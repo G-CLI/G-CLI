@@ -14,7 +14,7 @@ pub struct Configuration {
     pub verbose: bool,
     pub lv_version_string: Option<String>,
     pub bitness: Bitness,
-    pub timeout_secs: Option<f32>,
+    pub connect_timeout: Duration,
     /// If kill is Some then the value is a timeout to kill LabVIEW if it isn't already killed.
     pub kill: Option<Duration>,
     /// allows LabVIEW to show dialogs by removing the unattended flag.
@@ -50,13 +50,20 @@ impl Configuration {
                 Bitness::X86
             },
             // todo: use clap validation to remove risk of panic in this unwrap.
-            timeout_secs: args
-                .value_of("timeout (ms)")
-                .map(|str| str.parse::<f32>().unwrap() / 1000.0), //to ms
+            // First cant panic due to default values. Second could panic if invalid.
+            connect_timeout: Duration::from_millis(
+                args.value_of("timeout (ms)")
+                    .unwrap()
+                    .parse()
+                    .expect("Timeout value cannot be parsed to an integer"),
+            ),
             kill: if args.is_present("kill") {
                 //todo handle unwraps. The first should not fail due to default. The second could.
                 Some(Duration::from_millis(
-                    args.value_of("kill timeout (ms)").unwrap().parse().unwrap(),
+                    args.value_of("kill timeout (ms)")
+                        .unwrap()
+                        .parse()
+                        .expect("Kill timeout cannot be parsed to an integer."),
                 ))
             } else {
                 None
@@ -92,8 +99,10 @@ fn clap_app() -> clap::App<'static> {
         .arg(
             Arg::new("timeout (ms)")
                 .takes_value(true)
-                .long("timeout")
-                .help("The time in ms to wait for the connection from LabVIEW"),
+                .long("connect-timeout")
+                .alias("timeout")
+                .help("The time in ms to wait for the connection from LabVIEW")
+                .default_value("60000"),
         )
         .arg(
             Arg::new("kill")
@@ -301,11 +310,11 @@ mod tests {
         ];
 
         let config = Configuration::from_arg_array(args);
-        assert_eq!(None, config.timeout_secs);
+        assert_eq!(Duration::from_millis(60_000), config.connect_timeout);
     }
 
     #[test]
-    fn timeout_set() {
+    fn timeout_set_old_name() {
         let args = vec![
             String::from("g-cli"),
             String::from("--timeout"),
@@ -316,7 +325,22 @@ mod tests {
         ];
 
         let config = Configuration::from_arg_array(args);
-        assert_eq!(Some(10.0), config.timeout_secs);
+        assert_eq!(Duration::from_millis(10000), config.connect_timeout);
+    }
+
+    #[test]
+    fn timeout_set() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--connect-timeout"),
+            String::from("10000"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+        assert_eq!(Duration::from_millis(10000), config.connect_timeout);
     }
 
     #[test]

@@ -50,9 +50,7 @@ fn main() {
 
     let mut process = launch_process(&config, &app_listener);
 
-    let mut connection = app_listener
-        .wait_on_app(config.timeout_secs.unwrap_or(60.0))
-        .unwrap();
+    let mut connection = app_listener.wait_on_app(config.connect_timeout).unwrap();
 
     process.set_connected().unwrap();
 
