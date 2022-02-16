@@ -57,7 +57,7 @@ impl MonitoredProcess {
                             if let Some(id) = check_process(&thread_path, pid) {
                                 current_pid = Some(id);
                             } else {
-                                debug!("The process appears to have closed down.");
+                                debug!("The process appears to have closed down");
                                 current_pid = None;
                             }
                         }
@@ -66,6 +66,7 @@ impl MonitoredProcess {
 
                 sleep(POLL_INTERVAL);
             }
+            debug!("Monitoring thread completed");
         });
 
         Ok(Self {
@@ -81,6 +82,7 @@ impl MonitoredProcess {
     pub fn stop(self, kill_process: Option<Duration>) {
         //todo: error handling
         self.stop_channel.send(kill_process).unwrap();
+        debug!("Waiting on monitoring thread to complete");
         self.monitor_thread.join().unwrap();
     }
 

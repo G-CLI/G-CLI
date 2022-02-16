@@ -10,6 +10,13 @@ use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn main() {
+    //wrap the app seperately so destructors are all called
+    //before exit.
+    let return_code = gcli();
+    std::process::exit(return_code);
+}
+
+fn gcli() -> i32 {
     let config = cli::Configuration::from_env();
     let program_args = cli::program_arguments(std::env::args());
     let cwd = std::env::current_dir().unwrap();
@@ -84,7 +91,8 @@ fn main() {
     }
 
     process.stop(config.kill);
-    std::process::exit(exit_code);
+    debug!("Ending G-CLI with exit code {}", exit_code);
+    return exit_code;
 }
 
 //todo: Error handling
