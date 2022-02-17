@@ -1,8 +1,9 @@
 use super::{error::LabVIEWError, Registration};
 use log::{debug, error, info};
 use std::collections::HashMap;
+use std::os::windows::process::CommandExt;
 use std::path::PathBuf;
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::sync::mpsc;
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration, Instant};
@@ -144,7 +145,24 @@ fn check_process(thread_path: &PathBuf, current_pid: Pid) -> Option<Pid> {
 /// Launches the LabVIEW process.
 /// Returns the process ID.
 fn launch(path: &PathBuf, args: &[String]) -> Result<u32, LabVIEWError> {
-    let launch_result = Command::new(path).args(args).spawn();
+    //map stdin, out and err to null to prevent holding this process open.
+
+    let mut command = Command::new(path);
+    command
+        .args(args)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
+
+    #[cfg(target_os = "windows")]
+    {
+        const DETACHED_PROCESS: u32 = 0x00000008;
+        const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
+        command.creation_flags(DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP);
+        debug!("Added flags");
+    }
+
+    let launch_result = command.spawn();
 
     match launch_result {
         Ok(output) => {
