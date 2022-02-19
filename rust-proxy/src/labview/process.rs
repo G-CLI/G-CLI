@@ -1,8 +1,7 @@
 use super::{error::LabVIEWError, Registration};
 use log::{debug, error, info};
 use std::collections::HashMap;
-use std::os::windows::process::CommandExt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::mpsc;
 use std::thread::{sleep, spawn, JoinHandle};
@@ -142,9 +141,34 @@ fn check_process(thread_path: &PathBuf, current_pid: Pid) -> Option<Pid> {
     return process_result;
 }
 
+#[cfg(target_os = "windows")]
+/// Disables inheritance on the inout pipe handles.
+fn disable_handle_inheritance() {
+    use windows::Win32::Foundation::{SetHandleInformation, HANDLE_FLAGS, HANDLE_FLAG_INHERIT};
+    use windows::Win32::System::Console::{
+        GetStdHandle, STD_ERROR_HANDLE, STD_INPUT_HANDLE, STD_OUTPUT_HANDLE,
+    };
+
+    unsafe {
+        let std_err = GetStdHandle(STD_ERROR_HANDLE);
+        let std_in = GetStdHandle(STD_INPUT_HANDLE);
+        let std_out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+        for handle in [std_err, std_in, std_out] {
+            SetHandleInformation(handle, HANDLE_FLAG_INHERIT.0, HANDLE_FLAGS(0));
+        }
+    }
+}
+
 /// Launches the LabVIEW process.
 /// Returns the process ID.
 fn launch(path: &PathBuf, args: &[String]) -> Result<u32, LabVIEWError> {
+    // disable the automatic inheritance of pipes under windows
+    // unfortunately std lib command enables this feature.
+    // so this function will do it for the i/o pipes.
+    #[cfg(target_os = "windows")]
+    disable_handle_inheritance();
+
     //map stdin, out and err to null to prevent holding this process open.
 
     let mut command = Command::new(path);
@@ -154,29 +178,19 @@ fn launch(path: &PathBuf, args: &[String]) -> Result<u32, LabVIEWError> {
         .stdout(Stdio::null())
         .stderr(Stdio::null());
 
-    #[cfg(target_os = "windows")]
-    {
-        const DETACHED_PROCESS: u32 = 0x00000008;
-        const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
-        command.creation_flags(DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP);
-        debug!("Added flags");
-    }
-
     let launch_result = command.spawn();
 
     match launch_result {
         Ok(output) => {
             debug!("Process launched with PID {}", output.id());
-            return Ok(output.id());
+            Ok(output.id())
         }
-        Err(e) => {
-            return Err(LabVIEWError::ProcessLaunchFailed(e));
-        }
+        Err(e) => Err(LabVIEWError::ProcessLaunchFailed(e)),
     }
 }
 
 /// Returns a list of all instances running of LabVIEW
-fn find_instances(path: &PathBuf) -> HashMap<Pid, String> {
+fn find_instances(path: &Path) -> HashMap<Pid, String> {
     let sys = System::new_all();
     let mut processes = HashMap::new();
 
