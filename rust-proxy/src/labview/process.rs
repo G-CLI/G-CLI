@@ -31,7 +31,7 @@ impl MonitoredProcess {
         //setup a channel for passing stop messages//
         let (stop_tx, stop_rx) = mpsc::channel::<Option<Duration>>();
 
-        let thread_path = path.clone();
+        let thread_path = path;
 
         let monitor_thread = spawn(move || {
             let mut current_pid = Some(Pid::from_u32(original_pid));
@@ -101,7 +101,7 @@ impl MonitoredProcess {
 
 /// If the kill option is set then it will give the process that duration to stop on it's own.
 /// After that timeout, it will use the kill command.
-fn kill_process_with_timeout(kill_option: Option<Duration>, thread_path: &PathBuf, pid: Pid) {
+fn kill_process_with_timeout(kill_option: Option<Duration>, thread_path: &Path, pid: Pid) {
     if let Some(timeout) = kill_option {
         info!(
             "Process Kill Requested - Monitoring for Timeout {}ms",
@@ -128,7 +128,7 @@ fn kill_process_with_timeout(kill_option: Option<Duration>, thread_path: &PathBu
 }
 
 /// Checks if the process is still running and returns the new PID if it is.
-fn check_process(thread_path: &PathBuf, current_pid: Pid) -> Option<Pid> {
+fn check_process(thread_path: &Path, current_pid: Pid) -> Option<Pid> {
     let matching_processes = find_instances(thread_path);
     let process_result = find_process(&matching_processes, current_pid);
     if let Some(id) = process_result {
@@ -138,7 +138,7 @@ fn check_process(thread_path: &PathBuf, current_pid: Pid) -> Option<Pid> {
     } else {
         info!("Process Lost");
     }
-    return process_result;
+    process_result
 }
 
 #[cfg(target_os = "windows")]
@@ -205,7 +205,7 @@ fn find_instances(path: &Path) -> HashMap<Pid, String> {
     for (pid, process) in sys.processes() {
         let process_path = process.exe();
         if process_path == path {
-            processes.insert(pid.clone(), process.name().to_owned());
+            processes.insert(*pid, process.name().to_owned());
         }
     }
 
@@ -233,11 +233,7 @@ fn find_process(processes: &HashMap<Pid, String>, original_id: Pid) -> Option<Pi
         Some(original_id)
     } else {
         // Returns None if no others, or some if they do.
-        processes
-            .keys()
-            .next()
-            //map to make it owned.
-            .map(|id| id.clone())
+        processes.keys().next().copied()
     }
 }
 
