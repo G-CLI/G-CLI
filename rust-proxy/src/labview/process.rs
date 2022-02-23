@@ -162,13 +162,7 @@ fn disable_handle_inheritance() {
 
 /// Launches the LabVIEW process.
 /// Returns the process ID.
-fn launch(path: &PathBuf, args: &[String]) -> Result<u32, LabVIEWError> {
-    // disable the automatic inheritance of pipes under windows
-    // unfortunately std lib command enables this feature.
-    // so this function will do it for the i/o pipes.
-    #[cfg(target_os = "windows")]
-    disable_handle_inheritance();
-
+fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
     //map stdin, out and err to null to prevent holding this process open.
 
     let mut command = Command::new(path);
@@ -177,6 +171,20 @@ fn launch(path: &PathBuf, args: &[String]) -> Result<u32, LabVIEWError> {
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null());
+
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        // disable the automatic inheritance of pipes under windows
+        // unfortunately std lib command enables this feature.
+        // so this function will do it for the i/o pipes.
+        disable_handle_inheritance();
+
+        // Detatch the process trees.
+        const DETACHED_PROCESS: u32 = 0x00000008;
+        const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
+        command.creation_flags(DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP);
+    }
 
     let launch_result = command.spawn();
 
