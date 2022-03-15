@@ -1,8 +1,8 @@
 use super::{error::LabVIEWError, Registration};
 use log::{debug, error, info};
 use std::collections::HashMap;
+use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
 use std::sync::mpsc;
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration, Instant};
@@ -141,28 +141,11 @@ fn check_process(thread_path: &Path, current_pid: Pid) -> Option<Pid> {
     process_result
 }
 
-#[cfg(target_os = "windows")]
-/// Disables inheritance on the inout pipe handles.
-fn disable_handle_inheritance() {
-    use windows::Win32::Foundation::{SetHandleInformation, HANDLE_FLAGS, HANDLE_FLAG_INHERIT};
-    use windows::Win32::System::Console::{
-        GetStdHandle, STD_ERROR_HANDLE, STD_INPUT_HANDLE, STD_OUTPUT_HANDLE,
-    };
-
-    unsafe {
-        let std_err = GetStdHandle(STD_ERROR_HANDLE);
-        let std_in = GetStdHandle(STD_INPUT_HANDLE);
-        let std_out = GetStdHandle(STD_OUTPUT_HANDLE);
-
-        for handle in [std_err, std_in, std_out] {
-            SetHandleInformation(handle, HANDLE_FLAG_INHERIT.0, HANDLE_FLAGS(0));
-        }
-    }
-}
-
 /// Launches the LabVIEW process.
 /// Returns the process ID.
+#[cfg(target_os = "unix")]
 fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
+    use std::process::{Command, Stdio};
     //map stdin, out and err to null to prevent holding this process open.
 
     let mut command = Command::new(path);
@@ -171,20 +154,6 @@ fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null());
-
-    #[cfg(target_os = "windows")]
-    {
-        use std::os::windows::process::CommandExt;
-        // disable the automatic inheritance of pipes under windows
-        // unfortunately std lib command enables this feature.
-        // so this function will do it for the i/o pipes.
-        disable_handle_inheritance();
-
-        // Detatch the process trees.
-        const DETACHED_PROCESS: u32 = 0x00000008;
-        const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
-        command.creation_flags(DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP);
-    }
 
     let launch_result = command.spawn();
 
@@ -195,6 +164,79 @@ fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
         }
         Err(e) => Err(LabVIEWError::ProcessLaunchFailed(e)),
     }
+}
+
+/// Launches the LabVIEW process.
+/// Returns the process ID.
+/// This is a specialised version using the windows API to avoid handle inheritance.
+#[cfg(target_os = "windows")]
+fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
+    use std::ptr;
+    use windows::Win32::{
+        Foundation::{CloseHandle, PWSTR},
+        System::Threading::{
+            CreateProcessW, CREATE_NEW_PROCESS_GROUP, CREATE_UNICODE_ENVIRONMENT, DETACHED_PROCESS,
+            PROCESS_INFORMATION, STARTUPINFOW,
+        },
+    };
+
+    let mut pi = PROCESS_INFORMATION::default();
+    let si = STARTUPINFOW::default();
+
+    //build out required command line.
+    let mut command = OsString::from("\"");
+    command.push(path.as_os_str().to_owned());
+    command.push("\" ");
+    for arg in args {
+        command.push("\"");
+        command.push(arg);
+        command.push("\" ");
+    }
+
+    debug!(
+        "Command to be executed {}",
+        &command.clone().into_string().unwrap()
+    );
+
+    //app name not required - build it into command line.
+    let lpcommandline = PWSTR(to_wide(&command).as_mut_ptr());
+    let dwcreationflags = CREATE_UNICODE_ENVIRONMENT | DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP;
+    let success = unsafe {
+        CreateProcessW(
+            PWSTR(ptr::null()),
+            lpcommandline,
+            ptr::null(),
+            ptr::null(),
+            false,
+            dwcreationflags,
+            ptr::null(),
+            PWSTR(ptr::null()),
+            &si,
+            &mut pi as *mut PROCESS_INFORMATION,
+        )
+    };
+    println!("Starting success: {:?}", success);
+
+    if success.as_bool() {
+        let pid = pi.dwProcessId;
+        unsafe {
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
+        }
+        debug!("Process launched with PID {}", pid);
+        Ok(pid)
+    } else {
+        Err(LabVIEWError::ProcessLaunchFailed(
+            std::io::Error::last_os_error(),
+        ))
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn to_wide(input: &OsStr) -> Vec<u16> {
+    use std::os::windows::ffi::OsStrExt;
+
+    input.encode_wide().chain(Some(0u16)).collect::<Vec<u16>>()
 }
 
 /// Returns a list of all instances running of LabVIEW
