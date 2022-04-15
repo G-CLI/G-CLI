@@ -199,12 +199,12 @@ fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
     );
 
     //app name not required - build it into command line.
-    let lpcommandline = PWSTR(to_wide(&command).as_mut_ptr());
+    let command_wide = to_wide(&command);
     let dwcreationflags = CREATE_UNICODE_ENVIRONMENT | DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP;
     let success = unsafe {
         CreateProcessW(
             PWSTR(ptr::null()),
-            lpcommandline,
+            PWSTR(command_wide.as_ptr()),
             ptr::null(),
             ptr::null(),
             false,
@@ -215,7 +215,6 @@ fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
             &mut pi as *mut PROCESS_INFORMATION,
         )
     };
-    println!("Starting success: {:?}", success);
 
     if success.as_bool() {
         let pid = pi.dwProcessId;

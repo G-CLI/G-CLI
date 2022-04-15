@@ -3,16 +3,16 @@
 $common_params='-v'
 $delay_between_tests=3
 $cli_cmd= $args[0] + 'g-cli'
-echo $cli_cmd
+echo $cli_cmd $common_params
 
-& "$cli_cmd" $common_params "Echo Parameters.vi" -- "Param 1" "Param 2" | find "Param 1	Param 2"
+& "$cli_cmd" -v "Echo Parameters.vi" -- "Param 1" "Param 2" | find "Param 1	Param 2"
 if(!$?) { 
   echo "Echo Parameters VI Failed"
   Exit 1
  }
 Start-Sleep -s $delay_between_tests
 
-& "$cli_cmd" $common_params "Echo CWD.vi" | find $pwd
+& "$cli_cmd" -v "Echo CWD.vi" | find $pwd
 if(!$?) { 
   echo "Echo CWD VI Failed"
   Exit 1
