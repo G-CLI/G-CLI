@@ -1,11 +1,14 @@
 mod cli;
 mod comms;
 mod labview;
+mod os_string_support;
 
 use comms::{AppListener, CommsError, MessageFromLV, MessageToLV};
 use labview::{detect_installations, installs::Bitness, launch_exe, launch_lv};
 use log::{debug, error, LevelFilter};
 use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
+
+use os_string_support::join_os_string;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
@@ -18,7 +21,7 @@ fn main() {
 
 fn gcli() -> i32 {
     let config = cli::Configuration::from_env();
-    let program_args = cli::program_arguments(std::env::args());
+    let program_args = cli::program_arguments(std::env::args_os());
     let cwd = std::env::current_dir().unwrap();
 
     let log_level = if config.verbose {
@@ -46,7 +49,10 @@ fn gcli() -> i32 {
     debug!("G CLI Started - Verbose Mode");
     debug!("Version {}", VERSION);
     debug!("G CLI Arguments: TBC");
-    debug!("Arguments passed to LabVIEW: {}", program_args.join(" "));
+    debug!(
+        "Arguments passed to LabVIEW: {:?}",
+        join_os_string(&program_args, " ")
+    );
 
     //give deprecated warning for no-launch
     if config.no_launch {

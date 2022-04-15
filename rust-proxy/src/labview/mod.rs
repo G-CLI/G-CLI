@@ -19,20 +19,22 @@ pub use install_detection_linux::*;
 pub use install_detection_win::*;
 
 use log::debug;
-use std::path::PathBuf;
+use std::{ffi::OsString, path::PathBuf};
 
 use port_discovery::Registration;
 
+use crate::os_string_support::join_os_string;
+
 use self::error::LabVIEWError;
 
-fn create_args(port: u16, allow_dialogs: bool) -> Vec<String> {
+fn create_args(port: u16, allow_dialogs: bool) -> Vec<OsString> {
     let mut args = vec![];
     if !allow_dialogs {
-        args.push(String::from("-unattended"));
+        args.push(OsString::from("-unattended"));
     }
 
-    args.push(String::from("--"));
-    args.push(format!("-p:{}", port));
+    args.push(OsString::from("--"));
+    args.push(OsString::from(format!("-p:{}", port)));
     return args;
 }
 
@@ -67,15 +69,15 @@ pub fn launch_lv(
     let registration = Registration::register(&vi, install, &port)?;
 
     //todo: unwrap could fail here, can we validate it?
-    let mut lv_args = vec![vi.to_str().unwrap().to_owned()];
+    let mut lv_args = vec![vi.as_os_str().to_owned()];
     lv_args.append(&mut create_args(port, allow_dialogs));
 
     let path = install.application_path();
 
     debug!(
-        "Launching: {} {}",
+        "Launching: {} {:?}",
         path.to_string_lossy(),
-        lv_args.join(" ")
+        join_os_string(&lv_args, " ")
     );
 
     process::MonitoredProcess::start(path, &lv_args, Some(registration))
@@ -91,9 +93,9 @@ mod tests {
         let args = create_args(1234, false);
 
         let expected = vec![
-            String::from("-unattended"),
-            String::from("--"),
-            String::from("-p:1234"),
+            OsString::from("-unattended"),
+            OsString::from("--"),
+            OsString::from("-p:1234"),
         ];
 
         assert_eq!(args, expected);
@@ -103,7 +105,7 @@ mod tests {
     fn test_args_no_dialog() {
         let args = create_args(1234, true);
 
-        let expected = vec![String::from("--"), String::from("-p:1234")];
+        let expected = vec![OsString::from("--"), OsString::from("-p:1234")];
 
         assert_eq!(args, expected);
     }

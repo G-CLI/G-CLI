@@ -1,6 +1,7 @@
 //! Contains the CLI API Defintion.
 //!
 use clap::{App, AppSettings, Arg, ArgMatches};
+use std::ffi::OsString;
 use std::iter::IntoIterator;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -132,7 +133,7 @@ fn clap_app() -> clap::App<'static> {
 }
 
 /// Extract the arguments that are going to be passed to the VI/exe we will run.
-pub fn program_arguments<T: IntoIterator<Item = String>>(main_args: T) -> Vec<String> {
+pub fn program_arguments<T: IntoIterator<Item = OsString>>(main_args: T) -> Vec<OsString> {
     let args_iter = main_args.into_iter();
 
     args_iter.skip_while(|s| s != "--").skip(1).collect()
@@ -408,12 +409,12 @@ mod tests {
     #[test]
     fn get_program_arguments() {
         let args = vec![
-            String::from("g-cli"),
-            String::from("test.vi"),
-            String::from("--"),
-            String::from("test1"),
-            String::from("-t"),
-            String::from("test2"),
+            OsString::from("g-cli"),
+            OsString::from("test.vi"),
+            OsString::from("--"),
+            OsString::from("test1"),
+            OsString::from("-t"),
+            OsString::from("test2"),
         ];
 
         let processed = program_arguments(args);
@@ -421,19 +422,19 @@ mod tests {
         assert_eq!(
             processed,
             vec![
-                String::from("test1"),
-                String::from("-t"),
-                String::from("test2")
+                OsString::from("test1"),
+                OsString::from("-t"),
+                OsString::from("test2")
             ]
         );
     }
 
     #[test]
     fn get_program_arguments_empty() {
-        let args = vec![String::from("g-cli"), String::from("test.vi")];
+        let args = vec![OsString::from("g-cli"), OsString::from("test.vi")];
 
         let processed = program_arguments(args);
 
-        assert_eq!(processed, Vec::<String>::new());
+        assert_eq!(processed, Vec::<OsString>::new());
     }
 }

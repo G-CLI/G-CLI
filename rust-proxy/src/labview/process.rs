@@ -1,7 +1,7 @@
 use super::{error::LabVIEWError, Registration};
 use log::{debug, error, info};
 use std::collections::HashMap;
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc;
 use std::thread::{sleep, spawn, JoinHandle};
@@ -23,7 +23,7 @@ pub struct MonitoredProcess {
 impl MonitoredProcess {
     pub fn start(
         path: PathBuf,
-        args: &[String],
+        args: &[OsString],
         port_registration: Option<Registration>,
     ) -> Result<Self, LabVIEWError> {
         let original_pid = launch(&path, args)?;
@@ -166,11 +166,103 @@ fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
     }
 }
 
+/// This module takes utility functions from the std library of rust
+/// that we lost by bypassing the standard process module.
+///
+/// These are reused here under the MIT license with modifications
+/// due to it being outside the std library.
+#[cfg(target_os = "windows")]
+mod process_utilities {
+    use std::ffi::OsString;
+    use std::os::windows::ffi::OsStrExt;
+    use std::result::Result;
+    use std::{ffi::OsStr, path::Path};
+
+    use crate::labview::error::LabVIEWError;
+
+    fn ensure_no_nuls<T: AsRef<OsStr>>(str: T) -> Result<T, LabVIEWError> {
+        if str.as_ref().encode_wide().any(|b| b == 0) {
+            Err(LabVIEWError::NullCharInArgument)
+        } else {
+            Ok(str)
+        }
+    }
+
+    // Produces a wide string *without terminating null*; returns an error if
+    // `prog` or any of the `args` contain a nul.
+    pub fn make_command_line(
+        prog: &Path,
+        args: &[OsString],
+    ) -> std::result::Result<Vec<u16>, LabVIEWError> {
+        // Encode the command and arguments in a command line string such
+        // that the spawned process may recover them using CommandLineToArgvW.
+        let mut cmd: Vec<u16> = Vec::new();
+
+        // CreateFileW has special handling for .bat and .cmd files, which means we
+        // need to add an extra pair of quotes surrounding the whole command line
+        // so they are properly passed on to the script.
+        // See issue #91991.
+        let is_batch_file = prog
+            .extension()
+            .map(|ext| ext.eq_ignore_ascii_case("cmd") || ext.eq_ignore_ascii_case("bat"))
+            .unwrap_or(false);
+        if is_batch_file {
+            cmd.push(b'"' as u16);
+        }
+
+        // Always quote the program name so CreateProcess doesn't interpret args as
+        // part of the name if the binary wasn't found first time.
+        append_arg(&mut cmd, prog.as_os_str())?;
+        for arg in args {
+            cmd.push(' ' as u16);
+            append_arg(&mut cmd, arg)?;
+        }
+        if is_batch_file {
+            cmd.push(b'"' as u16);
+        }
+        return Ok(cmd);
+
+        fn append_arg(cmd: &mut Vec<u16>, arg: &OsStr) -> std::result::Result<(), LabVIEWError> {
+            // If an argument has 0 characters then we need to quote it to ensure
+            // that it actually gets passed through on the command line or otherwise
+            // it will be dropped entirely when parsed on the other end.
+            ensure_no_nuls(arg)?;
+            let (quote, escape) = (true, true);
+            if quote {
+                cmd.push('"' as u16);
+            }
+
+            let mut backslashes: usize = 0;
+            for x in arg.encode_wide() {
+                if escape {
+                    if x == '\\' as u16 {
+                        backslashes += 1;
+                    } else {
+                        if x == '"' as u16 {
+                            // Add n+1 backslashes to total 2n+1 before internal '"'.
+                            cmd.extend((0..=backslashes).map(|_| '\\' as u16));
+                        }
+                        backslashes = 0;
+                    }
+                }
+                cmd.push(x);
+            }
+
+            if quote {
+                // Add n backslashes to total 2n before ending '"'.
+                cmd.extend((0..backslashes).map(|_| '\\' as u16));
+                cmd.push('"' as u16);
+            }
+            Ok(())
+        }
+    }
+}
+
 /// Launches the LabVIEW process.
 /// Returns the process ID.
 /// This is a specialised version using the windows API to avoid handle inheritance.
 #[cfg(target_os = "windows")]
-fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
+fn launch(path: &Path, args: &[OsString]) -> Result<u32, LabVIEWError> {
     use std::ptr;
     use windows::Win32::{
         Foundation::{CloseHandle, PWSTR},
@@ -184,27 +276,14 @@ fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
     let si = STARTUPINFOW::default();
 
     //build out required command line.
-    let mut command = OsString::from("\"");
-    command.push(path.as_os_str().to_owned());
-    command.push("\" ");
-    for arg in args {
-        command.push("\"");
-        command.push(arg);
-        command.push("\" ");
-    }
-
-    debug!(
-        "Command to be executed {}",
-        &command.clone().into_string().unwrap()
-    );
+    let command = process_utilities::make_command_line(path, args)?;
 
     //app name not required - build it into command line.
-    let command_wide = to_wide(&command);
     let dwcreationflags = CREATE_UNICODE_ENVIRONMENT | DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP;
     let success = unsafe {
         CreateProcessW(
             PWSTR(ptr::null()),
-            PWSTR(command_wide.as_ptr()),
+            PWSTR(command.as_ptr()),
             ptr::null(),
             ptr::null(),
             false,
@@ -229,13 +308,6 @@ fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
             std::io::Error::last_os_error(),
         ))
     }
-}
-
-#[cfg(target_os = "windows")]
-fn to_wide(input: &OsStr) -> Vec<u16> {
-    use std::os::windows::ffi::OsStrExt;
-
-    input.encode_wide().chain(Some(0u16)).collect::<Vec<u16>>()
 }
 
 /// Returns a list of all instances running of LabVIEW

@@ -5,6 +5,7 @@
 //!
 //!
 use std::convert::TryInto;
+use std::ffi::OsString;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::thread::sleep;
@@ -181,7 +182,7 @@ impl<'a> MessageFromLV<'a> {
 #[derive(Clone, PartialEq, Debug)]
 pub enum MessageToLV<'a> {
     /// Arguments sent as a tab delimited list
-    ARGS(&'a [String]),
+    ARGS(&'a [OsString]),
     /// Current working directory as a path.
     CCWD(PathBuf),
 }
@@ -197,7 +198,12 @@ impl<'a> MessageToLV<'a> {
         };
 
         let message_contents = match &self {
-            MessageToLV::ARGS(args) => args.join("\t"),
+            MessageToLV::ARGS(args) => args
+                .iter()
+                .map(|s| s.to_str())
+                .collect::<Option<Vec<&str>>>()
+                .unwrap()
+                .join("\t"),
             MessageToLV::CCWD(path) => path.to_str().unwrap().to_string(),
         };
 
@@ -223,7 +229,7 @@ mod tests {
     #[test]
     fn single_argument_message_to_buffer() {
         let mut buffer = [0u8; 9000];
-        let args = [String::from("Test1")];
+        let args = [OsString::from("Test1")];
 
         let message = MessageToLV::ARGS(&args);
 
@@ -238,7 +244,7 @@ mod tests {
     #[test]
     fn multiple_argument_message_to_buffer() {
         let mut buffer = [0u8; 9000];
-        let args = [String::from("Test1"), String::from("Test2")];
+        let args = [OsString::from("Test1"), OsString::from("Test2")];
 
         let message = MessageToLV::ARGS(&args);
 
