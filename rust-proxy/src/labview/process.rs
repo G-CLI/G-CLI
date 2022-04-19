@@ -143,7 +143,7 @@ fn check_process(thread_path: &Path, current_pid: Pid) -> Option<Pid> {
 
 /// Launches the LabVIEW process.
 /// Returns the process ID.
-#[cfg(target_os = "unix")]
+#[cfg(not(target_os = "windows"))]
 fn launch(path: &Path, args: &[String]) -> Result<u32, LabVIEWError> {
     use std::process::{Command, Stdio};
     //map stdin, out and err to null to prevent holding this process open.
