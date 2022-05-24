@@ -48,7 +48,14 @@ fn gcli() -> i32 {
 
     debug!("G CLI Started - Verbose Mode");
     debug!("Version {}", VERSION);
-    debug!("G CLI Arguments: TBC");
+    debug!(
+        "G CLI Arguments: {}",
+        std::env::args_os()
+            .map(|os_string| os_string.to_string_lossy().into_owned())
+            .map(|arg| format!("\"{arg}\"")) //wrap in quotes.
+            .collect::<Vec<String>>()
+            .join(" ")
+    );
     debug!(
         "Arguments passed to LabVIEW: {:?}",
         join_os_string(&program_args, " ")
