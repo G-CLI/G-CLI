@@ -8,6 +8,8 @@ use thiserror::Error;
 pub enum LabviewInstallError {
     #[error("Cannot Access Windows Registry for Detection: {1}")]
     RegKeyError(#[source] std::io::Error, String),
+    #[error("Error Scanning LabVIEW Install Directory. Dir: \"{1}\"")]
+    DirectoryError(#[source] std::io::Error, String),
 }
 
 /// Defines if LabVIEW is 64 bit or 32 bit.
@@ -37,6 +39,12 @@ pub struct LabviewInstall {
     pub bitness: Bitness,
 }
 
+#[cfg(target_os = "windows")]
+const LABVIEW_EXE: &'static str = "LabVIEW.exe";
+
+#[cfg(not(target_os = "windows"))]
+const LABVIEW_EXE: &'static str = "labview";
+
 impl LabviewInstall {
     pub fn major_version(&self) -> String {
         // For current versions this just means taking everything before the space.
@@ -49,14 +57,15 @@ impl LabviewInstall {
     /// This could be a future expansion point for things like <vi.lib>
     pub fn relative_path(&self, vi: &Path) -> PathBuf {
         let mut actual_path = self.path.clone();
-        actual_path.push("vi.lib\\G CLI Tools");
+        actual_path.push("vi.lib");
+        actual_path.push("G CLI Tools");
         actual_path.push(vi);
         return actual_path;
     }
 
     /// Get the LabVIEW application path.
     pub fn application_path(&self) -> PathBuf {
-        self.path.join("LabVIEW.exe")
+        self.path.join(LABVIEW_EXE)
     }
 }
 
@@ -220,6 +229,7 @@ mod test {
         assert_eq!(install.major_version(), "2011")
     }
 
+    #[cfg(target_os = "windows")]
     #[test]
     fn properly_cased_app_path() {
         let install = LabviewInstall {
@@ -234,6 +244,22 @@ mod test {
         )
     }
 
+    #[cfg(not(target_os = "windows"))]
+    #[test]
+    fn properly_cased_app_path() {
+        let install = LabviewInstall {
+            version: String::from("2011 SP1"),
+            bitness: Bitness::X64,
+            path: PathBuf::from("/LV2011_64"),
+        };
+
+        assert_eq!(
+            install.application_path(),
+            PathBuf::from("/LV2011_64/labview")
+        )
+    }
+
+    #[cfg(target_os = "windows")]
     #[test]
     fn get_install_relative_path() {
         let install = LabviewInstall {
@@ -247,6 +273,22 @@ mod test {
         assert_eq!(
             relative_path.to_str().unwrap(),
             "C:\\LV2011_64\\vi.lib\\G CLI Tools\\test.vi"
+        );
+    }
+    #[cfg(not(target_os = "windows"))]
+    #[test]
+    fn get_install_relative_path() {
+        let install = LabviewInstall {
+            version: String::from("2011 SP1"),
+            bitness: Bitness::X64,
+            path: PathBuf::from("/LV2011_64/"),
+        };
+
+        let relative_path = install.relative_path(&PathBuf::from("test.vi"));
+
+        assert_eq!(
+            relative_path.to_str().unwrap(),
+            "/LV2011_64/vi.lib/G CLI Tools/test.vi"
         );
     }
 }
