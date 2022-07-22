@@ -18,6 +18,7 @@ ureq = { version = "2.*", default-features = false }
 regex = "1.5"
 lazy_static = "1.4"
 eyre = "0.6"
+ctrlc = "3.2"
 
 
 [target.'cfg(windows)'.dependencies] 

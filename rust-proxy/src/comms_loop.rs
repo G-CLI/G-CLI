@@ -1,6 +1,9 @@
 use std::sync::{atomic::AtomicBool, mpsc::Sender, Arc};
 use std::time::Duration;
 
+use log::debug;
+use windows::Win32::Foundation::ERROR_CANNOT_BREAK_OPLOCK;
+
 use crate::{
     action_loop::ActionMessage,
     comms::{AppConnection, CommsError, MessageFromLV},
@@ -34,31 +37,20 @@ pub fn start(mut connection: AppConnection, tx: Sender<ActionMessage>, stop: Arc
                     Err(CommsError::ReadLvMessageError(e))
                         if e.kind() == std::io::ErrorKind::WouldBlock =>
                     {
-                        //no new messages - check stop.
-                        if stop.load(std::sync::atomic::Ordering::Relaxed) {
-                            break;
-                        }
                         //Limit the loop rate.
                         std::thread::sleep(EMPTY_PAUSE);
                     }
                     Err(error) => {
-                        match error {
-                            //Expected if we have recieved no new errors.
-                            CommsError::ReadLvMessageError(e)
-                                if e.kind() == std::io::ErrorKind::WouldBlock => {}
-
-                            _ => {
-                                tx.send(ActionMessage::CommsError(Box::new(error)))
-                                    .expect("Cant send to action loop.");
-                            }
-                        }
-
-                        if stop.load(std::sync::atomic::Ordering::Relaxed) {
-                            break;
-                        }
+                        tx.send(ActionMessage::CommsError(Box::new(error)))
+                            .expect("Cant send to action loop.");
                     }
                 }
+                //check stop outside of match to prevent an stream of messages holding the program open.
+                if stop.load(std::sync::atomic::Ordering::Relaxed) {
+                    break;
+                }
             }
+            debug!("Comms reader stopped.");
         })
         .expect("Could not start comms thread");
 }

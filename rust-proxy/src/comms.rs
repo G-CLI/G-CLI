@@ -108,7 +108,7 @@ pub struct AppConnection {
 impl AppConnection {
     pub fn new(stream: TcpStream) -> Result<Self, CommsError> {
         stream
-            .set_nonblocking(false)
+            .set_nonblocking(true)
             .map_err(|e| CommsError::ErrorCreatingConnection(e))?;
         stream
             .set_nodelay(true)

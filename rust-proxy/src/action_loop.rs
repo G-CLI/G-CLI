@@ -1,5 +1,5 @@
 use crate::comms::MessageFromLV;
-use log::error;
+use log::{debug, error};
 use std::error::Error;
 use std::sync::atomic::AtomicBool;
 use std::sync::mpsc::{Receiver, Sender};
@@ -8,6 +8,14 @@ use std::sync::{mpsc, Arc};
 pub enum ActionMessage {
     LVMessage(MessageFromLV),
     CommsError(Box<dyn Error + Send + Sync>),
+    CtrlC,
+}
+
+pub enum ExitAction {
+    /// Exit cleanly with the provided error code.
+    CleanExit(i32),
+    /// Kill signals have been recieved. Stop and kill all processes ASAP.
+    ForcedExit,
 }
 
 pub struct ActionLoop {
@@ -37,10 +45,10 @@ impl ActionLoop {
     ///
     /// Stops running once all writers drop their sender.
     /// returns an exit code to use.
-    pub fn run(self: Self) -> i32 {
+    pub fn run(self: Self) -> ExitAction {
         let Self { tx, rx, stopped } = self;
 
-        let mut exit_code = 0;
+        let mut exit_action = ExitAction::CleanExit(0);
 
         //Force drop our own unused sender.
         drop(tx);
@@ -54,18 +62,24 @@ impl ActionLoop {
                     print!("{}", string);
                 }
                 ActionMessage::LVMessage(MessageFromLV::EXIT(code)) => {
-                    exit_code = code;
+                    exit_action = ExitAction::CleanExit(code);
                     set_stop(&stopped);
                 }
                 ActionMessage::CommsError(e) => {
-                    exit_code = -1;
+                    exit_action = ExitAction::CleanExit(-1);
                     set_stop(&stopped);
-                    error!("{:?}", e);
+                    error!("Comms Error: {}", e);
+                }
+                ActionMessage::CtrlC => {
+                    set_stop(&stopped);
+                    debug!("Recieved Ctrl+C Kill Signal");
+                    exit_action = ExitAction::ForcedExit;
                 }
             }
         }
 
-        return exit_code;
+        debug!("Action loop stopped.");
+        exit_action
     }
 }
 

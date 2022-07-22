@@ -4,16 +4,18 @@ mod comms;
 mod comms_loop;
 mod labview;
 mod os_string_support;
+mod signal_loop;
 
 use comms::{AppListener, MessageToLV};
 use eyre::{eyre, Report, Result, WrapErr};
 use labview::{detect_installations, installs::Bitness, launch_exe, launch_lv};
 use log::{debug, error, LevelFilter};
 use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
+use std::time::Duration;
 
 use os_string_support::join_os_string;
 
-use crate::action_loop::ActionLoop;
+use crate::action_loop::{ActionLoop, ExitAction};
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
@@ -74,18 +76,32 @@ fn gcli() -> Result<i32> {
     // 1. Action Loop - Recieves messages from inputs and takes appropriate actions.
     //                  Also writes a stop signal for other threads.
     // 2. Comms Loop - Recieve incoming comms from LabVIEW.
+    // 3. CtrlC Handler
 
     let action_loop = ActionLoop::new();
+
     comms_loop::start(
         connection,
         action_loop.get_channel(),
         action_loop.get_stop_signal(),
     );
-    let exit_code = action_loop.run();
 
-    process.stop(config.kill);
-    debug!("Ending G-CLI with exit code {}", exit_code);
-    Ok(exit_code)
+    signal_loop::start(action_loop.get_channel(), action_loop.get_stop_signal())?;
+
+    let exit = action_loop.run();
+
+    match exit {
+        ExitAction::CleanExit(code) => {
+            process.stop(config.kill);
+            debug!("Ending G-CLI with exit code {}", code);
+            Ok(code)
+        }
+        ExitAction::ForcedExit => {
+            debug!("Recieved a signal to kill the process. Exiting and killing LabVIEW process");
+            process.stop(Some(Duration::from_millis(1)));
+            Ok(-1)
+        }
+    }
 }
 
 fn configure_logger(verbose: bool) -> Result<(), Report> {
