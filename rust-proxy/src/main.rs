@@ -10,7 +10,7 @@ use comms::{AppListener, MessageToLV};
 use eyre::{eyre, Report, Result, WrapErr};
 use labview::{detect_installations, installs::Bitness, launch_exe, launch_lv};
 use log::{debug, error, LevelFilter};
-use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
+use simplelog::{format_description, ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
 use std::time::Duration;
 
 use os_string_support::join_os_string;
@@ -115,7 +115,7 @@ fn configure_logger(verbose: bool) -> Result<(), Report> {
         .add_filter_allow_str("g_cli")
         .set_thread_level(LevelFilter::Off)
         .set_target_level(LevelFilter::Off)
-        .set_time_format_str("%H:%M:%S%.3f");
+        .set_time_format_custom(format_description!("[hour]:[minute]:[second].[subsecond]"));
     TermLogger::init(
         log_level,
         logger_config.build(),
