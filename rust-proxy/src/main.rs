@@ -93,7 +93,7 @@ fn gcli() -> Result<i32> {
     match exit {
         ExitAction::CleanExit(code) => {
             process.stop(config.kill);
-            debug!("Ending G-CLI with exit code {}", code);
+            debug!("Exiting G-CLI with exit code {}", code);
             Ok(code)
         }
         ExitAction::ForcedExit => {

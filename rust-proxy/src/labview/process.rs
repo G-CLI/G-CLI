@@ -49,7 +49,9 @@ impl MonitoredProcess {
                             if let Some(pid) = current_pid {
                                 kill_process_with_timeout(kill, &thread_path, pid)
                             };
-                            debug!("Stopping monitoring due to stop command from application");
+                            debug!(
+                                "Stopping LabVIEW monitoring due to stop command from application"
+                            );
                             break;
                         }
 
@@ -59,7 +61,7 @@ impl MonitoredProcess {
                                 if let Some(id) = check_process(&thread_path, pid) {
                                     current_pid = Some(id);
                                 } else {
-                                    debug!("The process appears to have closed down");
+                                    debug!("The LabVIEW process appears to have closed down");
                                     current_pid = None;
                                 }
                             }
@@ -107,7 +109,7 @@ impl MonitoredProcess {
 fn kill_process_with_timeout(kill_option: Option<Duration>, thread_path: &Path, pid: Pid) {
     if let Some(timeout) = kill_option {
         info!(
-            "Process Kill Requested - Monitoring for Timeout {}ms",
+            "Forcing LabVIEW to terminate in {}ms if it doesn't close.",
             timeout.as_millis()
         );
         let end_time = Instant::now() + timeout;
@@ -330,12 +332,12 @@ fn find_instances(path: &Path) -> HashMap<Pid, String> {
 
 /// Kill the process by PID
 fn kill(pid: Pid) {
-    info!("Killing process {}", pid);
+    info!("Killing LabVIEW process ({})", pid);
     let sys = System::new_all();
     if let Some(process) = sys.process(pid) {
         process.kill();
     } else {
-        error!("Process ID Not Found to Kill");
+        info!("Process ID Not Found to kill. It may have already closed.");
     }
 }
 
