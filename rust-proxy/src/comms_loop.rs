@@ -2,7 +2,6 @@ use std::sync::{atomic::AtomicBool, mpsc::Sender, Arc};
 use std::time::Duration;
 
 use log::debug;
-use windows::Win32::Foundation::ERROR_CANNOT_BREAK_OPLOCK;
 
 use crate::{
     action_loop::ActionMessage,
