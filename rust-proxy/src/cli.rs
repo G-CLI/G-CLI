@@ -1,6 +1,6 @@
 //! Contains the CLI API Defintion.
 //!
-use clap::{App, AppSettings, Arg, ArgMatches};
+use clap::{AppSettings, Arg, ArgMatches, Command};
 use std::ffi::OsString;
 use std::iter::IntoIterator;
 use std::path::PathBuf;
@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use crate::labview::installs::Bitness;
 
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub struct Configuration {
     pub to_launch: PathBuf,
@@ -76,8 +76,8 @@ impl Configuration {
 }
 
 /// Returns a fully configured clap app with all the parameters configured.
-fn clap_app() -> clap::App<'static> {
-    App::new("G CLI")
+fn clap_app() -> clap::Command<'static> {
+    Command::new("G CLI")
         .version(VERSION)
         .about("Connects a LabVIEW app to the command line.")
         .arg(
@@ -128,7 +128,7 @@ fn clap_app() -> clap::App<'static> {
             .long("no-launch")
             .help("Don't launch your VI or application automatically. You must start it manually.")
         )
-        .setting(AppSettings::TrailingVarArg)
+        .trailing_var_arg(true)
         .arg(Arg::new("app to run").multiple_occurrences(true).required(true))
 }
 

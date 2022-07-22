@@ -115,7 +115,9 @@ fn configure_logger(verbose: bool) -> Result<(), Report> {
         .add_filter_allow_str("g_cli")
         .set_thread_level(LevelFilter::Off)
         .set_target_level(LevelFilter::Off)
-        .set_time_format_custom(format_description!("[hour]:[minute]:[second].[subsecond]"));
+        .set_time_format_custom(format_description!(
+            "[hour]:[minute]:[second].[subsecond digits:3]"
+        ));
     TermLogger::init(
         log_level,
         logger_config.build(),
