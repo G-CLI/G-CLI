@@ -25,6 +25,8 @@ pub enum CommsError {
     ExitCodeStringNotParsable(#[source] std::num::ParseIntError, String),
     #[error("Message ID is invalid \"{0}\"")]
     UnknownMessageId(String),
+    #[error("Unexpected EOF Error: LabVIEW has probably closed the connection")]
+    ConnectionClosedEof(#[source] std::io::Error),
     #[error("IO Error While Listening for LabVIEW to Connect")]
     WaitOnConnectionIoError(#[source] std::io::Error),
     #[error("IO Error When Reading Messages From LabVIEW")]
@@ -129,30 +131,38 @@ impl AppConnection {
     pub fn read(&mut self) -> Result<MessageFromLV, CommsError> {
         self.stream
             .read_exact(&mut self.buffer[0..4])
-            .map_err(|e| CommsError::ReadLvMessageError(e))?;
+            .map_err(wrap_read_error)?;
 
         let size = u32::from_be_bytes(self.buffer[0..4].try_into().unwrap());
 
         self.stream
             .read_exact(&mut self.buffer[4..(size as usize) + 4])
-            .map_err(|e| CommsError::ReadLvMessageError(e))?;
+            .map_err(wrap_read_error)?;
 
         MessageFromLV::from_buffer(&self.buffer)
     }
 }
 
+fn wrap_read_error(e: std::io::Error) -> CommsError {
+    if e.kind() == std::io::ErrorKind::UnexpectedEof {
+        CommsError::ConnectionClosedEof(e)
+    } else {
+        CommsError::ReadLvMessageError(e)
+    }
+}
+
 /// All messages we can recieve from LabVIEW.
 #[derive(Clone, PartialEq, Debug)]
-pub enum MessageFromLV<'a> {
+pub enum MessageFromLV {
     /// Exit with the exit code provided.
     EXIT(i32),
     /// Output to the command line.
-    OUTP(&'a str),
+    OUTP(String),
 }
 
-impl<'a> MessageFromLV<'a> {
+impl MessageFromLV {
     /// Get the message from the buffer.
-    pub fn from_buffer(buffer: &'a [u8; 9000]) -> Result<MessageFromLV<'a>, CommsError> {
+    pub fn from_buffer(buffer: &[u8; 9000]) -> Result<MessageFromLV, CommsError> {
         let length = i32::from_be_bytes(
             buffer[0..4]
                 .try_into()
@@ -172,7 +182,7 @@ impl<'a> MessageFromLV<'a> {
                 })?;
                 Ok(MessageFromLV::EXIT(code))
             }
-            "OUTP" => Ok(MessageFromLV::OUTP(contents)),
+            "OUTP" => Ok(MessageFromLV::OUTP(contents.to_string())),
             _ => Err(CommsError::UnknownMessageId(String::from(id))),
         }
     }
@@ -329,6 +339,9 @@ mod tests {
 
         let message = MessageFromLV::from_buffer(&buffer);
 
-        assert_eq!(message.unwrap(), MessageFromLV::OUTP("Hello, World\n"));
+        assert_eq!(
+            message.unwrap(),
+            MessageFromLV::OUTP(String::from("Hello, World\n"))
+        );
     }
 }

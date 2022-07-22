@@ -1,15 +1,19 @@
+mod action_loop;
 mod cli;
 mod comms;
+mod comms_loop;
 mod labview;
 mod os_string_support;
 
-use comms::{AppListener, CommsError, MessageFromLV, MessageToLV};
+use comms::{AppListener, MessageToLV};
 use eyre::{eyre, Report, Result, WrapErr};
 use labview::{detect_installations, installs::Bitness, launch_exe, launch_lv};
 use log::{debug, error, LevelFilter};
 use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
 
 use os_string_support::join_os_string;
+
+use crate::action_loop::ActionLoop;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
@@ -66,33 +70,22 @@ fn gcli() -> Result<i32> {
         .write(MessageToLV::CCWD(cwd))
         .wrap_err("Failed to write CWD to LabVIEW application")?;
 
-    let mut exit_code = 0;
+    // At this point we spawn multiple tasks as processes:
+    // 1. Action Loop - Recieves messages from inputs and takes appropriate actions.
+    //                  Also writes a stop signal for other threads.
+    // 2. Comms Loop - Recieve incoming comms from LabVIEW.
 
-    loop {
-        match connection.read() {
-            Ok(MessageFromLV::OUTP(string)) => {
-                print!("{}", string);
-            }
-            Ok(MessageFromLV::EXIT(code)) => {
-                debug!("Recieved exit code {}", code);
-                exit_code = code;
-                break;
-            }
-            Err(CommsError::ReadLvMessageError(e))
-                if e.kind() == std::io::ErrorKind::WouldBlock =>
-            {
-                //no new messages
-            }
-            Err(e) => {
-                error!("{:?}", e);
-                break;
-            }
-        }
-    }
+    let action_loop = ActionLoop::new();
+    comms_loop::start(
+        connection,
+        action_loop.get_channel(),
+        action_loop.get_stop_signal(),
+    );
+    let exit_code = action_loop.run();
 
     process.stop(config.kill);
     debug!("Ending G-CLI with exit code {}", exit_code);
-    return Ok(exit_code);
+    Ok(exit_code)
 }
 
 fn configure_logger(verbose: bool) -> Result<(), Report> {

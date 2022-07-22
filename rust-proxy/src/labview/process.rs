@@ -4,11 +4,11 @@ use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc;
-use std::thread::{sleep, spawn, JoinHandle};
+use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, Instant};
 use sysinfo::{Pid, PidExt, ProcessExt, System, SystemExt};
 
-const POLL_INTERVAL: Duration = Duration::from_millis(100);
+const POLL_INTERVAL: Duration = Duration::from_millis(1000);
 
 // TODO: There are definately improvements to the process monitoring. For example reusing the system item.
 
@@ -33,41 +33,44 @@ impl MonitoredProcess {
 
         let thread_path = path;
 
-        let monitor_thread = spawn(move || {
-            let mut current_pid = Some(Pid::from_u32(original_pid));
+        let monitor_thread = std::thread::Builder::new()
+            .name("Process Monitor".to_string())
+            .spawn(move || {
+                let mut current_pid = Some(Pid::from_u32(original_pid));
 
-            // Loop until we recieve a stop. The only way to leave is when the main thread has sent stop.
-            // if we stop independently we get a race condition where the main loop will send stop to an invalid channel.
-            // Wrap the PID in the option where None means we have lost the process to gate on the kill process.
-            loop {
-                match stop_rx.try_recv() {
-                    Ok(kill) => {
-                        //stop requested. See if we have been asked to kill the process.
-                        //disable if we aren't tracking a process though.
-                        if let Some(pid) = current_pid {
-                            kill_process_with_timeout(kill, &thread_path, pid)
-                        };
-                        debug!("Stopping monitoring due to stop command from application");
-                        break;
-                    }
+                // Loop until we recieve a stop. The only way to leave is when the main thread has sent stop.
+                // if we stop independently we get a race condition where the main loop will send stop to an invalid channel.
+                // Wrap the PID in the option where None means we have lost the process to gate on the kill process.
+                loop {
+                    match stop_rx.try_recv() {
+                        Ok(kill) => {
+                            //stop requested. See if we have been asked to kill the process.
+                            //disable if we aren't tracking a process though.
+                            if let Some(pid) = current_pid {
+                                kill_process_with_timeout(kill, &thread_path, pid)
+                            };
+                            debug!("Stopping monitoring due to stop command from application");
+                            break;
+                        }
 
-                    Err(_) => {
-                        //no stop command. Validate processes if we are still monitoring a pid.
-                        if let Some(pid) = current_pid {
-                            if let Some(id) = check_process(&thread_path, pid) {
-                                current_pid = Some(id);
-                            } else {
-                                debug!("The process appears to have closed down");
-                                current_pid = None;
+                        Err(_) => {
+                            //no stop command. Validate processes if we are still monitoring a pid.
+                            if let Some(pid) = current_pid {
+                                if let Some(id) = check_process(&thread_path, pid) {
+                                    current_pid = Some(id);
+                                } else {
+                                    debug!("The process appears to have closed down");
+                                    current_pid = None;
+                                }
                             }
                         }
                     }
-                }
 
-                sleep(POLL_INTERVAL);
-            }
-            debug!("Monitoring thread completed");
-        });
+                    sleep(POLL_INTERVAL);
+                }
+                debug!("Monitoring thread completed");
+            })
+            .expect("Could not create monitor thread.");
 
         Ok(Self {
             stop_channel: stop_tx,
