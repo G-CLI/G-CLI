@@ -27,6 +27,8 @@ pub enum CommsError {
     UnknownMessageId(String),
     #[error("Unexpected EOF Error: LabVIEW has probably closed the connection")]
     ConnectionClosedEof(#[source] std::io::Error),
+    #[error("Connection Aborted: LabVIEW has probably crashed or failed to properly close the connection")]
+    ConenctionClosedAborted(#[source] std::io::Error),
     #[error("IO Error While Listening for LabVIEW to Connect")]
     WaitOnConnectionIoError(#[source] std::io::Error),
     #[error("IO Error When Reading Messages From LabVIEW")]
@@ -144,10 +146,10 @@ impl AppConnection {
 }
 
 fn wrap_read_error(e: std::io::Error) -> CommsError {
-    if e.kind() == std::io::ErrorKind::UnexpectedEof {
-        CommsError::ConnectionClosedEof(e)
-    } else {
-        CommsError::ReadLvMessageError(e)
+    match e.kind() {
+        std::io::ErrorKind::UnexpectedEof => CommsError::ConnectionClosedEof(e),
+        std::io::ErrorKind::ConnectionAborted => CommsError::ConenctionClosedAborted(e),
+        _ => CommsError::ReadLvMessageError(e),
     }
 }
 
