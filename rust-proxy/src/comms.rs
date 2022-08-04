@@ -51,8 +51,8 @@ pub struct AppListener {
 impl AppListener {
     /// Create the listener and reserve the port.
     pub fn new() -> Result<Self, CommsError> {
-        let listener =
-            TcpListener::bind("127.0.0.1:0").map_err(|e| CommsError::ErrorCreatingListener(e))?;
+        let listener = TcpListener::bind("127.0.0.1:5000")
+            .map_err(|e| CommsError::ErrorCreatingListener(e))?;
 
         // So we can implement a timeout later.
         listener
@@ -160,6 +160,8 @@ pub enum MessageFromLV {
     EXIT(i32),
     /// Output to the command line.
     OUTP(String),
+    /// Output to Standard Error
+    SERR(String),
 }
 
 impl MessageFromLV {
@@ -185,6 +187,7 @@ impl MessageFromLV {
                 Ok(MessageFromLV::EXIT(code))
             }
             "OUTP" => Ok(MessageFromLV::OUTP(contents.to_string())),
+            "SERR" => Ok(MessageFromLV::SERR(contents.to_string())),
             _ => Err(CommsError::UnknownMessageId(String::from(id))),
         }
     }
@@ -344,6 +347,22 @@ mod tests {
         assert_eq!(
             message.unwrap(),
             MessageFromLV::OUTP(String::from("Hello, World\n"))
+        );
+    }
+
+    #[test]
+    fn error_output_from_buffer() {
+        let mut buffer = [0u8; 9000];
+
+        let input = "\x00\x00\x00\x11SERRHello, World\n";
+
+        buffer[0..input.len()].copy_from_slice(input.as_bytes());
+
+        let message = MessageFromLV::from_buffer(&buffer);
+
+        assert_eq!(
+            message.unwrap(),
+            MessageFromLV::SERR(String::from("Hello, World\n"))
         );
     }
 }

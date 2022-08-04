@@ -61,6 +61,9 @@ impl ActionLoop {
                 ActionMessage::LVMessage(MessageFromLV::OUTP(string)) => {
                     print!("{}", string);
                 }
+                ActionMessage::LVMessage(MessageFromLV::SERR(string)) => {
+                    eprint!("{}", string);
+                }
                 ActionMessage::LVMessage(MessageFromLV::EXIT(code)) => {
                     exit_action = ExitAction::CleanExit(code);
                     set_stop(&stopped);

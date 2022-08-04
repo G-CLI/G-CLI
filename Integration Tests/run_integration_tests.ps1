@@ -26,6 +26,16 @@ if(!$?) {
  }
 Start-Sleep -s $delay_between_tests
 
+$output = & "$cli_cmd" $common_params "Generate Large Error.vi" -- 10000 2>&1
+$errors = $output | ?{$_.gettype().Name -eq "ErrorRecord"}
+Write-Host "STDERR"
+Write-Host $errors
+if(!$errors) { 
+  echo "Nothing in Error Output"
+  Exit 1
+ }
+Start-Sleep -s $delay_between_tests
+
 
 & "$cli_cmd" $common_params "Quit With Parameter Code.vi" -- 10000
 echo "Exit Code $LastExitCode"
