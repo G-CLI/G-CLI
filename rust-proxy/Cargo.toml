@@ -1,6 +1,6 @@
 [package]
 name = "g-cli"
-version = "3.0.0-alpha.2"
+version = "3.0.0-beta.1"
 authors = ["James McNally <james@wiresmithtech.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
