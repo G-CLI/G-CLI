@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2022-08-03 17:13:01" Creator="James McNally" Comments="" ID="e45582cd2a68f3bd491e162e2034e66a">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2022-08-04 16:45:25" Creator="James McNally" Comments="" ID="d454d6c45b0d270a42050f74a8a6d4f7">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
-    <Library_Version>3.0.0.3</Library_Version>
+    <Library_Version>3.0.0.4</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -147,6 +147,12 @@ NOTE: Since the Windows application installs to path administrator access is req
       </Destination_Overrides>
       <Destination_Overrides>
         <Path>Tools/QuitLabVIEW.vi</Path>
+        <Destination>0</Destination>
+        <Additional_Destination>true</Additional_Destination>
+        <Additional_Destination_Index>0</Additional_Destination_Index>
+      </Destination_Overrides>
+      <Destination_Overrides>
+        <Path>Tools/ClearCache.vi</Path>
         <Destination>0</Destination>
         <Additional_Destination>true</Additional_Destination>
         <Additional_Destination_Index>0</Additional_Destination_Index>
@@ -392,7 +398,7 @@ NOTE: Since the Windows application installs to path administrator access is req
         <Path>CLI Class\Write Line.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>1E53A824179308B86AC14BCCE756ECEE</GUID>
+      <GUID>E6A0878ABB72330BD464F5ACB5992F3D</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
