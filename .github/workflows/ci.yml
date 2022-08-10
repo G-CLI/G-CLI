@@ -184,7 +184,7 @@ jobs:
           path: Integration Tests
     
       - name: LabVIEW Dependencies
-        run: labview-cli -v "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\vipcApply.vi" -- "${{github.workspace}}\LabVIEW Source\Dependencies\G CLI Dev Dependencies.vipc" 2011
+        run: g-cli -v "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\vipcApply.vi" -- "${{github.workspace}}\LabVIEW Source\Dependencies\G CLI Dev Dependencies.vipc" 2011
      
      #unit tests disabled due to lack of reporting support in lv2011. To be enabled when min LV version is bumped.
      # - name: Unit Tests
