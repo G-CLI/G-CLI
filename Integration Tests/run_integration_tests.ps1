@@ -1,4 +1,5 @@
-
+#Making this explicit as it is important to how the script runs.
+$ErrorActionPreference = 'stop'
 
 $common_params='-v'
 $delay_between_tests=3
@@ -26,6 +27,7 @@ if(!$?) {
  }
 Start-Sleep -s $delay_between_tests
 
+$ErrorActionPreference = 'continue'
 $output = & "$cli_cmd" $common_params "Generate Large Error.vi" -- 10000 2>&1
 $errors = $output | ?{$_.gettype().Name -eq "ErrorRecord"}
 Write-Host "STDERR"
@@ -35,6 +37,7 @@ if(!$errors) {
   Exit 1
  }
 Start-Sleep -s $delay_between_tests
+$ErrorActionPreference = 'stop'
 
 
 & "$cli_cmd" $common_params "Quit With Parameter Code.vi" -- 10000
