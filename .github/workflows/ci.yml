@@ -197,7 +197,7 @@ jobs:
      #note the direct call as the build fails if the files are loaded.
       - name: LabVIEW Build
         run: |
-          labview-cli -v --kill "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\setVipBuildNumber.vi" -- "LabVIEW Source\G CLI.vipb" "${{github.workspace}}" ${{github.run_number}}
+          g-cli -v --kill "C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\setVipBuildNumber.vi" -- "LabVIEW Source\G CLI.vipb" "${{github.workspace}}" ${{github.run_number}}
           New-Item -ItemType Directory -Force -Path Builds
           cmd /c """C:\Program Files `(x86`)\National Instruments\LabVIEW 2011\LabVIEW.exe"" ""C:\Users\Public\Documents\National Instruments\LV-CLI Common Steps\steps\vipbBuild-nocli.vi"" -- ""LabVIEW Source\G CLI.vipb"" Builds  ""${{github.workspace}}"""
       
