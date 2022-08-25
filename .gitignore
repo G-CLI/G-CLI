@@ -1,6 +1,7 @@
 # Libraries
 *.lvlibp
 !rust-proxy/test_data/*.lvlibp
+!/Integration Tests/*.lvlibp
 *.llb
 
 # Shared objects (inc. Windows DLLs)
