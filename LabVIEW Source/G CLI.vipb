@@ -1,4 +1,4 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2022-08-10 10:50:16" Creator="James McNally" Comments="" ID="e19901dccd898d4cf3460d41ec52a407">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2022-08-25 11:56:53" Creator="James McNally" Comments="" ID="d330d31a1b1329a792a1bbe44af0a5c7">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
     <Library_Version>3.0.0.4</Library_Version>
@@ -45,6 +45,7 @@ NOTE: Since the Windows application installs to path administrator access is req
 * Exit With Error Code.vi now writes to standard error.
 * Non-verbose mode does not add anything to the output you generate.
 * ClearCache tool included.
+* Support for launching VIs in packed libraries/LLBs.
 
 Deprecations/Breaking Changes
 ===================
@@ -409,7 +410,7 @@ Deprecations/Breaking Changes
         <Path>CLI Class\Write Line.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>9977F8AA7D124A45079F18CE6F1F1FAD</GUID>
+      <GUID>2DB3B25A65696D03BF6AE7B308F1507C</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>

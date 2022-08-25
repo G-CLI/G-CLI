@@ -20,6 +20,13 @@ if(!$?) {
  }
 Start-Sleep -s $delay_between_tests
 
+& "$cli_cmd" -v "Tests.lvlibp/Echo CWD.vi" | find $pwd
+if(!$?) { 
+  echo "Echo CWD VI Failed"
+  Exit 1
+ }
+Start-Sleep -s $delay_between_tests
+
 & "$cli_cmd" $common_params "Generate Large Output.vi" -- 10000
 if(!$?) { 
   echo "Large Output VI Failed"

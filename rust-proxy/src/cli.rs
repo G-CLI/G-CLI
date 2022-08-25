@@ -1,6 +1,6 @@
 //! Contains the CLI API Defintion.
 //!
-use clap::{AppSettings, Arg, ArgMatches, Command};
+use clap::{Arg, ArgMatches, Command};
 use std::ffi::OsString;
 use std::iter::IntoIterator;
 use std::path::PathBuf;

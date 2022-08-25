@@ -1,6 +1,6 @@
 use super::error::LabVIEWError;
 use super::installs::LabviewInstall;
-use std::fs::canonicalize;
+use super::vi_location::VILocation;
 use std::path::Path;
 use ureq::get;
 
@@ -10,14 +10,11 @@ pub struct Registration {
 
 impl Registration {
     pub fn register(
-        vi_path: &Path,
+        vi: &VILocation,
         install: &LabviewInstall,
         port: &u16,
     ) -> Result<Registration, LabVIEWError> {
-        //Need to make this a full path here.
-        let full_path = canonicalize(vi_path).unwrap();
-
-        let id = generate_registration_id(&full_path, install);
+        let id = generate_registration_id(&vi.canonical_vi_path(), install);
         // The response we want the discovery service to give. I'm not sure if these need further escaping but so far it works
         let base_response = "HTTP/1.0 200 OK%0D%0AServer: Service Locator%0D%0APragma: no-cache%0D%0AConnection: Close%0D%0AContent-Length: 12%0D%0AContent-Type: text/html%0D%0A%0D%0A";
         let url = format!(

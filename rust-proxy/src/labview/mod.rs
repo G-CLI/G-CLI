@@ -7,6 +7,7 @@ pub mod error;
 pub mod installs;
 mod port_discovery;
 pub mod process;
+mod vi_location;
 
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 pub mod install_detection_linux;
@@ -21,9 +22,9 @@ pub use install_detection_win::*;
 use log::debug;
 use std::{ffi::OsString, path::PathBuf};
 
-use port_discovery::Registration;
-
 use crate::os_string_support::join_os_string;
+use port_discovery::Registration;
+use vi_location::VILocation;
 
 use self::error::LabVIEWError;
 
@@ -48,16 +49,16 @@ pub fn launch_lv(
     port: u16,
     allow_dialogs: bool,
 ) -> Result<process::MonitoredProcess, LabVIEWError> {
-    let mut vi = launch_vi.clone();
+    let mut vi = VILocation::new(&launch_vi);
 
     if !vi.exists() {
         debug!(
             "Looks like VI \"{}\" doesn't exist - Checking in vi.lib/G CLI Tools instead.",
-            vi.to_string_lossy()
+            vi
         );
-        let relative_path = install.relative_path(&vi);
+        let relative_path = install.relative_path(vi.container());
         if relative_path.exists() {
-            vi = relative_path;
+            vi = VILocation::new(&install.relative_path(&launch_vi));
         }
     }
 
@@ -69,7 +70,7 @@ pub fn launch_lv(
     let registration = Registration::register(&vi, install, &port)?;
 
     //todo: unwrap could fail here, can we validate it?
-    let mut lv_args = vec![vi.as_os_str().to_owned()];
+    let mut lv_args = vec![vi.labview_parameter()];
     lv_args.append(&mut create_args(port, allow_dialogs));
 
     let path = install.application_path();
