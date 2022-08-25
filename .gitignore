@@ -1,5 +1,6 @@
 # Libraries
 *.lvlibp
+!rust-proxy/test_data/*.lvlibp
 *.llb
 
 # Shared objects (inc. Windows DLLs)
@@ -15,10 +16,7 @@
 # Metadata
 *.aliases
 *.lvlps
-/C Sharp Source/LabVIEW CLI/bin
-/C Sharp Source/LabVIEW CLI/obj
 /Installer
-/C Sharp Source/LabVIEW CLI Setup/LabVIEW CLI Setup/Express
 
 # Rust Files
 /rust-proxy/target
