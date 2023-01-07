@@ -9,7 +9,7 @@ To install download the VI package (or search it on the tools network) and run. 
 
 The Windows application has to be added to the system path so it will cause a UAC prompt in Windows.
 
-The VI package is built for LabVIEW 2011 and later. The Windows application has been tested on Windows 7 & 10 but should work on other versions of Windows.
+The VI package is built for LabVIEW 2015 and later. The Windows application has been tested on Windows 7 & 10 but should work on other versions of Windows.
 
 ## Launching
 

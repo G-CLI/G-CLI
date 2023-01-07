@@ -22,7 +22,7 @@ To build the installer you must install cargo wix. This is done as part of the C
 
 ## LabVIEW
 
-The LabVIEW library is maintained in LabVIEW 2011 32-bit and the source is in the LabVIEW Source subfolder.
+The LabVIEW library is maintained in LabVIEW 2015 32-bit and the source is in the LabVIEW Source subfolder.
 
 VI Tester is used for unit testing in LabVIEW>
 
