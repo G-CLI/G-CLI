@@ -1,8 +1,13 @@
 # Libraries
+
 *.lvlibp
 !rust-proxy/test_data/*.lvlibp
 !/Integration Tests/*.lvlibp
 *.llb
+
+#Outputs
+Builds
+lv-results.xml
 
 # Shared objects (inc. Windows DLLs)
 *.dll
