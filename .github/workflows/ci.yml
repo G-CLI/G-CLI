@@ -189,15 +189,7 @@ jobs:
      
       - name: Unit Tests
         run: g-cli -v --lv-ver 2015 viTester -- "LabVIEW Source\G CLI.lvproj" -xml "lv-results.xml"
-        
-      - name: Report
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: VI Tests
-          path: lv-results.xml
-          reporter: java-junit
-          fail-on-error: true
+
      
       - name: Integration Tests
         working-directory: "Integration Tests"
