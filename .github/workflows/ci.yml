@@ -199,9 +199,10 @@ jobs:
           g-cli -v --kill "build\setVipBuildNumber.vi" -- "LabVIEW Source\G CLI.vipb" "${{github.workspace}}" ${{github.run_number}}
           New-Item -ItemType Directory -Force -Path Builds
           cmd /c """C:\Program Files `(x86`)\National Instruments\LabVIEW 2015\LabVIEW.exe"" ""build\vipbBuild-nocli.vi"" -- ""LabVIEW Source\G CLI.vipb"" Builds  ""${{github.workspace}}"""
-          
-      - name: Install vip file
-        run: g-cli vipInstall -- 2015 32 Builds/wiresmith_technology_lib_g_cli-3.0.0.${{github.run_number}}.vip
+      
+     # Will have to leave this as manual. this doesn't work as it requires local admin rights.  And can't run while g-cli is running.    
+     # - name: Install vip file
+     #   run: g-cli vipInstall -- 2015 32 Builds/wiresmith_technology_lib_g_cli-3.0.0.${{github.run_number}}.vip
           
       - name: Integration Tests
         working-directory: "Integration Tests"
