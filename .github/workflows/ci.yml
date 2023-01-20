@@ -191,9 +191,7 @@ jobs:
         run: g-cli -v --lv-ver 2015 viTester -- "LabVIEW Source\G CLI.lvproj" -xml "lv-results.xml"
 
      
-      - name: Integration Tests
-        working-directory: "Integration Tests"
-        run: .\run_integration_tests.ps1 .\
+
      
      #note the direct call as the build fails if the files are loaded.
       - name: LabVIEW Build
@@ -201,6 +199,13 @@ jobs:
           g-cli -v --kill "build\setVipBuildNumber.vi" -- "LabVIEW Source\G CLI.vipb" "${{github.workspace}}" ${{github.run_number}}
           New-Item -ItemType Directory -Force -Path Builds
           cmd /c """C:\Program Files `(x86`)\National Instruments\LabVIEW 2015\LabVIEW.exe"" ""build\vipbBuild-nocli.vi"" -- ""LabVIEW Source\G CLI.vipb"" Builds  ""${{github.workspace}}"""
+          
+      - name: Install vip file
+        run: g-cli vipInstall -- 2015 32 Builds/wiresmith_technology_lib_g_cli-3.0.0.${{github.run_number}}.vip
+          
+      - name: Integration Tests
+        working-directory: "Integration Tests"
+        run: .\run_integration_tests.ps1 .\
       
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.3.1
