@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2023-01-19 21:12:39" Creator="James McNally" Comments="" ID="0b8217eec6cf3f6786314ca02f64291c">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2023-01-20 15:52:50" Creator="James McNally" Comments="" ID="5a8b597f22284c93525e4cbf9f72de11">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
-    <Library_Version>3.0.0.13</Library_Version>
+    <Library_Version>3.0.0.14</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -412,7 +412,7 @@ Deprecations/Breaking Changes
         <Path>CLI Class\Write Line.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>0D220EDBA15B2DADBB6C35EDCB9C61C5</GUID>
+      <GUID>940879E938384B343A83C9EFF1708467</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>

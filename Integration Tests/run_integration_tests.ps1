@@ -6,21 +6,21 @@ $delay_between_tests=3
 $cli_cmd= $args[0] + 'g-cli'
 echo $cli_cmd $common_params
 
-& "$cli_cmd" -v "Echo Parameters.vi" -- "Param 1" "Param 2" | find "Param 1	Param 2"
+& "$cli_cmd" -v "Echo Parameters.vi" -- "Param 1" "Param 2" | find /V "Param 1	Param 2"
 if(!$?) { 
   echo "Echo Parameters VI Failed"
   Exit 1
  }
 Start-Sleep -s $delay_between_tests
 
-& "$cli_cmd" -v "Echo CWD.vi" | find $pwd
+& "$cli_cmd" -v "Echo CWD.vi" | find /V $pwd
 if(!$?) { 
   echo "Echo CWD VI Failed"
   Exit 1
  }
 Start-Sleep -s $delay_between_tests
 
-& "$cli_cmd" -v "Tests.lvlibp/Echo CWD.vi" | find $pwd
+& "$cli_cmd" -v "Tests.lvlibp/Echo CWD.vi" | find /V $pwd
 if(!$?) { 
   echo "Echo CWD VI Failed"
   Exit 1
@@ -65,12 +65,28 @@ if ($LastExitCode -ne -10000) {
 Start-Sleep -s $delay_between_tests
 
 
-& "$cli_cmd" $common_params ".\exes\Echo CLI.exe" -- "Param 1" "Param 2" | find "Param 1	Param 2"
+& "$cli_cmd" $common_params "Check Unicode Response.vi" -- "HÜll°" | find /V """HÜll°"""
+if(!$?) { 
+  echo "Non-Ascii in Input/Output Failed"
+  Exit 1
+ }
+Start-Sleep -s $delay_between_tests
+# Not ready for this.
+#& "$cli_cmd" $common_params "Check Unicode Response HÜll°.vi" -- "HÜll°" | find /V """HÜll°"""
+#if(!$?) { 
+#  echo "Non-Ascii in Name Failed"
+#  Exit 1
+# }
+#Start-Sleep -s $delay_between_tests
+
+
+& "$cli_cmd" $common_params ".\exes\Echo CLI.exe" -- "Param 1" "Param 2" | find /V "Param 1	Param 2"
 if(!$?) { 
   echo "Echo Parameters EXE Failed"
   Exit 1
  }
 Start-Sleep -s $delay_between_tests 
+
 
 
 & "$cli_cmd" $common_params ".\exes\Echo CWD.exe" | find $pwd

@@ -27,6 +27,7 @@
 		<Item Name="Tools" Type="Folder">
 			<Item Name="Echo.vi" Type="VI" URL="../Tools/Echo.vi"/>
 			<Item Name="QuitLabVIEW.vi" Type="VI" URL="../Tools/QuitLabVIEW.vi"/>
+			<Item Name="ClearCache.vi" Type="VI" URL="../Tools/ClearCache.vi"/>
 		</Item>
 		<Item Name="Tests" Type="Folder">
 			<Item Name="Options Parsing Tests.lvclass" Type="LVClass" URL="../Tests/Options Parsing Tests/Options Parsing Tests.lvclass"/>
