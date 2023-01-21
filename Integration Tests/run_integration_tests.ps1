@@ -65,14 +65,14 @@ if ($LastExitCode -ne -10000) {
 Start-Sleep -s $delay_between_tests
 
 
-& "$cli_cmd" $common_params "Check Unicode Response.vi" -- "HÜll°" | find /V """HÜll°"""
+& "$cli_cmd" $common_params "Check Unicode Response.vi" -- "HÃœllÂ°" | find /V """HÃœllÂ°"""
 if(!$?) { 
   echo "Non-Ascii in Input/Output Failed"
   Exit 1
  }
 Start-Sleep -s $delay_between_tests
 # Not ready for this.
-#& "$cli_cmd" $common_params "Check Unicode Response HÜll°.vi" -- "HÜll°" | find /V """HÜll°"""
+#& "$cli_cmd" $common_params "Check Unicode Response HÃœllÂ°.vi" -- "HÃœllÂ°" | find /V """HÃœllÂ°"""
 #if(!$?) { 
 #  echo "Non-Ascii in Name Failed"
 #  Exit 1
