@@ -184,7 +184,7 @@ jobs:
           path: rust-proxy/target/release
           
       - name: Setup Just
-      - uses: extractions/setup-just@v1
+        uses: extractions/setup-just@v1
     
       - name: LabVIEW Dependencies
         run: g-cli --lv-ver 2015 vipcApply -- "LabVIEW Source\Dependencies\G CLI Dev Dependencies.vipc" 2015 32
