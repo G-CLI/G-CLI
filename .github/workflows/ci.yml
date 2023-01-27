@@ -189,6 +189,9 @@ jobs:
      
       - name: Unit Tests
         run: g-cli -v --lv-ver 2015 viTester -- "LabVIEW Source\G CLI.lvproj" -xml "lv-results.xml"
+        
+      - name: Integration Tests
+        run: just integration-test
 
      
 
@@ -200,13 +203,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path Builds
           cmd /c """C:\Program Files `(x86`)\National Instruments\LabVIEW 2015\LabVIEW.exe"" ""build\vipbBuild-nocli.vi"" -- ""LabVIEW Source\G CLI.vipb"" Builds  ""${{github.workspace}}"""
       
-     # Will have to leave this as manual. this doesn't work as it requires local admin rights.  And can't run while g-cli is running.    
-     # - name: Install vip file
-     #   run: g-cli vipInstall -- 2015 32 Builds/wiresmith_technology_lib_g_cli-3.0.0.${{github.run_number}}.vip
-          
-      - name: Integration Tests
-        working-directory: "Integration Tests"
-        run: .\run_integration_tests.ps1 .\
+
       
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.3.1

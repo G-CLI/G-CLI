@@ -29,6 +29,7 @@ Start-Sleep -s $delay_between_tests
 #  Exit 1
 # }
 #Start-Sleep -s $delay_between_tests
+echo "WARNING: Skipping packed library test due to build issue"
 
 echo "Large Output"
 & "$cli_cmd" $common_params "Integration Tests/Generate Large Output.vi" -- 10000
