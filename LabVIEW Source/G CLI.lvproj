@@ -39,8 +39,8 @@
 		</Item>
 		<Item Name="Option Parser.lvlib" Type="Library" URL="../Argument Parser/Option Parser.lvlib"/>
 		<Item Name="CLI.lvclass" Type="LVClass" URL="../CLI Class/CLI.lvclass"/>
-		<Item Name="Integration Tests.lvlib" Type="Library" URL="../../Integration Tests/Integration Tests.lvlib"/>
-		<Item Name="TestLib.lvlib" Type="Library" URL="../../Integration Tests/TestLib.lvlib"/>
+		<Item Name="Integration Tests.lvlib" Type="Library" URL="../integration-tests/Integration Tests.lvlib"/>
+		<Item Name="TestLib.lvlib" Type="Library" URL="../integration-tests/TestLib.lvlib"/>
 		<Item Name="Dependencies" Type="Dependencies">
 			<Item Name="vi.lib" Type="Folder">
 				<Item Name="BuildHelpPath.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/BuildHelpPath.vi"/>
@@ -389,19 +389,20 @@
 				<Property Name="Bld_excludeInlineSubVIs" Type="Bool">true</Property>
 				<Property Name="Bld_excludeLibraryItems" Type="Bool">true</Property>
 				<Property Name="Bld_excludePolymorphicVIs" Type="Bool">true</Property>
-				<Property Name="Bld_localDestDir" Type="Path">../Integration Tests/exes</Property>
+				<Property Name="Bld_localDestDir" Type="Path">../Builds</Property>
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{0E74C042-9798-4311-86EF-20E5E3D06DCE}</Property>
+				<Property Name="Bld_version.build" Type="Int">2</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">Echo CWD.exe</Property>
-				<Property Name="Destination[0].path" Type="Path">../Integration Tests/exes/Echo CWD.exe</Property>
+				<Property Name="Destination[0].path" Type="Path">../Builds/Echo CWD.exe</Property>
 				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
 				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
-				<Property Name="Destination[1].path" Type="Path">../Integration Tests/exes/data</Property>
+				<Property Name="Destination[1].path" Type="Path">../Builds/data</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
-				<Property Name="Source[0].itemID" Type="Str">{57F6346A-C83D-4A7E-BA3D-28BC843DB0D8}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{EC913425-D37F-40DC-A3C3-101CFE798C4F}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
 				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integration Tests.lvlib/Echo CWD.vi</Property>
@@ -427,19 +428,20 @@
 				<Property Name="Bld_excludeInlineSubVIs" Type="Bool">true</Property>
 				<Property Name="Bld_excludeLibraryItems" Type="Bool">true</Property>
 				<Property Name="Bld_excludePolymorphicVIs" Type="Bool">true</Property>
-				<Property Name="Bld_localDestDir" Type="Path">../Integration Tests/exes</Property>
+				<Property Name="Bld_localDestDir" Type="Path">../Builds</Property>
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{93131568-F627-49AD-BDDF-D47D4102A4DE}</Property>
+				<Property Name="Bld_version.build" Type="Int">2</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">Echo CLI.exe</Property>
-				<Property Name="Destination[0].path" Type="Path">../Integration Tests/exes/Echo CLI.exe</Property>
+				<Property Name="Destination[0].path" Type="Path">../Builds/Echo CLI.exe</Property>
 				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
 				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
-				<Property Name="Destination[1].path" Type="Path">../Integration Tests/exes/data</Property>
+				<Property Name="Destination[1].path" Type="Path">../Builds/data</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
-				<Property Name="Source[0].itemID" Type="Str">{57F6346A-C83D-4A7E-BA3D-28BC843DB0D8}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{EC913425-D37F-40DC-A3C3-101CFE798C4F}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
 				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integration Tests.lvlib/Echo CWD.vi</Property>
@@ -468,19 +470,20 @@
 				<Property Name="Bld_excludeInlineSubVIs" Type="Bool">true</Property>
 				<Property Name="Bld_excludeLibraryItems" Type="Bool">true</Property>
 				<Property Name="Bld_excludePolymorphicVIs" Type="Bool">true</Property>
-				<Property Name="Bld_localDestDir" Type="Path">../Integration Tests/exes</Property>
+				<Property Name="Bld_localDestDir" Type="Path">../Builds</Property>
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{C65C192F-A1FD-42E0-A71D-AD0664B8BC7C}</Property>
+				<Property Name="Bld_version.build" Type="Int">2</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">LargeOutput.exe</Property>
-				<Property Name="Destination[0].path" Type="Path">../Integration Tests/exes/LargeOutput.exe</Property>
+				<Property Name="Destination[0].path" Type="Path">../Builds/LargeOutput.exe</Property>
 				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
 				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
-				<Property Name="Destination[1].path" Type="Path">../Integration Tests/exes/data</Property>
+				<Property Name="Destination[1].path" Type="Path">../Builds/data</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
-				<Property Name="Source[0].itemID" Type="Str">{57F6346A-C83D-4A7E-BA3D-28BC843DB0D8}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{EC913425-D37F-40DC-A3C3-101CFE798C4F}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
 				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integration Tests.lvlib/Echo CWD.vi</Property>
@@ -512,19 +515,20 @@
 				<Property Name="Bld_excludeInlineSubVIs" Type="Bool">true</Property>
 				<Property Name="Bld_excludeLibraryItems" Type="Bool">true</Property>
 				<Property Name="Bld_excludePolymorphicVIs" Type="Bool">true</Property>
-				<Property Name="Bld_localDestDir" Type="Path">../Integration Tests/exes</Property>
+				<Property Name="Bld_localDestDir" Type="Path">../Builds</Property>
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{8439AB50-81E3-4A3A-8FEE-A623A2B2525E}</Property>
+				<Property Name="Bld_version.build" Type="Int">2</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">QuitWithCode.exe</Property>
-				<Property Name="Destination[0].path" Type="Path">../Integration Tests/exes/QuitWithCode.exe</Property>
+				<Property Name="Destination[0].path" Type="Path">../Builds/QuitWithCode.exe</Property>
 				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
 				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
-				<Property Name="Destination[1].path" Type="Path">../Integration Tests/exes/data</Property>
+				<Property Name="Destination[1].path" Type="Path">../Builds/data</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
-				<Property Name="Source[0].itemID" Type="Str">{57F6346A-C83D-4A7E-BA3D-28BC843DB0D8}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{EC913425-D37F-40DC-A3C3-101CFE798C4F}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
 				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integration Tests.lvlib/Echo CWD.vi</Property>
@@ -553,20 +557,20 @@
 				<Property Name="Bld_buildCacheID" Type="Str">{8983A3B4-EFDE-4F72-BB91-AD62754455E7}</Property>
 				<Property Name="Bld_buildSpecName" Type="Str">Test In Packed Library</Property>
 				<Property Name="Bld_excludeInlineSubVIs" Type="Bool">true</Property>
-				<Property Name="Bld_localDestDir" Type="Path">../Integration Tests</Property>
+				<Property Name="Bld_localDestDir" Type="Path">../Builds</Property>
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{BE5AAD23-2852-4E10-8342-A83569163CB8}</Property>
-				<Property Name="Bld_version.build" Type="Int">3</Property>
+				<Property Name="Bld_version.build" Type="Int">5</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">Tests.lvlibp</Property>
-				<Property Name="Destination[0].path" Type="Path">../Integration Tests/Tests.lvlibp</Property>
+				<Property Name="Destination[0].path" Type="Path">../Builds/Tests.lvlibp</Property>
 				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
 				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
-				<Property Name="Destination[1].path" Type="Path">../Integration Tests</Property>
+				<Property Name="Destination[1].path" Type="Path">../Builds</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
 				<Property Name="PackedLib_callersAdapt" Type="Bool">true</Property>
-				<Property Name="Source[0].itemID" Type="Str">{EC072B6D-E367-423F-9381-169A193ABE01}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{EC913425-D37F-40DC-A3C3-101CFE798C4F}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
 				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integration Tests.lvlib</Property>
