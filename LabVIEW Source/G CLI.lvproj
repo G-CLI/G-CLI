@@ -31,6 +31,7 @@
 		</Item>
 		<Item Name="Tests" Type="Folder">
 			<Item Name="Options Parsing Tests.lvclass" Type="LVClass" URL="../Tests/Options Parsing Tests/Options Parsing Tests.lvclass"/>
+			<Item Name="Service Name Tests.lvclass" Type="LVClass" URL="../Tests/Service Name Tests/Service Name Tests.lvclass"/>
 			<Item Name="Working Path Expansion Tests.lvclass" Type="LVClass" URL="../Tests/Working Path Expansion Tests/Working Path Expansion Tests.lvclass"/>
 		</Item>
 		<Item Name="Examples" Type="Folder">
@@ -393,7 +394,7 @@
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{0E74C042-9798-4311-86EF-20E5E3D06DCE}</Property>
-				<Property Name="Bld_version.build" Type="Int">2</Property>
+				<Property Name="Bld_version.build" Type="Int">3</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">Echo CWD.exe</Property>
 				<Property Name="Destination[0].path" Type="Path">../Builds/Echo CWD.exe</Property>
@@ -432,7 +433,7 @@
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{93131568-F627-49AD-BDDF-D47D4102A4DE}</Property>
-				<Property Name="Bld_version.build" Type="Int">2</Property>
+				<Property Name="Bld_version.build" Type="Int">3</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">Echo CLI.exe</Property>
 				<Property Name="Destination[0].path" Type="Path">../Builds/Echo CLI.exe</Property>
@@ -474,7 +475,7 @@
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{C65C192F-A1FD-42E0-A71D-AD0664B8BC7C}</Property>
-				<Property Name="Bld_version.build" Type="Int">2</Property>
+				<Property Name="Bld_version.build" Type="Int">3</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">LargeOutput.exe</Property>
 				<Property Name="Destination[0].path" Type="Path">../Builds/LargeOutput.exe</Property>
@@ -519,7 +520,7 @@
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{8439AB50-81E3-4A3A-8FEE-A623A2B2525E}</Property>
-				<Property Name="Bld_version.build" Type="Int">2</Property>
+				<Property Name="Bld_version.build" Type="Int">3</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">QuitWithCode.exe</Property>
 				<Property Name="Destination[0].path" Type="Path">../Builds/QuitWithCode.exe</Property>
@@ -560,7 +561,7 @@
 				<Property Name="Bld_localDestDir" Type="Path">../Builds</Property>
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{BE5AAD23-2852-4E10-8342-A83569163CB8}</Property>
-				<Property Name="Bld_version.build" Type="Int">5</Property>
+				<Property Name="Bld_version.build" Type="Int">6</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">Tests.lvlibp</Property>
 				<Property Name="Destination[0].path" Type="Path">../Builds/Tests.lvlibp</Property>
