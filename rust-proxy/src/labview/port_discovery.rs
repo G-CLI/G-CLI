@@ -57,7 +57,7 @@ fn generate_registration_id(vi_path: &Path, install: &LabviewInstall) -> String 
     let path_string = vi_path.to_string_lossy();
     // The extra [..] is required on the pattern array to get the format correct.
     let reg_name = path_string.replace(&[':', '\\', '.', ' ', '/', '?'][..], "");
-	let reg_name = reg_name.replace(|c: char| !c.is_ascii(), "_");
+    let reg_name = reg_name.replace(|c: char| !c.is_ascii(), "_");
 
     format!(
         "cli/{}/{}/{}",
@@ -127,8 +127,8 @@ mod tests {
 
         assert_eq!(String::from("cli/2011/64bit/CmyVIvi"), result);
     }
-	
-	#[test]
+
+    #[test]
     fn test_replaces_non_ascii_chars_with_underscore() {
         let install = LabviewInstall {
             path: PathBuf::from("C:\\LabVIEW.exe"),
@@ -140,5 +140,4 @@ mod tests {
 
         assert_eq!(String::from("cli/2011/32bit/Cmy_VI_vi"), result);
     }
-
 }
