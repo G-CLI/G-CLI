@@ -40,16 +40,27 @@ impl Configuration {
     }
 
     /// Private function to extract the common functionality of moving args to config.
+    ///
+    /// Panics if args fail validation. Need proper error handling here.
     fn args_to_configuration(args: ArgMatches) -> Self {
+        let bitness = if args.is_present("arch") {
+            match args.value_of("arch") {
+                Some("64") => Bitness::X64,
+                Some("32") => Bitness::X86,
+                Some(other) => panic!("Unknown value for arch: \"{other}\""),
+                None => unreachable!(),
+            }
+        } else if args.is_present("64bit") {
+            Bitness::X64
+        } else {
+            Bitness::X86
+        };
+
         Self {
             to_launch: PathBuf::from(args.value_of("app to run").unwrap().to_owned()),
             verbose: args.is_present("verbose mode"),
             lv_version_string: args.value_of("labview version").map(|str| str.to_owned()),
-            bitness: if args.is_present("64bit") {
-                Bitness::X64
-            } else {
-                Bitness::X86
-            },
+            bitness,
             // todo: use clap validation to remove risk of panic in this unwrap.
             // First cant panic due to default values. Second could panic if invalid.
             connect_timeout: Duration::from_millis(
@@ -93,9 +104,14 @@ fn clap_app() -> clap::Command<'static> {
                 .help("The version of LabVIEW to launch e.g. 2020"),
         )
         .arg(
+            Arg::new("arch")
+                .long("arch")
+                .takes_value(true)
+                .help("Set the bitness of the LabVIEW to run. Either \"64\" or \"32\". Default is 32 and if this is set it will override the --x64 flag."))
+        .arg(
             Arg::new("64bit")
                 .long("x64")
-                .help("Set this to launch the 64 bit version of LabVIEW."),
+                .help("Set this to launch the 64 bit version of LabVIEW. You should prefer the --arch flag as this will be deprecated in the future."),
         )
         .arg(
             Arg::new("timeout (ms)")
@@ -297,6 +313,64 @@ mod tests {
 
         assert_eq!(config.lv_version_string.unwrap(), String::from("2015"));
         assert_eq!(config.bitness, Bitness::X64);
+    }
+
+    #[test]
+    fn lv_details_arch_set_32bit() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--lv-ver"),
+            String::from("2015"),
+            String::from("--arch"),
+            String::from("32"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.lv_version_string.unwrap(), String::from("2015"));
+        assert_eq!(config.bitness, Bitness::X86);
+    }
+
+    #[test]
+    fn lv_details_arch_set_64bit() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--lv-ver"),
+            String::from("2015"),
+            String::from("--arch"),
+            String::from("64"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.lv_version_string.unwrap(), String::from("2015"));
+        assert_eq!(config.bitness, Bitness::X64);
+    }
+
+    #[test]
+    fn lv_details_arch_overrides_x64_flag() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--lv-ver"),
+            String::from("2015"),
+            String::from("--arch"),
+            String::from("32"),
+            String::from("--x64"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+
+        assert_eq!(config.lv_version_string.unwrap(), String::from("2015"));
+        assert_eq!(config.bitness, Bitness::X86);
     }
 
     #[test]
