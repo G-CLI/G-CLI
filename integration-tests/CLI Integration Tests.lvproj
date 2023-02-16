@@ -10,7 +10,8 @@
 		<Property Name="server.vi.callsEnabled" Type="Bool">true</Property>
 		<Property Name="server.vi.propertiesEnabled" Type="Bool">true</Property>
 		<Property Name="specify.custom.address" Type="Bool">false</Property>
-		<Item Name="Integrations.lvlib" Type="Library" URL="../Integrations.lvlib"/>
+		<Item Name="Integration Tests.lvlib" Type="Library" URL="../Integration Tests.lvlib"/>
+		<Item Name="TestLib.lvlib" Type="Library" URL="../TestLib.lvlib"/>
 		<Item Name="Dependencies" Type="Dependencies">
 			<Item Name="vi.lib" Type="Folder">
 				<Item Name="8.6CompatibleGlobalVar.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/config.llb/8.6CompatibleGlobalVar.vi"/>
@@ -18,7 +19,6 @@
 				<Item Name="Check if File or Folder Exists.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/libraryn.llb/Check if File or Folder Exists.vi"/>
 				<Item Name="Check Special Tags.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Check Special Tags.vi"/>
 				<Item Name="Clear Errors.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Clear Errors.vi"/>
-				<Item Name="CLI.lvclass" Type="LVClass" URL="/&lt;vilib&gt;/Wiresmith Technology/G CLI/CLI Class/CLI.lvclass"/>
 				<Item Name="Convert property node font to graphics font.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Convert property node font to graphics font.vi"/>
 				<Item Name="Details Display Dialog.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Details Display Dialog.vi"/>
 				<Item Name="DialogType.ctl" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/DialogType.ctl"/>
@@ -48,12 +48,13 @@
 				<Item Name="Simple Error Handler.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Simple Error Handler.vi"/>
 				<Item Name="TagReturnType.ctl" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/TagReturnType.ctl"/>
 				<Item Name="TCP Get Raw Net Object.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/tcp.llb/TCP Get Raw Net Object.vi"/>
-				<Item Name="TCP_NoDelay_Windows.vi" Type="VI" URL="/&lt;vilib&gt;/Wiresmith Technology/G CLI/Dependencies/TCP_NoDelay_Windows.vi"/>
 				<Item Name="Three Button Dialog CORE.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Three Button Dialog CORE.vi"/>
 				<Item Name="Three Button Dialog.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Three Button Dialog.vi"/>
 				<Item Name="Trim Whitespace.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Trim Whitespace.vi"/>
 				<Item Name="whitespace.ctl" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/whitespace.ctl"/>
 			</Item>
+			<Item Name="CLI.lvclass" Type="LVClass" URL="../../LabVIEW Source/CLI Class/CLI.lvclass"/>
+			<Item Name="TCP_NoDelay_Windows.vi" Type="VI" URL="../../LabVIEW Source/Dependencies/TCP_NoDelay_Windows.vi"/>
 			<Item Name="wsock32.dll" Type="Document" URL="wsock32.dll">
 				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
 			</Item>
@@ -74,22 +75,21 @@
 				<Property Name="Bld_previewCacheID" Type="Str">{15371F17-DE20-4506-B1EC-37201A5CF17F}</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">Echo CWD.exe</Property>
-				<Property Name="Destination[0].path" Type="Path">../Integration Tests/exes/Echo CWD.exe</Property>
+				<Property Name="Destination[0].path" Type="Path">../exes/Echo CWD.exe</Property>
+				<Property Name="Destination[0].path.type" Type="Str">relativeToProject</Property>
 				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
 				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
-				<Property Name="Destination[1].path" Type="Path">../Integration Tests/exes/data</Property>
+				<Property Name="Destination[1].path" Type="Path">../exes/data</Property>
+				<Property Name="Destination[1].path.type" Type="Str">relativeToProject</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
-				<Property Name="Source[0].itemID" Type="Str">{B964C433-7256-4C15-961A-7722673825CE}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{7AA141D9-BB47-4B0F-9B46-1F2E6816600D}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
-				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integrations.lvlib/Echo Parameters.vi</Property>
+				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integration Tests.lvlib/Echo CWD.vi</Property>
+				<Property Name="Source[1].sourceInclusion" Type="Str">TopLevel</Property>
 				<Property Name="Source[1].type" Type="Str">VI</Property>
-				<Property Name="Source[2].destinationIndex" Type="Int">0</Property>
-				<Property Name="Source[2].itemID" Type="Ref">/My Computer/Integrations.lvlib/Echo CWD.vi</Property>
-				<Property Name="Source[2].sourceInclusion" Type="Str">TopLevel</Property>
-				<Property Name="Source[2].type" Type="Str">VI</Property>
-				<Property Name="SourceCount" Type="Int">3</Property>
+				<Property Name="SourceCount" Type="Int">2</Property>
 				<Property Name="TgtF_companyName" Type="Str">Wiresmith Technology</Property>
 				<Property Name="TgtF_fileDescription" Type="Str">Echo</Property>
 				<Property Name="TgtF_internalName" Type="Str">Echo</Property>
@@ -113,16 +113,18 @@
 				<Property Name="Bld_previewCacheID" Type="Str">{C8E42A72-D7DC-49F9-B0E4-C0EAFB8C235E}</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">Echo CLI.exe</Property>
-				<Property Name="Destination[0].path" Type="Path">../Integration Tests/exes/Echo CLI.exe</Property>
+				<Property Name="Destination[0].path" Type="Path">../exes/Echo CLI.exe</Property>
+				<Property Name="Destination[0].path.type" Type="Str">relativeToProject</Property>
 				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
 				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
-				<Property Name="Destination[1].path" Type="Path">../Integration Tests/exes/data</Property>
+				<Property Name="Destination[1].path" Type="Path">../exes/data</Property>
+				<Property Name="Destination[1].path.type" Type="Str">relativeToProject</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
-				<Property Name="Source[0].itemID" Type="Str">{9A2659A8-0278-44C2-B0A9-434E315938A8}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{7AA141D9-BB47-4B0F-9B46-1F2E6816600D}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
-				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integrations.lvlib/Echo Parameters.vi</Property>
+				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integration Tests.lvlib/Echo Parameters.vi</Property>
 				<Property Name="Source[1].sourceInclusion" Type="Str">TopLevel</Property>
 				<Property Name="Source[1].type" Type="Str">VI</Property>
 				<Property Name="SourceCount" Type="Int">2</Property>
@@ -149,16 +151,18 @@
 				<Property Name="Bld_previewCacheID" Type="Str">{075581F0-1246-4D1E-9F20-B4E9D1192F72}</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">LargeOutput.exe</Property>
-				<Property Name="Destination[0].path" Type="Path">../Integration Tests/exes/LargeOutput.exe</Property>
+				<Property Name="Destination[0].path" Type="Path">../exes/LargeOutput.exe</Property>
+				<Property Name="Destination[0].path.type" Type="Str">relativeToProject</Property>
 				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
 				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
-				<Property Name="Destination[1].path" Type="Path">../Integration Tests/exes/data</Property>
+				<Property Name="Destination[1].path" Type="Path">../exes/data</Property>
+				<Property Name="Destination[1].path.type" Type="Str">relativeToProject</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
-				<Property Name="Source[0].itemID" Type="Str">{9A2659A8-0278-44C2-B0A9-434E315938A8}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{7AA141D9-BB47-4B0F-9B46-1F2E6816600D}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
-				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integrations.lvlib/Generate Large Output.vi</Property>
+				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integration Tests.lvlib/Generate Large Output.vi</Property>
 				<Property Name="Source[1].sourceInclusion" Type="Str">TopLevel</Property>
 				<Property Name="Source[1].type" Type="Str">VI</Property>
 				<Property Name="SourceCount" Type="Int">2</Property>
@@ -180,20 +184,22 @@
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToProject</Property>
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{B8FC2EFB-4D5E-433A-9F37-004B09028013}</Property>
-				<Property Name="Bld_version.build" Type="Int">3</Property>
+				<Property Name="Bld_version.build" Type="Int">5</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">Tests.lvlibp</Property>
-				<Property Name="Destination[0].path" Type="Path">../Integration Tests/Tests.lvlibp</Property>
+				<Property Name="Destination[0].path" Type="Path">../Tests.lvlibp</Property>
+				<Property Name="Destination[0].path.type" Type="Str">relativeToProject</Property>
 				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
 				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
-				<Property Name="Destination[1].path" Type="Path">../Integration Tests</Property>
+				<Property Name="Destination[1].path" Type="Path">..</Property>
+				<Property Name="Destination[1].path.type" Type="Str">relativeToProject</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
 				<Property Name="PackedLib_callersAdapt" Type="Bool">true</Property>
-				<Property Name="Source[0].itemID" Type="Str">{20243094-BC61-459F-A250-8612F1B02B90}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{7AA141D9-BB47-4B0F-9B46-1F2E6816600D}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
-				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integrations.lvlib</Property>
+				<Property Name="Source[1].itemID" Type="Ref">/My Computer/TestLib.lvlib</Property>
 				<Property Name="Source[1].Library.allowMissingMembers" Type="Bool">true</Property>
 				<Property Name="Source[1].Library.atomicCopy" Type="Bool">true</Property>
 				<Property Name="Source[1].Library.LVLIBPtopLevel" Type="Bool">true</Property>
@@ -224,16 +230,18 @@
 				<Property Name="Bld_previewCacheID" Type="Str">{A8482325-6E8F-4436-8AB4-2DA76A77AB59}</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">QuitWithCode.exe</Property>
-				<Property Name="Destination[0].path" Type="Path">../Integration Tests/exes/QuitWithCode.exe</Property>
+				<Property Name="Destination[0].path" Type="Path">../exes/QuitWithCode.exe</Property>
+				<Property Name="Destination[0].path.type" Type="Str">relativeToProject</Property>
 				<Property Name="Destination[0].preserveHierarchy" Type="Bool">true</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
 				<Property Name="Destination[1].destName" Type="Str">Support Directory</Property>
-				<Property Name="Destination[1].path" Type="Path">../Integration Tests/exes/data</Property>
+				<Property Name="Destination[1].path" Type="Path">../exes/data</Property>
+				<Property Name="Destination[1].path.type" Type="Str">relativeToProject</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
-				<Property Name="Source[0].itemID" Type="Str">{9A2659A8-0278-44C2-B0A9-434E315938A8}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{7AA141D9-BB47-4B0F-9B46-1F2E6816600D}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
-				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integrations.lvlib/Quit With Parameter Code.vi</Property>
+				<Property Name="Source[1].itemID" Type="Ref">/My Computer/Integration Tests.lvlib/Quit With Parameter Code.vi</Property>
 				<Property Name="Source[1].sourceInclusion" Type="Str">TopLevel</Property>
 				<Property Name="Source[1].type" Type="Str">VI</Property>
 				<Property Name="SourceCount" Type="Int">2</Property>
