@@ -194,7 +194,7 @@ jobs:
         run: g-cli -v --lv-ver 2015 viTester -- "LabVIEW Source\G CLI.lvproj" -xml "lv-results.xml"
         
       - name: Integration Tests
-        run: just integration-test
+        run: just integration-test-with-build
 
      
 
