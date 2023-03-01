@@ -1,4 +1,4 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2023-01-20 15:52:50" Creator="James McNally" Comments="" ID="5a8b597f22284c93525e4cbf9f72de11">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2023-03-01 12:45:05" Creator="James McNally" Comments="" ID="3aa60f77f295b822c070fa32df0cc0c3">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
     <Library_Version>3.0.0.14</Library_Version>
@@ -47,14 +47,17 @@ NOTE: Since the Windows application installs to path administrator access is req
 * Exit With Error Code.vi now writes to standard error.
 * Non-verbose mode does not add anything to the output you generate.
 * ClearCache tool included.
-* Support for launching VIs in packed libraries/LLBs.
+* Add Arch Flag for 32 bit and 64 bit setting
+* Support for launching VIs in packed libraries/LLBs. (experimental)
+* Experimental support for Linux
 
 Deprecations/Breaking Changes
 ===================
 
 * `labview-cli` command no longer works.
 *  `--no-launch` deprecated.
-* `--timeout` deprecated in favour of `--connect-timeout` to remove ambiguity</Release_Notes>
+* `--timeout` deprecated in favour of `--connect-timeout` to remove ambiguity
+* Minimum version is now 2015.</Release_Notes>
     </Description>
     <Destinations>
       <Toolkit_VIs>
@@ -230,7 +233,7 @@ Deprecations/Breaking Changes
       <Windows_Vista>true</Windows_Vista>
       <Windows_XP>true</Windows_XP>
       <Mac_OS>false</Mac_OS>
-      <Linux>false</Linux>
+      <Linux>true</Linux>
       <Built_LV_Version>false</Built_LV_Version>
       <Built_LV_Version_or_greater>true</Built_LV_Version_or_greater>
       <Windows_8>true</Windows_8>
@@ -412,7 +415,7 @@ Deprecations/Breaking Changes
         <Path>CLI Class\Write Line.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>940879E938384B343A83C9EFF1708467</GUID>
+      <GUID>5E76BFAC2FC3AB5986074CC4C4262D4C</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>

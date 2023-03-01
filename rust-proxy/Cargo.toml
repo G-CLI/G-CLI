@@ -1,9 +1,13 @@
 [package]
 name = "g-cli"
-version = "3.0.0-beta.2"
-authors = ["James McNally <james@wiresmithtech.com>"]
+version = "3.0.0"
+authors = ["James McNally <james@wiresmithtech.com>", "G-CLI Contributors"]
 edition = "2021"
 license = "BSD-2-Clause"
+homepage = "https://github.com/JamesMc86/G-CLI"
+readme = "../README.md"
+description = "Proxy application which will launch and communicate with LabVIEW VIs which use the client library."
+keywords = ["LabVIEW"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
