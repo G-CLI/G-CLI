@@ -34,6 +34,7 @@
 		<Item Name="Tests" Type="Folder">
 			<Item Name="Options Parsing Tests.lvclass" Type="LVClass" URL="../Tests/Options Parsing Tests/Options Parsing Tests.lvclass"/>
 			<Item Name="Working Path Expansion Tests.lvclass" Type="LVClass" URL="../Tests/Working Path Expansion Tests/Working Path Expansion Tests.lvclass"/>
+			<Item Name="Service Name Tests.lvclass" Type="LVClass" URL="../Tests/Service Name Tests/Service Name Tests.lvclass"/>
 		</Item>
 		<Item Name="Examples" Type="Folder">
 			<Item Name="CLI Demo.vi" Type="VI" URL="../CLI Demo.vi"/>
