@@ -378,6 +378,10 @@
 			<Item Name="wsock32.dll" Type="Document" URL="wsock32.dll">
 				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
 			</Item>
+			<Item Name="TCP_NoDelay_Linux.vi" Type="VI" URL="../Dependencies/TCP_NoDelay_Linux.vi"/>
+			<Item Name="libc.so.6" Type="Document" URL="libc.so.6">
+				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
+			</Item>
 		</Item>
 		<Item Name="Build Specifications" Type="Build">
 			<Item Name="CWD Test" Type="EXE">
