@@ -51,8 +51,8 @@ pub struct AppListener {
 impl AppListener {
     /// Create the listener and reserve the port.
     pub fn new() -> Result<Self, CommsError> {
-        let listener = TcpListener::bind("127.0.0.1:5000")
-            .map_err(|e| CommsError::ErrorCreatingListener(e))?;
+        let listener =
+            TcpListener::bind("127.0.0.1:0").map_err(|e| CommsError::ErrorCreatingListener(e))?;
 
         // So we can implement a timeout later.
         listener

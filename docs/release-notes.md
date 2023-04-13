@@ -1,5 +1,11 @@
 # Release Notes
 
+## v3.0.1
+
+### Fixes
+
+* Fix port hardcoded to port 5000 preventing parallel runs.
+
 ## v3.0.0
 
 ### New Features

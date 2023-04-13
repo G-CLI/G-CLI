@@ -1,7 +1,7 @@
-<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2023-03-01 12:45:05" Creator="James McNally" Comments="" ID="3aa60f77f295b822c070fa32df0cc0c3">
+<VI_Package_Builder_Settings Version="2018" Created_Date="2019-04-08 19:40:42" Modified_Date="2023-04-13 08:32:07" Creator="James McNally" Comments="" ID="dbc54c2da36c2dc76e365424ee3a9dd8">
   <Library_General_Settings>
     <Package_File_Name>Wiresmith_Technology_lib_G_CLI</Package_File_Name>
-    <Library_Version>3.0.0.14</Library_Version>
+    <Library_Version>3.0.1.15</Library_Version>
     <Auto_Increment_Version>false</Auto_Increment_Version>
     <Library_Source_Folder>.</Library_Source_Folder>
     <Library_Output_Folder>..</Library_Output_Folder>
@@ -39,25 +39,10 @@ NOTE: Since the Windows application installs to path administrator access is req
       <Copyright>Copyright (c) 2023, G CLI Contributors</Copyright>
       <Packager/>
       <URL>https://github.com/JamesMc86/LabVIEW-CLI</URL>
-      <Release_Notes>New Features
-==========
+      <Release_Notes>Fixes
+====
 
-* Proxy rebuilt in Rust for cross-platform support.
-* Standard error can be written to instead of standard out.
-* Exit With Error Code.vi now writes to standard error.
-* Non-verbose mode does not add anything to the output you generate.
-* ClearCache tool included.
-* Add Arch Flag for 32 bit and 64 bit setting
-* Support for launching VIs in packed libraries/LLBs. (experimental)
-* Experimental support for Linux
-
-Deprecations/Breaking Changes
-===================
-
-* `labview-cli` command no longer works.
-*  `--no-launch` deprecated.
-* `--timeout` deprecated in favour of `--connect-timeout` to remove ambiguity
-* Minimum version is now 2015.</Release_Notes>
+* Fix port hardcoded to port 5000 preventing parallel runs.</Release_Notes>
     </Description>
     <Destinations>
       <Toolkit_VIs>
@@ -232,7 +217,7 @@ Deprecations/Breaking Changes
       <Windows_7>true</Windows_7>
       <Windows_Vista>true</Windows_Vista>
       <Windows_XP>true</Windows_XP>
-      <Mac_OS>false</Mac_OS>
+      <Mac_OS>true</Mac_OS>
       <Linux>true</Linux>
       <Built_LV_Version>false</Built_LV_Version>
       <Built_LV_Version_or_greater>true</Built_LV_Version_or_greater>
@@ -415,7 +400,7 @@ Deprecations/Breaking Changes
         <Path>CLI Class\Write Line.vi</Path>
         <VI_Title/>
       </Items_Data>
-      <GUID>5E76BFAC2FC3AB5986074CC4C4262D4C</GUID>
+      <GUID>2E8F0C172BCEE4B86382C767BC460B3B</GUID>
     </Functions_Palette_Data>
   </Library_Palette_Definition>
 </VI_Package_Builder_Settings>
