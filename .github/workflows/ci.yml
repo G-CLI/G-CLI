@@ -38,7 +38,7 @@ jobs:
 
       - name: Get Major.Minor.Patch
         id: version
-        run: echo "::set-output name=version::$(cargo get version --major --minor --patch --delimiter=.)"
+        run: echo "version=$(cargo get version --major --minor --patch --delimiter=.)" >> $GITHUB_OUTPUT
 
   rust-style:
     name: Check Style
