@@ -100,7 +100,7 @@ jobs:
       - name: Cargo Target Cache
         uses: actions/cache@v3
         with:
-          path: ./target
+          path: rust-proxy/target
           key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
