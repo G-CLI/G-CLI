@@ -31,6 +31,6 @@ jobs:
     
     - uses: actions/upload-artifact@v3
       with:
-        name: my-artifact
+        name: g-cli linux binary
         path: |
           rust-proxy/target/x86_64-unknown-linux-musl/**/g-cli
