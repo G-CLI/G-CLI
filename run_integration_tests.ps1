@@ -3,11 +3,16 @@ $ErrorActionPreference = 'stop'
 
 
 $delay_between_tests = 3
+
+# directory with the built g-cli binary is the first argument
 $cli_cmd = $args[0] + 'g-cli'
-Write-Output $cli_cmd 
+# arguments to pass to g-cli is second argument -- convert to array (space delimited)
+$common_params = -split $args[1]
+# looks like --> ./rust-proxy/target/release/g-cli -v --lv-ver 2020 --x64
+Write-Output "$cli_cmd $common_params"
 
 Write-Output "Echo Parameters"
-$output_matches = & "$cli_cmd" "LabVIEW Source/integration-tests/Echo Parameters.vi" -- "Param 1" "Param 2" | % { $_.Trim() -eq "Param 1	Param 2" }
+$output_matches = & "$cli_cmd" $common_params "LabVIEW Source/integration-tests/Echo Parameters.vi" -- "Param 1" "Param 2" | % { $_.Trim() -eq "Param 1	Param 2" }
 if (!$output_matches) { 
   Write-Output "Echo Parameters VI Failed"
   Exit 1
@@ -15,7 +20,7 @@ if (!$output_matches) {
 Start-Sleep -s $delay_between_tests
 
 Write-Output "Echo CWD"
-$output_matches = & "$cli_cmd" "LabVIEW Source/integration-tests/Echo CWD.vi"  | % { $_.Trim() -eq $pwd.Path }
+$output_matches = & "$cli_cmd" $common_params "LabVIEW Source/integration-tests/Echo CWD.vi"  | % { $_.Trim() -eq $pwd.Path }
 if (!$output_matches) { 
   Write-Output "Echo CWD VI Failed"
   Exit 1
