@@ -1,0 +1,36 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux2014_x86_64
+
+    steps:
+    
+    - name: Install Rust Toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: x86_64-unknown-linux-musl
+    
+    - uses: actions/checkout@v3
+    - name: Build
+      run: |
+        cd rust-proxy
+        cargo build --release --target x86_64-unknown-linux-musl
+    
+    - uses: actions/upload-artifact@v3
+      with:
+        name: g-cli linux binary
+        path: |
+          rust-proxy/target/x86_64-unknown-linux-musl/**/g-cli
