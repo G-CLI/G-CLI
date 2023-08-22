@@ -14,6 +14,6 @@ build-integration-test:
   g-cli {{g_cli_args}} lvBuild -- {{lv_proj}} "Test In Packed Library"
   
 integration-test:
-  pwsh -File "./run_integration_tests.ps1" ./rust-proxy/target/release/
+  cd rust-proxy && cargo test --test '*' -- --test-threads=1
   
 integration-test-with-build: build-integration-test integration-test 

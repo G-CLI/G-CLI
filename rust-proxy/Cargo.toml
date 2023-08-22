@@ -25,6 +25,9 @@ lazy_static = "1.4"
 eyre = "0.6"
 ctrlc = "3.2"
 
+[dev-dependencies]
+snapbox = "0.4"
+
 
 [target.'cfg(windows)'.dependencies] 
 winreg = "0.10"
