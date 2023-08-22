@@ -17,7 +17,7 @@ log = "0.4"
 simplelog = "0.12"
 time = { version = "^0.3.11", features = ["macros"]}
 thiserror = "1.0"
-clap = "3.0"
+clap = "4.3"
 # minimal library - remove the features we aren't using.
 ureq = { version = "2.*", default-features = false }
 regex = "1.5"

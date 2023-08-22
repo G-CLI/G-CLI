@@ -1,6 +1,6 @@
 //! Contains the CLI API Defintion.
 //!
-use clap::{Arg, ArgMatches, Command};
+use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::ffi::OsString;
 use std::iter::IntoIterator;
 use std::path::PathBuf;
@@ -43,51 +43,45 @@ impl Configuration {
     ///
     /// Panics if args fail validation. Need proper error handling here.
     fn args_to_configuration(args: ArgMatches) -> Self {
-        let bitness = if args.is_present("arch") {
-            match args.value_of("arch") {
+        let bitness = if args.contains_id("arch") {
+            match args.get_one::<String>("arch").map(|s| s.as_str()) {
                 Some("64") => Bitness::X64,
                 Some("32") => Bitness::X86,
                 Some(other) => panic!("Unknown value for arch: \"{other}\""),
                 None => unreachable!(),
             }
-        } else if args.is_present("64bit") {
+        } else if args.get_flag("64bit") {
             Bitness::X64
         } else {
             Bitness::X86
         };
 
         Self {
-            to_launch: PathBuf::from(args.value_of("app to run").unwrap().to_owned()),
-            verbose: args.is_present("verbose mode"),
-            lv_version_string: args.value_of("labview version").map(|str| str.to_owned()),
+            to_launch: PathBuf::from(args.get_one::<String>("app to run").unwrap().to_owned()),
+            verbose: args.get_flag("verbose mode"),
+            lv_version_string: args
+                .get_one::<String>("labview version")
+                .map(|str| str.to_owned()),
             bitness,
-            // todo: use clap validation to remove risk of panic in this unwrap.
+
             // First cant panic due to default values. Second could panic if invalid.
-            connect_timeout: Duration::from_millis(
-                args.value_of("timeout (ms)")
-                    .unwrap()
-                    .parse()
-                    .expect("Timeout value cannot be parsed to an integer"),
-            ),
-            kill: if args.is_present("kill") {
+            connect_timeout: Duration::from_millis(*args.get_one::<u64>("timeout (ms)").unwrap()),
+            kill: if args.get_flag("kill") {
                 //todo handle unwraps. The first should not fail due to default. The second could.
                 Some(Duration::from_millis(
-                    args.value_of("kill timeout (ms)")
-                        .unwrap()
-                        .parse()
-                        .expect("Kill timeout cannot be parsed to an integer."),
+                    *args.get_one::<u64>("kill timeout (ms)").unwrap_or(&0),
                 ))
             } else {
                 None
             },
-            allow_dialogs: args.is_present("allow dialogs"),
-            no_launch: args.is_present("no launch"),
+            allow_dialogs: args.get_flag("allow dialogs"),
+            no_launch: args.get_flag("no launch"),
         }
     }
 }
 
 /// Returns a fully configured clap app with all the parameters configured.
-fn clap_app() -> clap::Command<'static> {
+fn clap_app() -> clap::Command {
     Command::new("G CLI")
         .version(VERSION)
         .about("Connects a LabVIEW app to the command line.")
@@ -95,57 +89,62 @@ fn clap_app() -> clap::Command<'static> {
             Arg::new("verbose mode")
                 .short('v')
                 .long("verbose")
+                .action(ArgAction::SetTrue)
                 .help("Prints additional details for debugging"),
         )
         .arg(
             Arg::new("labview version")
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .long("lv-ver")
                 .help("The version of LabVIEW to launch e.g. 2020"),
         )
         .arg(
             Arg::new("arch")
                 .long("arch")
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .help("Set the bitness of the LabVIEW to run. Either \"64\" or \"32\". Default is 32 and if this is set it will override the --x64 flag."))
         .arg(
             Arg::new("64bit")
                 .long("x64")
+                .action(ArgAction::SetTrue)
                 .help("Set this to launch the 64 bit version of LabVIEW. You should prefer the --arch flag as this will be deprecated in the future."),
         )
         .arg(
             Arg::new("timeout (ms)")
-                .takes_value(true)
                 .long("connect-timeout")
                 .alias("timeout")
                 .help("The time in ms to wait for the connection from LabVIEW")
+                .value_parser(value_parser!(u64))
                 .default_value("60000"),
         )
         .arg(
             Arg::new("kill")
             .long("kill")
+                .action(ArgAction::SetTrue)
             .help("Forces LabVIEW to exit when the program sends the exit code if set. Use kill-timeout to set a delay before this occurs.")
         )
         .arg(
             Arg::new("kill timeout (ms)")
-                .takes_value(true)
                 .long("kill-timeout")
                 .help("The delay before the LabVIEW process is killed if the kill flag is set.")
+                .value_parser(value_parser!(u64))
                 .default_value("10000")
         )
         .arg(
             Arg::new("allow dialogs")
             .long("allow-dialogs")
             .alias("allowDialogs")
+                .action(ArgAction::SetTrue)
             .help("Add this flag to allow LabVIEW to show user dialogs by removing the --unattended flag. Generally not recommended")
         )
         .arg(
             Arg::new("no launch")
             .long("no-launch")
+                .action(ArgAction::SetTrue)
             .help("Don't launch your VI or application automatically. You must start it manually.")
         )
         .trailing_var_arg(true)
-        .arg(Arg::new("app to run").multiple_occurrences(true).required(true))
+        .arg(Arg::new("app to run").action(ArgAction::Append).required(true))
 }
 
 /// Extract the arguments that are going to be passed to the VI/exe we will run.
