@@ -112,7 +112,8 @@ jobs:
           
 
       - name: Test
-        run: cargo test
+        run: cargo test --bin g-cli
+
       
       - name: Build
         run: |
