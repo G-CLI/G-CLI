@@ -17,7 +17,7 @@ use os_string_support::join_os_string;
 
 use crate::action_loop::{ActionLoop, ExitAction};
 
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn main() -> Result<(), Report> {
     //wrap the app seperately so destructors are all called

@@ -77,7 +77,7 @@ impl AppListener {
                     return AppConnection::new(stream);
                 }
                 Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    count = count + 1;
+                    count += 1;
 
                     if count < iterations {
                         //retry

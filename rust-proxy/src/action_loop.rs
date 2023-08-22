@@ -45,7 +45,7 @@ impl ActionLoop {
     ///
     /// Stops running once all writers drop their sender.
     /// returns an exit code to use.
-    pub fn run(self: Self) -> ExitAction {
+    pub fn run(self) -> ExitAction {
         let Self { tx, rx, stopped } = self;
 
         let mut exit_action = ExitAction::CleanExit(0);

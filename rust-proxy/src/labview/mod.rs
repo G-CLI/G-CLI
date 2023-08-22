@@ -36,7 +36,7 @@ fn create_args(port: u16, allow_dialogs: bool) -> Vec<OsString> {
 
     args.push(OsString::from("--"));
     args.push(OsString::from(format!("-p:{}", port)));
-    return args;
+    args
 }
 
 pub fn launch_exe(path: PathBuf, port: u16) -> Result<process::MonitoredProcess, LabVIEWError> {

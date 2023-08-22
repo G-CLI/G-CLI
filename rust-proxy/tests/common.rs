@@ -1,7 +1,7 @@
 use std::ffi::OsStr;
 
-pub const INTEGRATION_VI_FOLDER: &str = "../LabVIEW Source/integration-tests";
-pub const INTEGRATION_EXE_FOLDER: &str = "../Builds";
+const INTEGRATION_VI_FOLDER: &str = "../LabVIEW Source/integration-tests";
+const INTEGRATION_EXE_FOLDER: &str = "../Builds";
 
 pub fn integration_vi_path(vi: &str) -> String {
     format!("{}/{}", INTEGRATION_VI_FOLDER, vi)

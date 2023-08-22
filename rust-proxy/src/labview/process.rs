@@ -1,5 +1,5 @@
 use super::{error::LabVIEWError, Registration};
-use log::{debug, error, info};
+use log::{debug, info};
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};

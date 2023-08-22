@@ -15,7 +15,7 @@ pub fn join_os_string<S: AsRef<OsStr>>(vector: &[S], seperator: &str) -> OsStrin
         buffer.push(item);
     }
 
-    return buffer;
+    buffer
 }
 
 #[cfg(test)]

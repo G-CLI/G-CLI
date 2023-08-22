@@ -8,6 +8,7 @@ use thiserror::Error;
 pub enum LabviewInstallError {
     #[error("Cannot Access Windows Registry for Detection: {1}")]
     RegKeyError(#[source] std::io::Error, String),
+    #[allow(unused)]
     #[error("Error Scanning LabVIEW Install Directory. Dir: \"{1}\"")]
     DirectoryError(#[source] std::io::Error, String),
 }
@@ -40,16 +41,16 @@ pub struct LabviewInstall {
 }
 
 #[cfg(target_os = "windows")]
-const LABVIEW_EXE: &'static str = "LabVIEW.exe";
+const LABVIEW_EXE: &str = "LabVIEW.exe";
 
 #[cfg(not(target_os = "windows"))]
-const LABVIEW_EXE: &'static str = "labview";
+const LABVIEW_EXE: &str = "labview";
 
 impl LabviewInstall {
     pub fn major_version(&self) -> String {
         // For current versions this just means taking everything before the space.
         // The unwrap is safe since even if there is no space, it will have a single return.
-        self.version.split(" ").nth(0).unwrap().to_owned()
+        self.version.split(' ').next().unwrap().to_owned()
     }
 
     /// Checks the path for links relative to the install.
@@ -60,7 +61,7 @@ impl LabviewInstall {
         actual_path.push("vi.lib");
         actual_path.push("G CLI Tools");
         actual_path.push(vi);
-        return actual_path;
+        actual_path
     }
 
     /// Get the LabVIEW application path.

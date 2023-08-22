@@ -2,7 +2,7 @@
 //!
 //!
 
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::fs::canonicalize;
 use std::path::{Path, PathBuf};
 

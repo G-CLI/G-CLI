@@ -24,7 +24,7 @@ impl Registration {
 
         let response = get(&url)
             .call()
-            .map_err(|e| LabVIEWError::ServiceLocatorCommsError(e))?;
+            .map_err(|e| LabVIEWError::ServiceLocatorCommsError(Box::new(e)))?;
 
         let status_code = response.status();
 
@@ -39,7 +39,7 @@ impl Registration {
     pub fn unregister(self) -> Result<(), LabVIEWError> {
         let response = get(&format!("http://localhost:3580/delete?{}", self.id))
             .call()
-            .map_err(|e| LabVIEWError::ServiceLocatorCommsError(e))?;
+            .map_err(|e| LabVIEWError::ServiceLocatorCommsError(Box::new(e)))?;
 
         let status_code = response.status();
 
