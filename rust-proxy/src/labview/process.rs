@@ -269,8 +269,9 @@ mod process_utilities {
 #[cfg(target_os = "windows")]
 fn launch(path: &Path, args: &[OsString]) -> Result<u32, LabVIEWError> {
     use std::ptr;
+    use windows::core::{PCWSTR, PWSTR};
     use windows::Win32::{
-        Foundation::{CloseHandle, PWSTR},
+        Foundation::CloseHandle,
         System::Threading::{
             CreateProcessW, CREATE_NEW_PROCESS_GROUP, CREATE_UNICODE_ENVIRONMENT, DETACHED_PROCESS,
             PROCESS_INFORMATION, STARTUPINFOW,
@@ -281,30 +282,30 @@ fn launch(path: &Path, args: &[OsString]) -> Result<u32, LabVIEWError> {
     let si = STARTUPINFOW::default();
 
     //build out required command line.
-    let command = process_utilities::make_command_line(path, args)?;
+    let mut command = process_utilities::make_command_line(path, args)?;
 
     //app name not required - build it into command line.
     let dwcreationflags = CREATE_UNICODE_ENVIRONMENT | DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP;
     let success = unsafe {
         CreateProcessW(
-            PWSTR(ptr::null()),
-            PWSTR(command.as_ptr()),
-            ptr::null(),
-            ptr::null(),
+            PCWSTR(ptr::null()),
+            PWSTR(command.as_mut_ptr()),
+            None,
+            None,
             false,
             dwcreationflags,
-            ptr::null(),
-            PWSTR(ptr::null()),
+            None,
+            PCWSTR(ptr::null()),
             &si,
             &mut pi as *mut PROCESS_INFORMATION,
         )
     };
 
-    if success.as_bool() {
+    if success.is_ok() {
         let pid = pi.dwProcessId;
         unsafe {
-            CloseHandle(pi.hProcess);
-            CloseHandle(pi.hThread);
+            let _ = CloseHandle(pi.hProcess);
+            let _ = CloseHandle(pi.hThread);
         }
         debug!("Process launched with PID {}", pid);
         Ok(pid)

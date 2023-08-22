@@ -30,5 +30,5 @@ snapbox = "0.4"
 
 
 [target.'cfg(windows)'.dependencies] 
-winreg = "0.10"
-windows = { version = "0.32", features = ["Win32_Foundation", "Win32_System_Console","Win32_System_Threading", "Win32_Security"]}
+winreg = "0.51"
+windows = { version = "0.51", features = ["Win32_Foundation", "Win32_System_Console","Win32_System_Threading", "Win32_Security"]}
