@@ -17,17 +17,29 @@ pub fn detect_installations() -> Result<SystemLabviewInstalls, LabviewInstallErr
     const BASE_KEY: &str = "SOFTWARE\\National Instruments\\LabVIEW";
     const BASE_KEY_WOW: &str = "SOFTWARE\\WOW6432Node\\National Instruments\\LabVIEW";
 
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-    let labview_32_key = hklm
-        .open_subkey(BASE_KEY_WOW)
-        .map_err(|err| LabviewInstallError::RegKeyError(err, BASE_KEY_WOW.to_owned()))?;
-    let labview_64_key = hklm
-        .open_subkey(BASE_KEY)
-        .map_err(|err| LabviewInstallError::RegKeyError(err, BASE_KEY.to_owned()))?;
+    let labview_32_key = try_open_key(BASE_KEY_WOW)?;
+    let labview_64_key = try_open_key(BASE_KEY)?;
 
-    installations_from_labview_registry(labview_32_key, Bitness::X86, &mut system)?;
-    installations_from_labview_registry(labview_64_key, Bitness::X64, &mut system)?;
+    if let Some(key) = labview_32_key {
+        installations_from_labview_registry(key, Bitness::X86, &mut system)?;
+    }
+
+    if let Some(key) = labview_64_key {
+        installations_from_labview_registry(key, Bitness::X64, &mut system)?;
+    }
+
     Ok(system)
+}
+
+// Try opening the provided key, returning none if not found.
+fn try_open_key(subkey: &str) -> Result<Option<RegKey>, LabviewInstallError> {
+    RegKey::predef(HKEY_LOCAL_MACHINE)
+        .open_subkey(subkey)
+        .map(Some)
+        .or_else(|err| match err.kind() {
+            std::io::ErrorKind::NotFound => Ok(None),
+            _ => Err(LabviewInstallError::RegKeyError(err, subkey.to_owned())),
+        })
 }
 
 /// When passed the LabVIEW registry key this function will extract all installs it can find.
