@@ -35,8 +35,8 @@ pub enum CommsError {
     ReadLvMessageError(#[source] std::io::Error),
     #[error("IO Error When Writing Messages to LabVIEW")]
     WriteLvMessageError(#[source] std::io::Error),
-    #[error("Timed out waiting for app to connect to g-cli")]
-    WaitOnConnectionTimeOut,
+    #[error("Timed out waiting for app to connect to g-cli (Timeout: {0:?})")]
+    WaitOnConnectionTimeOut(std::time::Duration),
     #[error("System error setting up app connection")]
     ErrorCreatingConnection(#[source] std::io::Error),
     #[error("System error setting up app listener")]
@@ -83,7 +83,7 @@ impl AppListener {
                         //retry
                         sleep(wait_time);
                     } else {
-                        return Err(CommsError::WaitOnConnectionTimeOut);
+                        return Err(CommsError::WaitOnConnectionTimeOut(timeout));
                     }
                 }
                 Err(e) => {
