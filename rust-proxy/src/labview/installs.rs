@@ -6,6 +6,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum LabviewInstallError {
+    #[cfg(target_os = "windows")]
     #[error("Cannot Access Windows Registry for Detection: {1}")]
     RegKeyError(#[source] std::io::Error, String),
     #[allow(unused)]

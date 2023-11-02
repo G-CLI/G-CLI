@@ -4,7 +4,6 @@ version = "3.0.1"
 authors = ["James McNally <james@wiresmithtech.com>", "G-CLI Contributors"]
 edition = "2021"
 license = "BSD-2-Clause"
-license-file = "../LICENSE"
 homepage = "https://github.com/JamesMc86/G-CLI"
 readme = "../README.md"
 description = "Proxy application which will launch and communicate with LabVIEW VIs which use the client library."
@@ -15,7 +14,7 @@ keywords = ["LabVIEW"]
 [dependencies]
 sysinfo = "0.29"
 log = "0.4"
-simplelog = "0.12"cd 
+simplelog = "0.12" 
 time = { version = "^0.3.11", features = ["macros"]}
 thiserror = "1.0"
 clap = "4.3"
