@@ -85,6 +85,7 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           subFolder: rust-proxy
+          push: never
           runCmd: |
             cargo test --lib
             cargo build --release
