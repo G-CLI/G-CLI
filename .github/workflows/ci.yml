@@ -65,20 +65,67 @@ jobs:
       - name: Cargo Check
         run: cargo check
 
-  build-cli:
-    name: Test & Build on ${{ matrix.os }}
+  build-linux:
+    name: Test & Build in Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cargo Target Cache
+        uses: actions/cache@v3
+        with:
+          path: rust-proxy/target
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
+            ${{ runner.os }}-cargo-target
+
+      - name: Build In DevContainer
+        uses: devcontainers/ci@v0.3
+        with:
+          subFolder: rust-proxy
+          runCmd: |
+            cargo test
+            cargo build --release
+            cargo deb
+            strip target/release/g-cli
+            cargo generate-rpm
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v3
+        with:
+          # Artifact name
+          name: Exe_linux
+          # A file, directory or wildcard pattern that describes what to upload
+          path: rust-proxy/target/release/g-cli
+          if-no-files-found: error
+
+      - name: Upload RPM
+        uses: actions/upload-artifact@v3
+        with:
+          # Artifact name
+          name: rpm
+          # A file, directory or wildcard pattern that describes what to upload
+          path: rust-proxy/target/release/generate-rpm/*.rpm
+          if-no-files-found: error
+
+      - name: Upload Deb
+        uses: actions/upload-artifact@v3
+        with:
+          # Artifact name
+          name: rpm
+          # A file, directory or wildcard pattern that describes what to upload
+          path: rust-proxy/target/release/debian/*.deb
+          if-no-files-found: error
+
+  build-windows:
+    name: Test & Build on Windows
     needs: [get-version]
     env:
       version: ${{needs.get-version.outputs.version}}
-    strategy:
-      matrix:
-        os:
-        #  - ubuntu-latest
-          - windows-latest
-        #  - macOS-latest
 
-
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
 
     defaults:
       run:
@@ -124,7 +171,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           # Artifact name
-          name: Exe_${{ matrix.os }}
+          name: Exe_windows
           # A file, directory or wildcard pattern that describes what to upload
           path: rust-proxy/target/release/g-cli.exe
           if-no-files-found: error
@@ -142,7 +189,7 @@ jobs:
   build-lv:
   
     runs-on: labview
-    needs: build-cli
+    needs: [build-windows, build-linux]
     
     steps:
     
