@@ -1,0 +1,10 @@
+//devcontainer.json
+{
+  "name": "Centos7",
+  "build": {
+    "dockerfile": "centos.Dockerfile"
+  }
+
+
+
+}
