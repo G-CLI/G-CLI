@@ -108,7 +108,7 @@ jobs:
           # Artifact name
           name: rpm
           # A file, directory or wildcard pattern that describes what to upload
-          path: rust-proxy/target/release/debian/*.deb
+          path: rust-proxy/target/debian/*.deb
           if-no-files-found: error
 
       - name: Upload RPM
@@ -117,7 +117,7 @@ jobs:
           # Artifact name
           name: rpm
           # A file, directory or wildcard pattern that describes what to upload
-          path: rust-proxy/target/release/generate-rpm/*.rpm
+          path: rust-proxy/target/generate-rpm/*.rpm
           if-no-files-found: error
 
   build-windows:
