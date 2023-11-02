@@ -106,7 +106,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           # Artifact name
-          name: rpm
+          name: Linux_Packages
           # A file, directory or wildcard pattern that describes what to upload
           path: rust-proxy/target/debian/*.deb
           if-no-files-found: error
@@ -115,7 +115,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           # Artifact name
-          name: rpm
+          name: Linux_Packages
           # A file, directory or wildcard pattern that describes what to upload
           path: rust-proxy/target/generate-rpm/*.rpm
           if-no-files-found: error
@@ -208,13 +208,21 @@ jobs:
           name: MSI_Installer
           # Destination path
           path: LabVIEW Source\Installation Support\G_CLI.msi
+          
+      - name: Get Linux Packages
+        uses: actions/download-artifact@v3
+        with:
+          # Artifact name
+          name: Linux_Packages
+          # Destination path
+          path: LabVIEW Source\Installation Support
 
           
       - name: Get x64 EXE for Integration Test
         uses: actions/download-artifact@v3
         with:
           # Artifact name
-          name: Exe_windows-latest
+          name: Exe_windows
           # Destination path
           path: rust-proxy/target/release
     
