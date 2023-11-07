@@ -323,7 +323,8 @@ fn find_instances(path: &Path) -> HashMap<Pid, String> {
 
     for (pid, process) in sys.processes() {
         let process_path = process.exe();
-        if process_path == path {
+        // We need to compare starts_with as linux will add suffixes for license version.
+        if process_path.starts_with(path) {
             processes.insert(*pid, process.name().to_owned());
         }
     }
