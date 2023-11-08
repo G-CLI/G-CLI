@@ -17,4 +17,17 @@ When installed with the supplied installer the application is added to Windows p
 
 ## Usage
 
-See https://github.com/JamesMc86/G-CLI/wiki/Getting-Started-With-G-CLI for instructions on using this tool.
+See http://jamesmc86.github.io/G-CLI/ for instructions on using this tool.
+
+
+## What About The LabVIEW 2018 CLI Tool?
+
+NI now ships a CLI tool in LabVIEW with some common tools for continuous integration.
+
+We have and will continue to develop this as our ability to iterate faster and having something community-driven (aka developed by the people using it) has shown a number of benefits which should show in greater stability and ease of use.
+
+The key benefits to G CLI currently are:
+
+* Supporting libraries for creating tools with custom options and continuous output.
+* Automatic detection of installed LV versions (no need to provide long paths or port numbers)
+* Support for LabVIEW built executables
