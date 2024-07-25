@@ -17,7 +17,7 @@ When installed with the supplied installer the application is added to Windows p
 
 ## Usage
 
-See http://jamesmc86.github.io/G-CLI/ for instructions on using this tool.
+See [http://jamesmc86.github.io/G-CLI/](http://g-cli.github.io/G-CLI/) for instructions on using this tool.
 
 
 ## What About The LabVIEW 2018 CLI Tool?
