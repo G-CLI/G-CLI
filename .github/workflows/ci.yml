@@ -203,7 +203,7 @@ jobs:
           clean: true
 
       - name: Get MSI
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           # Artifact name
           name: MSI_Installer
@@ -211,7 +211,7 @@ jobs:
           path: LabVIEW Source\Installation Support\G_CLI.msi
           
       - name: Get Linux Packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           # Artifact name
           name: Linux_Packages
@@ -220,7 +220,7 @@ jobs:
 
           
       - name: Get x64 EXE for Integration Test
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           # Artifact name
           name: Exe_windows
