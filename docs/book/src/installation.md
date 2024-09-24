@@ -10,7 +10,7 @@ There are two components required for G-CLI:
 The G-CLI library is available through VIPM.
 
 1. Launch VIPM.
-2. Search for `G-CLI`
+2. Search for `G CLI`
 3. Install for each version of LabVIEW you need.
 
 Alternative releases will be listed at https://github.com/JamesMc86/G-CLI/releases.
