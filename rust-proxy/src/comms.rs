@@ -52,12 +52,12 @@ impl AppListener {
     /// Create the listener and reserve the port.
     pub fn new() -> Result<Self, CommsError> {
         let listener =
-            TcpListener::bind("127.0.0.1:0").map_err(|e| CommsError::ErrorCreatingListener(e))?;
+            TcpListener::bind("127.0.0.1:0").map_err(CommsError::ErrorCreatingListener)?;
 
         // So we can implement a timeout later.
         listener
             .set_nonblocking(true)
-            .map_err(|e| CommsError::ErrorCreatingListener(e))?;
+            .map_err(CommsError::ErrorCreatingListener)?;
 
         Ok(Self { listener })
     }
@@ -111,10 +111,10 @@ impl AppConnection {
     pub fn new(stream: TcpStream) -> Result<Self, CommsError> {
         stream
             .set_nonblocking(true)
-            .map_err(|e| CommsError::ErrorCreatingConnection(e))?;
+            .map_err(CommsError::ErrorCreatingConnection)?;
         stream
             .set_nodelay(true)
-            .map_err(|e| CommsError::ErrorCreatingConnection(e))?;
+            .map_err(CommsError::ErrorCreatingConnection)?;
         Ok(Self {
             stream,
             buffer: [0u8; 9000],
@@ -126,7 +126,7 @@ impl AppConnection {
         let result = self.stream.write(&self.buffer[0..size]);
         //match return type.
         result
-            .map_err(|e| CommsError::WriteLvMessageError(e))
+            .map_err(CommsError::WriteLvMessageError)
             .map(|_| ())
     }
 
@@ -157,11 +157,11 @@ fn wrap_read_error(e: std::io::Error) -> CommsError {
 #[derive(Clone, PartialEq, Debug)]
 pub enum MessageFromLV {
     /// Exit with the exit code provided.
-    EXIT(i32),
+    Exit(i32),
     /// Output to the command line.
-    OUTP(String),
+    Output(String),
     /// Output to Standard Error
-    SERR(String),
+    SErr(String),
 }
 
 impl MessageFromLV {
@@ -174,20 +174,20 @@ impl MessageFromLV {
         );
 
         let id =
-            std::str::from_utf8(&buffer[4..8]).map_err(|e| CommsError::MessageIdNotValidUTF8(e))?;
+            std::str::from_utf8(&buffer[4..8]).map_err(CommsError::MessageIdNotValidUTF8)?;
         let data_end: usize = 8 + (length as usize) - 4; // 8 = offset, 4 = already used for id
         let contents = std::str::from_utf8(&buffer[8..data_end])
-            .map_err(|e| CommsError::MessageContentsNotValidUTF8(e))?;
+            .map_err(CommsError::MessageContentsNotValidUTF8)?;
 
         match id {
             "EXIT" => {
                 let code = contents.parse::<i32>().map_err(|e| {
                     CommsError::ExitCodeStringNotParsable(e, String::from(contents))
                 })?;
-                Ok(MessageFromLV::EXIT(code))
+                Ok(MessageFromLV::Exit(code))
             }
-            "OUTP" => Ok(MessageFromLV::OUTP(contents.to_string())),
-            "SERR" => Ok(MessageFromLV::SERR(contents.to_string())),
+            "OUTP" => Ok(MessageFromLV::Output(contents.to_string())),
+            "SERR" => Ok(MessageFromLV::SErr(contents.to_string())),
             _ => Err(CommsError::UnknownMessageId(String::from(id))),
         }
     }
@@ -197,9 +197,9 @@ impl MessageFromLV {
 #[derive(Clone, PartialEq, Debug)]
 pub enum MessageToLV<'a> {
     /// Arguments sent as a tab delimited list
-    ARGS(&'a [OsString]),
+    Args(&'a [OsString]),
     /// Current working directory as a path.
-    CCWD(PathBuf),
+    Ccwd(PathBuf),
 }
 
 impl<'a> MessageToLV<'a> {
@@ -208,18 +208,18 @@ impl<'a> MessageToLV<'a> {
     /// Returns the size of bytes to actually write.
     pub fn to_buffer(&'a self, buffer: &mut [u8; 9000]) -> usize {
         let message_id = match self {
-            MessageToLV::ARGS(_) => "ARGS",
-            MessageToLV::CCWD(_) => "CCWD",
+            MessageToLV::Args(_) => "ARGS",
+            MessageToLV::Ccwd(_) => "CCWD",
         };
 
         let message_contents = match &self {
-            MessageToLV::ARGS(args) => args
+            MessageToLV::Args(args) => args
                 .iter()
                 .map(|s| s.to_str())
                 .collect::<Option<Vec<&str>>>()
                 .unwrap()
                 .join("\t"),
-            MessageToLV::CCWD(path) => path.to_str().unwrap().to_string(),
+            MessageToLV::Ccwd(path) => path.to_str().unwrap().to_string(),
         };
 
         let length = message_contents.len() + message_id.len();
@@ -246,7 +246,7 @@ mod tests {
         let mut buffer = [0u8; 9000];
         let args = [OsString::from("Test1")];
 
-        let message = MessageToLV::ARGS(&args);
+        let message = MessageToLV::Args(&args);
 
         let size = message.to_buffer(&mut buffer);
 
@@ -261,7 +261,7 @@ mod tests {
         let mut buffer = [0u8; 9000];
         let args = [OsString::from("Test1"), OsString::from("Test2")];
 
-        let message = MessageToLV::ARGS(&args);
+        let message = MessageToLV::Args(&args);
 
         let size = message.to_buffer(&mut buffer);
 
@@ -276,7 +276,7 @@ mod tests {
         let mut buffer = [0u8; 9000];
         let dir = PathBuf::from("C:\\test");
 
-        let message = MessageToLV::CCWD(dir);
+        let message = MessageToLV::Ccwd(dir);
 
         let size = message.to_buffer(&mut buffer);
 
@@ -296,7 +296,7 @@ mod tests {
 
         let message = MessageFromLV::from_buffer(&buffer);
 
-        assert_eq!(message.unwrap(), MessageFromLV::EXIT(123));
+        assert_eq!(message.unwrap(), MessageFromLV::Exit(123));
     }
 
     #[test]
@@ -346,7 +346,7 @@ mod tests {
 
         assert_eq!(
             message.unwrap(),
-            MessageFromLV::OUTP(String::from("Hello, World\n"))
+            MessageFromLV::Output(String::from("Hello, World\n"))
         );
     }
 
@@ -362,7 +362,7 @@ mod tests {
 
         assert_eq!(
             message.unwrap(),
-            MessageFromLV::SERR(String::from("Hello, World\n"))
+            MessageFromLV::SErr(String::from("Hello, World\n"))
         );
     }
 }

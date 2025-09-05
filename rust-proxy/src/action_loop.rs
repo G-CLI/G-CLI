@@ -58,13 +58,13 @@ impl ActionLoop {
         // Then this will stop automatically once they are all gone allowing us to process further messages.
         for message in rx {
             match message {
-                ActionMessage::LVMessage(MessageFromLV::OUTP(string)) => {
+                ActionMessage::LVMessage(MessageFromLV::Output(string)) => {
                     print!("{}", string);
                 }
-                ActionMessage::LVMessage(MessageFromLV::SERR(string)) => {
+                ActionMessage::LVMessage(MessageFromLV::SErr(string)) => {
                     eprint!("{}", string);
                 }
-                ActionMessage::LVMessage(MessageFromLV::EXIT(code)) => {
+                ActionMessage::LVMessage(MessageFromLV::Exit(code)) => {
                     exit_action = ExitAction::CleanExit(code);
                     set_stop(&stopped);
                 }

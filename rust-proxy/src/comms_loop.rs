@@ -24,7 +24,7 @@ pub fn start(mut connection: AppConnection, tx: Sender<ActionMessage>, stop: Arc
                 match connection.read() {
                     Ok(message) => {
                         //before we send it - check if it is a message that terminates the connection.
-                        let terminating_message = matches!(message, MessageFromLV::EXIT(_));
+                        let terminating_message = matches!(message, MessageFromLV::Exit(_));
 
                         tx.send(ActionMessage::LVMessage(message))
                             .expect("Can't send to action loop.");

@@ -66,10 +66,10 @@ fn gcli() -> Result<i32> {
         .wrap_err("Failed to notify the monitoring process of the connection")?;
 
     connection
-        .write(MessageToLV::ARGS(&program_args[..]))
+        .write(MessageToLV::Args(&program_args[..]))
         .wrap_err("Failed to write arguments to LabVIEW application")?;
     connection
-        .write(MessageToLV::CCWD(cwd))
+        .write(MessageToLV::Ccwd(cwd))
         .wrap_err("Failed to write CWD to LabVIEW application")?;
 
     // At this point we spawn multiple tasks as processes:
