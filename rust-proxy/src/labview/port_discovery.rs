@@ -16,7 +16,7 @@ impl Registration {
     ) -> Result<Registration, LabVIEWError> {
         let id = generate_registration_id(&vi.canonical_vi_path(), install);
         // The response we want the discovery service to give. I'm not sure if these need further escaping but so far it works
-        let base_response = "HTTP/1.0 200 OK%0D%0AServer: Service Locator%0D%0APragma: no-cache%0D%0AConnection: Close%0D%0AContent-Length: 12%0D%0AContent-Type: text/html%0D%0A%0D%0A";
+        let base_response = "HTTP/1.0%20200%20OK%0D%0AServer:%20Service%20Locator%0D%0APragma:%20no-cache%0D%0AConnection:%20Close%0D%0AContent-Length:%2012%0D%0AContent-Type:%20text/html%0D%0A%0D%0A";
         let url = format!(
             "http://localhost:3580/publish?{}={}Port={}%0D%0A",
             id, base_response, port
@@ -28,8 +28,10 @@ impl Registration {
 
         let status_code = response.status();
 
-        if status_code > 299 {
-            Err(LabVIEWError::ServiceLocatorResponseError(status_code))
+        if !status_code.is_success() {
+            Err(LabVIEWError::ServiceLocatorResponseError(
+                status_code.as_u16(),
+            ))
         } else {
             Ok(Registration { id })
         }
@@ -43,8 +45,10 @@ impl Registration {
 
         let status_code = response.status();
 
-        if status_code > 299 {
-            Err(LabVIEWError::ServiceLocatorResponseError(status_code))
+        if !status_code.is_success() {
+            Err(LabVIEWError::ServiceLocatorResponseError(
+                status_code.as_u16(),
+            ))
         } else {
             Ok(())
         }

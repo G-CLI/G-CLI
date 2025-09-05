@@ -12,7 +12,7 @@ fn test_echo_parameters() {
     Command::new(cargo_bin("g-cli"))
         .args(g_cli_args(&vi, ["Param1", "Param2"]))
         .assert()
-        .stdout_matches("Param1\tParam2[..]")
+        .stdout_eq("Param1\tParam2[..]")
         .code(0);
 }
 
@@ -26,7 +26,7 @@ fn test_echo_working_dir() {
     Command::new(cargo_bin("g-cli"))
         .args(g_cli_args(&vi, []))
         .assert()
-        .stdout_matches(cwd_str);
+        .stdout_eq(cwd_str);
 }
 
 #[test]

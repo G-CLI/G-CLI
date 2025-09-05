@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc;
 use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, Instant};
-use sysinfo::{Pid,  System};
+use sysinfo::{Pid, System};
 
 const POLL_INTERVAL: Duration = Duration::from_millis(1000);
 
@@ -289,7 +289,7 @@ fn launch(path: &Path, args: &[OsString]) -> Result<u32, LabVIEWError> {
     let success = unsafe {
         CreateProcessW(
             PCWSTR(ptr::null()),
-            PWSTR(command.as_mut_ptr()),
+            Some(PWSTR(command.as_mut_ptr())),
             None,
             None,
             false,
