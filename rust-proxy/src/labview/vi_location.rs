@@ -64,11 +64,10 @@ impl std::fmt::Display for VILocation {
 /// Otherwise it returns a clone of the VI path.
 fn get_file_container(vi: &Path) -> PathBuf {
     for sub_path in vi.ancestors() {
-        if let Some(extension) = sub_path.extension() {
-            if extension == "lvlibp" || extension == "llb" {
+        if let Some(extension) = sub_path.extension()
+            && (extension == "lvlibp" || extension == "llb") {
                 return sub_path.to_owned();
             }
-        }
     }
 
     //if we reached this far, then no container.

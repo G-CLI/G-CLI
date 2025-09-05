@@ -2,7 +2,7 @@
 name = "g-cli"
 version = "3.0.1"
 authors = ["James McNally <james@wiresmithtech.com>", "G-CLI Contributors"]
-edition = "2021"
+edition = "2024"
 license = "BSD-2-Clause"
 homepage = "https://github.com/JamesMc86/G-CLI"
 readme = "../README.md"
