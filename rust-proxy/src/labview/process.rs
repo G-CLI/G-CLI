@@ -1,10 +1,10 @@
-use super::{error::LabVIEWError, Registration};
+use super::{Registration, error::LabVIEWError};
 use log::{debug, info};
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc;
-use std::thread::{sleep, JoinHandle};
+use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
 use sysinfo::{Pid, System};
 
@@ -269,14 +269,14 @@ mod process_utilities {
 #[cfg(target_os = "windows")]
 fn launch(path: &Path, args: &[OsString]) -> Result<u32, LabVIEWError> {
     use std::ptr;
-    use windows::core::{PCWSTR, PWSTR};
     use windows::Win32::{
         Foundation::CloseHandle,
         System::Threading::{
-            CreateProcessW, CREATE_NEW_PROCESS_GROUP, CREATE_UNICODE_ENVIRONMENT, DETACHED_PROCESS,
+            CREATE_NEW_PROCESS_GROUP, CREATE_UNICODE_ENVIRONMENT, CreateProcessW, DETACHED_PROCESS,
             PROCESS_INFORMATION, STARTUPINFOW,
         },
     };
+    use windows::core::{PCWSTR, PWSTR};
 
     let mut pi = PROCESS_INFORMATION::default();
     let si = STARTUPINFOW::default();

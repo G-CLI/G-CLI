@@ -7,10 +7,10 @@ mod os_string_support;
 mod signal_loop;
 
 use comms::{AppListener, MessageToLV};
-use eyre::{eyre, Report, Result, WrapErr};
+use eyre::{Report, Result, WrapErr, eyre};
 use labview::{detect_installations, installs::Bitness, launch_exe, launch_lv};
-use log::{debug, error, LevelFilter};
-use simplelog::{format_description, ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
+use log::{LevelFilter, debug, error};
+use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode, format_description};
 use std::time::Duration;
 
 use os_string_support::join_os_string;
@@ -141,7 +141,6 @@ fn launch_process(
         ext.to_str().expect("Extension isn't valid UTF-8")
     });
 
-    
     match extension_as_str {
         Some("vi") => {
             let active_install = find_install(&config.lv_version_string, config.bitness)?;

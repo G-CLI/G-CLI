@@ -3,7 +3,7 @@ use log::{debug, error};
 use std::error::Error;
 use std::sync::atomic::AtomicBool;
 use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 
 pub enum ActionMessage {
     LVMessage(MessageFromLV),

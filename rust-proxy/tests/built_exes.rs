@@ -2,8 +2,8 @@ mod common;
 
 use common::{g_cli_args, integration_build_path};
 
-use snapbox::cmd::cargo_bin;
 use snapbox::cmd::Command;
+use snapbox::cmd::cargo_bin;
 
 #[test]
 fn test_echo_parameters() {

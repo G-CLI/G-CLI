@@ -2,8 +2,8 @@
 //!
 use std::path::PathBuf;
 
-use winreg::enums::*;
 use winreg::RegKey;
+use winreg::enums::*;
 
 use super::installs::{Bitness, LabviewInstall, LabviewInstallError, SystemLabviewInstalls};
 

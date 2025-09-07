@@ -1,9 +1,9 @@
 use crate::action_loop::ActionMessage;
 use eyre::{Context, Result};
 use log::debug;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{channel, RecvTimeoutError, Sender};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{RecvTimeoutError, Sender, channel};
 use std::time::Duration;
 
 /// Starts a thread that monitors a ctrlc or SIGINT event.

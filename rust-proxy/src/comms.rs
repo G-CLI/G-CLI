@@ -27,7 +27,9 @@ pub enum CommsError {
     UnknownMessageId(String),
     #[error("Unexpected EOF Error: LabVIEW has probably closed the connection")]
     ConnectionClosedEof(#[source] std::io::Error),
-    #[error("Connection Aborted: LabVIEW has probably crashed or failed to properly close the connection")]
+    #[error(
+        "Connection Aborted: LabVIEW has probably crashed or failed to properly close the connection"
+    )]
     ConenctionClosedAborted(#[source] std::io::Error),
     #[error("IO Error While Listening for LabVIEW to Connect")]
     WaitOnConnectionIoError(#[source] std::io::Error),
@@ -125,9 +127,7 @@ impl AppConnection {
         let size = message.to_buffer(&mut self.buffer);
         let result = self.stream.write(&self.buffer[0..size]);
         //match return type.
-        result
-            .map_err(CommsError::WriteLvMessageError)
-            .map(|_| ())
+        result.map_err(CommsError::WriteLvMessageError).map(|_| ())
     }
 
     pub fn read(&mut self) -> Result<MessageFromLV, CommsError> {
@@ -173,8 +173,7 @@ impl MessageFromLV {
                 .map_err(|_| CommsError::SizeParameterInvalid)?,
         );
 
-        let id =
-            std::str::from_utf8(&buffer[4..8]).map_err(CommsError::MessageIdNotValidUTF8)?;
+        let id = std::str::from_utf8(&buffer[4..8]).map_err(CommsError::MessageIdNotValidUTF8)?;
         let data_end: usize = 8 + (length as usize) - 4; // 8 = offset, 4 = already used for id
         let contents = std::str::from_utf8(&buffer[8..data_end])
             .map_err(CommsError::MessageContentsNotValidUTF8)?;
