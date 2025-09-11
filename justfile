@@ -3,10 +3,15 @@ set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 g_cli_args := " -v --lv-ver 2015"
 lv_proj := "\"LabVIEW Source\\G CLI.lvproj\""
 
+[working-directory: 'rust-proxy']
 rust-test:
-  cd rust-proxy && cargo fmt --check
-  cd rust-proxy && cargo clippy
-  cd rust-proxy && cargo test --lib
+  cargo test --bin g-cli
+
+[working-directory: 'rust-proxy']
+rust-validate:
+  cargo fmt --check
+  cargo clippy
+  
 
 unit-test:
   g-cli {{g_cli_args}} vitester -- -r "lv-results.xml" {{lv_proj}}

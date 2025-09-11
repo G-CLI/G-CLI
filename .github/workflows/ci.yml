@@ -29,22 +29,19 @@ jobs:
         id: version
         run: echo "version=$(cargo get package.version --major --minor --patch --delimiter=.)" >> $GITHUB_OUTPUT
 
-  rust-style:
-    name: Check Style
+  rust-validate:
+    name: Check Rust
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: rust-proxy
     steps:
       - name: Checkout
         uses: actions/checkout@v5
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: rustfmt, clippy
-      - name: Formatting Check
-        run: cargo fmt --all -- --check
-      - name: Cargo Check
-        run: cargo check
+      - name: Install Just
+        run: cargo install just
+      - name: Check
+        run: just rust-validate
 
   build-ubuntu:
     name: Test & Build in Ubuntu
@@ -53,8 +50,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Install Just
+        run: cargo install just
       - name: Unit Test
-        run: cd rust-proxy && cargo test --bin g-cli
+        run: just rust-test
       - name: Build
         run: cd rust-proxy && cargo build --release
       - name: Package
@@ -198,8 +197,10 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v5
         - uses: actions-rust-lang/setup-rust-toolchain@v1
+        - name: Install Just
+          run: cargo install just
         - name: Unit Test
-          run: cd rust-proxy && cargo test --bin g-cli
+          run: just rust-test
         - name: Build
           run: cd rust-proxy && cargo build --release
         - name: Prepare EXE
