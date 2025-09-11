@@ -38,6 +38,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: rustfmt, clippy
+          rustflags: ""
       - name: Install Just
         run: cargo install just
       - name: Check
@@ -50,6 +51,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+          with:
+            rustflags: ""
       - name: Install Just
         run: cargo install just
       - name: Unit Test
@@ -197,6 +200,8 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v5
         - uses: actions-rust-lang/setup-rust-toolchain@v1
+          with:
+            rustflags: ""
         - name: Install Just
           run: cargo install just
         - name: Unit Test
