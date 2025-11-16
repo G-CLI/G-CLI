@@ -193,29 +193,6 @@ jobs:
          path: Builds/**.vip
          if-no-files-found: error
 
-  build-el8:
-    runs-on: ubuntu-latest
-    container: rhel8/gcc-toolset-14-toolchain
-    steps:
-        - name: Checkout
-          uses: actions/checkout@v5
-        - uses: actions-rust-lang/setup-rust-toolchain@v1
-          with:
-            rustflags: ""
-        - name: Install Just
-          run: cargo install just
-        - name: Unit Test
-          run: just rust-test
-        - name: Build
-          run: cd rust-proxy && cargo build --release
-        - name: Prepare EXE
-          run: strip rust-proxy/target/release/g-cli
-        - name: Upload EXE
-          uses: actions/upload-artifact@v4
-          with:
-            name: gcli_rhel
-            path: rust-proxy/target/release/g-cli
-            if-no-files-found: error
 
 
 
