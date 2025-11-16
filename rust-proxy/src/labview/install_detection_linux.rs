@@ -30,7 +30,7 @@ pub fn detect_installations() -> Result<SystemLabviewInstalls, LabviewInstallErr
         }
     }
 
-    return Ok(system);
+    Ok(system)
 }
 
 /// Takes a folder name and either returns a tuple of LabVIEW version and bitness
