@@ -162,6 +162,8 @@ pub enum MessageFromLV {
     Output(String),
     /// Output to Standard Error
     SErr(String),
+    /// Flush the output buffer.
+    Flush,
 }
 
 impl MessageFromLV {
@@ -187,6 +189,7 @@ impl MessageFromLV {
             }
             "OUTP" => Ok(MessageFromLV::Output(contents.to_string())),
             "SERR" => Ok(MessageFromLV::SErr(contents.to_string())),
+            "OFLS" => Ok(MessageFromLV::Flush),
             _ => Err(CommsError::UnknownMessageId(String::from(id))),
         }
     }
@@ -363,5 +366,17 @@ mod tests {
             message.unwrap(),
             MessageFromLV::SErr(String::from("Hello, World\n"))
         );
+    }
+
+    #[test]
+    fn flush_message_from_buffer() {
+        let mut buffer = [0u8; 9000];
+        let input = "\x00\x00\x00\x04OFLS";
+
+        buffer[0..input.len()].copy_from_slice(input.as_bytes());
+
+        let message = MessageFromLV::from_buffer(&buffer);
+
+        assert_eq!(message.unwrap(), MessageFromLV::Flush);
     }
 }

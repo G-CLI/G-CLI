@@ -1,6 +1,7 @@
 use crate::comms::MessageFromLV;
 use log::{debug, error};
 use std::error::Error;
+use std::io::Write;
 use std::sync::atomic::AtomicBool;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, mpsc};
@@ -67,6 +68,10 @@ impl ActionLoop {
                 ActionMessage::LVMessage(MessageFromLV::Exit(code)) => {
                     exit_action = ExitAction::CleanExit(code);
                     set_stop(&stopped);
+                }
+                ActionMessage::LVMessage(MessageFromLV::Flush) => {
+                    let _ = std::io::stdout().flush();
+                    let _ = std::io::stderr().flush();
                 }
                 ActionMessage::CommsError(e) => {
                     exit_action = ExitAction::CleanExit(-1);

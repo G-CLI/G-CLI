@@ -10,7 +10,20 @@ This establishes the connection back to the command line and provides you with t
 ## Write String
 ![](images/cli%20interface%20write%20string.png)
 
-Writes the text back to the stdout of the command line. Note: you have to include your own new line characters.
+Writes the text back to the stdout of the command line. Note: you have to include your own new line characters and so may require the Flush Output VI afterwards.
+
+## Write Line
+![](images/cli-interface-write-line.png)
+
+Writes the text to the selected output buffer and terminates it with a line ending.
+
+
+## Flush Output
+![](images/flush-output.png)
+
+Flushes the output buffer to the command line. This isn't required if you write lines to the buffers as they will automatically flush.
+
+However, for more advanced scenarios, you may need to flush the output buffer manually.
 
 ## Path From Parameter
 ![](images/path%20from%20parameter.png)

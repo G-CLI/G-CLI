@@ -1,5 +1,11 @@
 # Release Notes
 
+## v3.1.0 (Unreleased)
+
+### New Features
+
+* You can programmatically flush the output buffer from LabVIEW.
+
 ## v3.0.1
 
 ### Fixes

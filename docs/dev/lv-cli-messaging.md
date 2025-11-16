@@ -44,6 +44,7 @@ Available message types will be:
 | Exit | `EXIT` | Exit the process. The message contents are a string of the decimal number. (up to v1.5.2 this was an I32 encoding of the number) |
 | StdOut | `OUTP` | Write to the console. The message contents are a string to be written to the console. |
 | StdErr | `SERR` | Write to the console on standard error. The message contents are a string to be written to the console. |
+| Flush Output | `OFLS` | Flush the console output buffer. |
 
 The maximum length of data payload is 8992 bytes (9000 - overheads). Longer messages should be split across multiple messages.
 
