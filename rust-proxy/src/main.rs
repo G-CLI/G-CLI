@@ -10,10 +10,10 @@ use comms::{AppListener, MessageToLV};
 use eyre::{Report, Result, WrapErr, eyre};
 use labview::{detect_installations, installs::Bitness, launch_exe, launch_lv};
 use log::{LevelFilter, debug, error};
-use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode, format_description};
-use std::time::Duration;
-
 use os_string_support::join_os_string;
+use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
+use std::time::Duration;
+use time::macros::format_description;
 
 use crate::action_loop::{ActionLoop, ExitAction};
 
