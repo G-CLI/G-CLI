@@ -5,6 +5,7 @@ mod comms_loop;
 mod labview;
 mod os_string_support;
 mod signal_loop;
+mod stdin_loop;
 
 use comms::{AppListener, MessageToLV};
 use eyre::{Report, Result, WrapErr, eyre};
@@ -72,11 +73,17 @@ fn gcli() -> Result<i32> {
         .write(MessageToLV::Ccwd(cwd))
         .wrap_err("Failed to write CWD to LabVIEW application")?;
 
+    // Clone the connection so we can use it in both comms_loop (reading) and action_loop (writing)
+    let connection_for_action_loop = connection
+        .try_clone()
+        .wrap_err("Failed to clone connection for action loop")?;
+
     // At this point we spawn multiple tasks as processes:
-    // 1. Action Loop - Recieves messages from inputs and takes appropriate actions.
+    // 1. Action Loop - Receives messages from inputs and takes appropriate actions.
     //                  Also writes a stop signal for other threads.
-    // 2. Comms Loop - Recieve incoming comms from LabVIEW.
-    // 3. CtrlC Handler
+    // 2. Comms Loop - Receive incoming comms from LabVIEW.
+    // 3. Stdin Loop - Read from stdin and send commands to LabVIEW.
+    // 4. CtrlC Handler
 
     let action_loop = ActionLoop::new();
 
@@ -86,9 +93,11 @@ fn gcli() -> Result<i32> {
         action_loop.get_stop_signal(),
     );
 
+    stdin_loop::start(action_loop.get_channel(), action_loop.get_stop_signal());
+
     signal_loop::start(action_loop.get_channel(), action_loop.get_stop_signal())?;
 
-    let exit = action_loop.run();
+    let exit = action_loop.run(connection_for_action_loop);
 
     match exit {
         ExitAction::CleanExit(code) => {

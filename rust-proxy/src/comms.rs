@@ -143,6 +143,16 @@ impl AppConnection {
 
         MessageFromLV::from_buffer(&self.buffer)
     }
+
+    /// Clone the underlying TCP stream to create a new connection.
+    /// This allows multiple threads to have independent connections to the same socket.
+    pub fn try_clone(&self) -> Result<Self, CommsError> {
+        let cloned_stream = self
+            .stream
+            .try_clone()
+            .map_err(CommsError::ErrorCreatingConnection)?;
+        Self::new(cloned_stream)
+    }
 }
 
 fn wrap_read_error(e: std::io::Error) -> CommsError {
@@ -202,6 +212,8 @@ pub enum MessageToLV<'a> {
     Args(&'a [OsString]),
     /// Current working directory as a path.
     Ccwd(PathBuf),
+    /// Stdin command input (for interactive mode)
+    Stdin(String),
 }
 
 impl<'a> MessageToLV<'a> {
@@ -212,6 +224,7 @@ impl<'a> MessageToLV<'a> {
         let message_id = match self {
             MessageToLV::Args(_) => "ARGS",
             MessageToLV::Ccwd(_) => "CCWD",
+            MessageToLV::Stdin(_) => "CMND",
         };
 
         let message_contents = match &self {
@@ -222,6 +235,7 @@ impl<'a> MessageToLV<'a> {
                 .unwrap()
                 .join("\t"),
             MessageToLV::Ccwd(path) => path.to_str().unwrap().to_string(),
+            MessageToLV::Stdin(line) => line.clone(),
         };
 
         let length = message_contents.len() + message_id.len();
@@ -378,5 +392,20 @@ mod tests {
         let message = MessageFromLV::from_buffer(&buffer);
 
         assert_eq!(message.unwrap(), MessageFromLV::Flush);
+    }
+
+    #[test]
+    fn stdin_command_message_to_buffer() {
+        let mut buffer = [0u8; 9000];
+        let command = String::from("add 5 3");
+
+        let message = MessageToLV::Stdin(command);
+
+        let size = message.to_buffer(&mut buffer);
+
+        let expected = "\x00\x00\x00\x0BCMNDadd 5 3";
+
+        assert_eq!(size, 11 + 4); // 11 content bytes plus 4 for length
+        assert_eq!(&buffer[0..size], expected.as_bytes());
     }
 }
