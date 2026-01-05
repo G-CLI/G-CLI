@@ -13,9 +13,14 @@ const EMPTY_PAUSE: Duration = Duration::from_millis(10);
 /// This thread reads line-by-line from stdin, allowing for interactive command input.
 /// Each line is sent as a complete command to LabVIEW.
 ///
-/// The loop is non-blocking and checks the stop signal periodically.
+/// **Note:** The stdin read is blocking, so when the stop signal is set, the thread
+/// will only exit after the next line is entered (or EOF is reached).
+/// Users can press Enter or Ctrl+D to unblock and allow clean shutdown.
 ///
-/// This thread will panic if the action loop stops before this.
+/// This thread will stop cleanly when:
+/// - The stop signal is set AND user presses Enter
+/// - The action loop channel is closed (action loop exited)
+/// - EOF is reached (Ctrl+D on Unix, Ctrl+Z+Enter on Windows)
 pub fn start(tx: Sender<ActionMessage>, stop: Arc<AtomicBool>) {
     std::thread::Builder::new()
         .name("Stdin Loop".to_string())
@@ -27,6 +32,7 @@ pub fn start(tx: Sender<ActionMessage>, stop: Arc<AtomicBool>) {
             loop {
                 // Check if we should stop
                 if stop.load(std::sync::atomic::Ordering::Relaxed) {
+                    debug!("Stop signal received, exiting stdin loop");
                     break;
                 }
 
@@ -39,14 +45,23 @@ pub fn start(tx: Sender<ActionMessage>, stop: Arc<AtomicBool>) {
                         break;
                     }
                     Ok(_) => {
+                        // Check stop signal again after blocking read
+                        if stop.load(std::sync::atomic::Ordering::Relaxed) {
+                            debug!("Stop signal received after read, exiting stdin loop");
+                            break;
+                        }
+
                         // Successfully read a line
                         let line = buffer.trim_end().to_string();
 
                         // Only send non-empty lines
                         if !line.is_empty() {
                             debug!("Stdin received: {}", line);
-                            tx.send(ActionMessage::StdinInput(line))
-                                .expect("Can't send to action loop.");
+                            // Check if the channel is still open
+                            if tx.send(ActionMessage::StdinInput(line)).is_err() {
+                                debug!("Action loop has stopped, exiting stdin loop");
+                                break;
+                            }
                         }
                     }
                     Err(e) => {
@@ -54,6 +69,12 @@ pub fn start(tx: Sender<ActionMessage>, stop: Arc<AtomicBool>) {
                         debug!("Error reading from stdin: {}", e);
                         std::thread::sleep(EMPTY_PAUSE);
                     }
+                }
+
+                // Check stop signal at end of loop
+                if stop.load(std::sync::atomic::Ordering::Relaxed) {
+                    debug!("Stop signal received at end of loop, exiting stdin loop");
+                    break;
                 }
             }
             debug!("Stdin reader stopped.");
