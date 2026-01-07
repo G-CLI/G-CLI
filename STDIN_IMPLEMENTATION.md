@@ -101,19 +101,20 @@ LabVIEW receives "CMND" message
 
 ## Protocol Details
 
-### New Message Type: "CMND"
+### New Message Type: "STIN"
 
 **Direction:** Rust → LabVIEW
+**Name:** STIN (stdin input)
 
 **Format:**
 ```
-[4 bytes: total length][4 bytes: "CMND"][N bytes: command string]
+[4 bytes: total length][4 bytes: "STIN"][N bytes: input text]
 ```
 
 **Example:**
 ```
 Input: "add 5 3"
-Bytes: \x00\x00\x00\x0B C M N D a d d   5   3
+Bytes: \x00\x00\x00\x0B S T I N a d d   5   3
        ^^^^^^^^^^^ ^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^
        length=11   msg ID  content
 ```
@@ -123,6 +124,7 @@ Bytes: \x00\x00\x00\x0B C M N D a d d   5   3
 **To LabVIEW:**
 - `ARGS` - Command line arguments (initial startup)
 - `CCWD` - Current working directory
+- `STIN` - Stdin input (continuous, sent at ~100ms intervals or on newlines)
 
 **From LabVIEW:**
 - `OUTP` - Stdout output
@@ -143,10 +145,10 @@ All threads communicate via channels (message passing) and cooperatively shut do
 
 ## LabVIEW Side Implementation
 
-To receive stdin commands in LabVIEW, you need to:
+To receive stdin input in LabVIEW, you need to:
 
-1. **Handle the "CMND" message type** in your VI's message parser
-2. **Parse the command string** (e.g., split by spaces to get function name + args)
+1. **Handle the "STIN" message type** in your VI's message parser
+2. **Parse the input text** (e.g., split by spaces for command-style input)
 3. **Execute the command** using your existing function dispatcher
 4. **Send output back** using existing stdout (`OUTP`) mechanism
 
@@ -156,10 +158,9 @@ To receive stdin commands in LabVIEW, you need to:
 Case Structure on message ID:
   "ARGS": Handle initial arguments (existing)
   "CCWD": Handle working directory (existing)
-  "CMND": [NEW]
-    - Split string by spaces
-    - First element = function name
-    - Remaining elements = arguments
+  "STIN": [NEW]
+    - Parse input text (e.g., split by spaces for commands)
+    - Extract function name and arguments
     - Call function dispatcher
     - Send result via stdout
 ```
@@ -196,17 +197,21 @@ cargo test stdin_command_message_to_buffer
 
 ## Design Decisions
 
-### Line-Based vs Raw Input
+### Timeout-Based Input Transmission
 
-This implementation uses **line-based** input (waits for Enter key), which is simpler and covers most use cases. As discussed in [Issue #187](https://github.com/G-CLI/G-CLI/issues/187), a raw byte-streaming mode could be added later if needed.
+This implementation uses a **timeout-based approach** where stdin input is transmitted at regular intervals (~100ms) rather than only on newlines. As discussed in [Issue #187](https://github.com/G-CLI/G-CLI/issues/187), this design:
 
-**Pros of line-based:**
-- Simple to implement
-- Natural for command-line interfaces
-- Works well with LabVIEW's string processing
-- No special buffering needed
+**Benefits:**
+- **Clean shutdown**: When LabVIEW sends EXIT, g-cli exits automatically within 100ms (no manual intervention needed)
+- **Flexible input**: Supports both line-based and partial input
+- **Responsive**: Regular polling ensures timely delivery
+- **Simple for LabVIEW**: VI receives data in manageable chunks
 
-**Future enhancement:** Add `--stdin-raw` flag for character-by-character streaming
+**How it works:**
+1. Stdin reader thread blocks reading lines
+2. Main loop polls every 100ms with timeout
+3. Data sent immediately on newline OR after timeout
+4. Stop signal checked every 100ms for clean exit
 
 ### Connection Cloning
 

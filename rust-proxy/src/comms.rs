@@ -224,7 +224,7 @@ impl<'a> MessageToLV<'a> {
         let message_id = match self {
             MessageToLV::Args(_) => "ARGS",
             MessageToLV::Ccwd(_) => "CCWD",
-            MessageToLV::Stdin(_) => "CMND",
+            MessageToLV::Stdin(_) => "STIN",
         };
 
         let message_contents = match &self {
@@ -403,7 +403,7 @@ mod tests {
 
         let size = message.to_buffer(&mut buffer);
 
-        let expected = "\x00\x00\x00\x0BCMNDadd 5 3";
+        let expected = "\x00\x00\x00\x0BSTINadd 5 3";
 
         assert_eq!(size, 11 + 4); // 11 content bytes plus 4 for length
         assert_eq!(&buffer[0..size], expected.as_bytes());
