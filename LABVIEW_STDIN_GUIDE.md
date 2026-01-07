@@ -7,7 +7,7 @@ Quick guide for implementing stdin command handling in your LabVIEW VI.
 When you type a command in the terminal (e.g., `add 5 3`), g-cli sends:
 
 ```
-Message ID: "CMND"
+Message ID: "STIN"
 Content: "add 5 3"
 ```
 
@@ -21,7 +21,7 @@ Add a new case to handle "CMND" messages:
 Case Structure (Message ID String):
   "ARGS": [existing] Handle initial command-line arguments
   "CCWD": [existing] Handle current working directory
-  "CMND": [NEW] Handle stdin commands
+  "STIN": [NEW] Handle stdin input
      ↓
      Parse command string
      Execute function
@@ -39,7 +39,7 @@ For a command like `"add 5 3"`:
 ### 3. Example LabVIEW Block Diagram Logic
 
 ```
-[CMND message content] → [Split String by space]
+[STIN message content] → [Split String by space]
     ↓
 ["add", "5", "3"]
     ↓
@@ -73,7 +73,7 @@ Use your **existing stdout mechanism** (the one that already works):
 │    ↓                                    │
 │  Case Structure (ID):                   │
 │    ┌──────────────────────────────┐    │
-│    │ "CMND":                       │    │
+│    │ "STIN":                       │    │
 │    │   Split content by space      │    │
 │    │   Get function name (index 0) │    │
 │    │   Get arguments (rest)        │    │
@@ -126,7 +126,7 @@ Use your **existing stdout mechanism** (the one that already works):
 |---|---|---|
 | `ARGS` | Tab-separated args | Startup (once) |
 | `CCWD` | Working directory path | Startup (once) |
-| `CMND` | Command string | Each stdin line (continuous) |
+| `STIN` | Stdin input text | Stdin data (continuous, ~100ms intervals) |
 
 ### Messages FROM LabVIEW (to g-cli)
 
@@ -139,9 +139,9 @@ Use your **existing stdout mechanism** (the one that already works):
 
 ## Tips
 
-1. **Reuse your parser**: If you already parse `ARGS`, reuse that logic for `CMND`
-2. **Empty lines**: g-cli filters empty lines, you won't receive them
-3. **No history**: Users can't use up/down arrows (yet), each line is independent
+1. **Reuse your parser**: If you already parse `ARGS`, reuse that logic for `STIN`
+2. **Input sent automatically**: g-cli sends stdin data at ~100ms intervals or on newlines
+3. **Clean exit**: When LabVIEW sends EXIT, g-cli will close automatically (no need to press Enter!)
 4. **Error handling**: Send errors to stderr using `SERR` message
 5. **Exit gracefully**: When done, send `EXIT` message with code 0
 
