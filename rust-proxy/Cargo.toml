@@ -15,7 +15,7 @@ keywords = ["LabVIEW"]
 sysinfo = "0.37"
 log = "0.4"
 simplelog = "0.12" 
-time = { version = "^0.3.11", features = ["macros", "formatting"]}
+time = { version = "^0.3.47", features = ["macros", "formatting"]}
 thiserror = "2.0"
 clap = "4.3"
 # minimal library - remove the features we aren't using.
