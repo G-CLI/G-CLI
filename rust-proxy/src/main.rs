@@ -5,6 +5,7 @@ mod comms_loop;
 mod labview;
 mod os_string_support;
 mod signal_loop;
+mod stdin_loop;
 
 use comms::{AppListener, MessageToLV};
 use eyre::{Report, Result, WrapErr, eyre};
@@ -12,7 +13,6 @@ use labview::{detect_installations, installs::Bitness, launch_exe, launch_lv};
 use log::{LevelFilter, debug, error};
 use os_string_support::join_os_string;
 use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
-use std::time::Duration;
 use time::macros::format_description;
 
 use crate::action_loop::{ActionLoop, ExitAction};
@@ -54,16 +54,59 @@ fn gcli() -> Result<i32> {
     }
 
     let app_listener = AppListener::new().wrap_err("Failed to create the network listener")?;
-    let mut process =
-        launch_process(&config, &app_listener).wrap_err("Failed to launch the process.")?;
+    // Second, dedicated connection for stdin (and future signals like Ctrl+C, see #188).
+    // Kept separate from the main comms channel so LabVIEW code consuming stdin doesn't
+    // have to filter out unrelated message types (OUTP/SERR/EXIT/...).
+    // Diagnostic escape hatch: --no-signal skips this entirely so the main
+    // channel can be tested in isolation.
+    let signal_listener = if config.no_signal_channel {
+        debug!("Signal channel disabled (--no-signal)");
+        None
+    } else {
+        Some(
+            AppListener::new()
+                .wrap_err("Failed to create the signal channel network listener")?,
+        )
+    };
 
+    debug!(
+        "Waiting for connections - main channel port {}, signal channel port {}",
+        app_listener.port(),
+        signal_listener
+            .as_ref()
+            .map(|l| l.port().to_string())
+            .unwrap_or_else(|| "disabled".to_string())
+    );
+
+    let process = launch_process(&config, &app_listener, signal_listener.as_ref())
+        .wrap_err("Failed to launch the process.")?;
+
+    // Wait for both connections before writing anything, so we never write to
+    // a half-established pair of channels.
     let mut connection = app_listener
         .wait_on_app(config.connect_timeout)
         .wrap_err("No connection established with application.")?;
-
+    debug!("Main channel connected (port {})", app_listener.port());
     process
-        .set_connected()
-        .wrap_err("Failed to notify the monitoring process of the connection")?;
+        .set_main_connected()
+        .wrap_err("Failed to notify the monitoring process of the main channel connection")?;
+
+    let signal_connection = match &signal_listener {
+        Some(signal_listener) => {
+            let signal_connection = signal_listener
+                .wait_on_app(config.connect_timeout)
+                .wrap_err("No connection established on the signal channel with application.")?;
+            debug!(
+                "Signal channel connected (port {})",
+                signal_listener.port()
+            );
+            process.set_signal_connected().wrap_err(
+                "Failed to notify the monitoring process of the signal channel connection",
+            )?;
+            Some(signal_connection)
+        }
+        None => None,
+    };
 
     connection
         .write(MessageToLV::Args(&program_args[..]))
@@ -71,12 +114,14 @@ fn gcli() -> Result<i32> {
     connection
         .write(MessageToLV::Ccwd(cwd))
         .wrap_err("Failed to write CWD to LabVIEW application")?;
+    debug!("Sent ARGS and CCWD on main channel");
 
     // At this point we spawn multiple tasks as processes:
-    // 1. Action Loop - Recieves messages from inputs and takes appropriate actions.
+    // 1. Action Loop - Receives messages from inputs and takes appropriate actions.
     //                  Also writes a stop signal for other threads.
-    // 2. Comms Loop - Recieve incoming comms from LabVIEW.
-    // 3. CtrlC Handler
+    // 2. Comms Loop - Receive incoming comms from LabVIEW.
+    // 3. Stdin Loop - Read from stdin and send commands to LabVIEW over the signal channel.
+    // 4. CtrlC Handler
 
     let action_loop = ActionLoop::new();
 
@@ -86,7 +131,30 @@ fn gcli() -> Result<i32> {
         action_loop.get_stop_signal(),
     );
 
-    signal_loop::start(action_loop.get_channel(), action_loop.get_stop_signal())?;
+    // signal_loop needs its own handle to the signal connection (independent
+    // of stdin_loop's) so it can send SIGI on Ctrl+C without contending for
+    // stdin_loop's &mut connection.
+    let signal_connection_for_ctrlc = match &signal_connection {
+        Some(connection) => Some(
+            connection
+                .try_clone()
+                .wrap_err("Failed to clone signal channel connection for Ctrl+C handling")?,
+        ),
+        None => None,
+    };
+
+    match signal_connection {
+        Some(signal_connection) => {
+            stdin_loop::start(signal_connection, action_loop.get_stop_signal());
+        }
+        None => debug!("Stdin forwarding disabled (--no-signal)"),
+    }
+
+    signal_loop::start(
+        action_loop.get_channel(),
+        action_loop.get_stop_signal(),
+        signal_connection_for_ctrlc,
+    )?;
 
     let exit = action_loop.run();
 
@@ -97,8 +165,12 @@ fn gcli() -> Result<i32> {
             Ok(code)
         }
         ExitAction::ForcedExit => {
-            debug!("Recieved a signal to kill the process. Exiting and killing LabVIEW process");
-            process.stop(Some(Duration::from_millis(1)));
+            debug!(
+                "Recieved a signal to kill the process. LabVIEW has been notified via the signal channel; \
+                 waiting up to {:?} before force-killing (--ctrlc-timeout)",
+                config.ctrlc_timeout
+            );
+            process.stop(config.ctrlc_timeout);
             Ok(-1)
         }
     }
@@ -134,12 +206,14 @@ fn configure_logger(verbose: bool) -> Result<(), Report> {
 fn launch_process(
     config: &cli::Configuration,
     app_listener: &AppListener,
+    signal_listener: Option<&AppListener>,
 ) -> Result<labview::process::MonitoredProcess> {
     let launch_path = config.to_launch.clone();
     let extension_as_str = launch_path.extension().map(|ext| {
         //allow panic here as I don't expect we will ever really hit it.
         ext.to_str().expect("Extension isn't valid UTF-8")
     });
+    let signal_port = signal_listener.map(|l| l.port());
 
     match extension_as_str {
         Some("vi") => {
@@ -149,13 +223,13 @@ fn launch_process(
                 &active_install,
                 launch_path,
                 app_listener.port(),
+                signal_port,
                 config.allow_dialogs,
             )
             .wrap_err("Failed to Launch LabVIEW")
         }
-        Some("exe") => {
-            launch_exe(launch_path, app_listener.port()).wrap_err("Failed to Launch Executable")
-        }
+        Some("exe") => launch_exe(launch_path, app_listener.port(), signal_port)
+            .wrap_err("Failed to Launch Executable"),
         None => {
             debug!("No extension in path. Assume it is a .vi");
             //Modify the path to include the .vi. Alias as mutable for this case.
@@ -168,6 +242,7 @@ fn launch_process(
                 &active_install,
                 launch_path,
                 app_listener.port(),
+                signal_port,
                 config.allow_dialogs,
             )
             .wrap_err("Failed to launch LabVIEW")

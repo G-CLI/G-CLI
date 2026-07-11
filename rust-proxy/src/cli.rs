@@ -22,6 +22,14 @@ pub struct Configuration {
     pub allow_dialogs: bool,
     /// Dont launch anything if this is true.
     pub no_launch: bool,
+    /// Diagnostic flag: disables the signal channel entirely (no listener,
+    /// no `-p2:` arg, no service locator registration for it, no stdin
+    /// forwarding) so the main channel can be tested in isolation.
+    pub no_signal_channel: bool,
+    /// Grace period after sending the Ctrl+C signal to LabVIEW before g-cli
+    /// force-kills the process. `None` means wait indefinitely (no forced
+    /// kill - rely on LabVIEW exiting itself after cleanup).
+    pub ctrlc_timeout: Option<Duration>,
 }
 
 impl Configuration {
@@ -76,6 +84,12 @@ impl Configuration {
             },
             allow_dialogs: args.get_flag("allow dialogs"),
             no_launch: args.get_flag("no launch"),
+            no_signal_channel: args.get_flag("no signal channel"),
+            ctrlc_timeout: match args.get_one::<i64>("ctrlc timeout (ms)") {
+                Some(ms) if *ms < 0 => None,
+                Some(ms) => Some(Duration::from_millis(*ms as u64)),
+                None => unreachable!(), // has a default value
+            },
         }
     }
 }
@@ -131,6 +145,14 @@ fn clap_app() -> clap::Command {
                 .default_value("10000")
         )
         .arg(
+            Arg::new("ctrlc timeout (ms)")
+                .long("ctrlc-timeout")
+                .help("On Ctrl+C, how long to wait (in ms) after signaling LabVIEW before force-killing the process. Use -1 to wait indefinitely instead of force-killing.")
+                .value_parser(value_parser!(i64))
+                .allow_hyphen_values(true)
+                .default_value("60000")
+        )
+        .arg(
             Arg::new("allow dialogs")
             .long("allow-dialogs")
             .alias("allowDialogs")
@@ -142,6 +164,12 @@ fn clap_app() -> clap::Command {
             .long("no-launch")
                 .action(ArgAction::SetTrue)
             .help("Don't launch your VI or application automatically. You must start it manually.")
+        )
+        .arg(
+            Arg::new("no signal channel")
+            .long("no-signal")
+                .action(ArgAction::SetTrue)
+            .help("Diagnostic flag: disables the stdin/signal channel entirely (no -p2: connection). Use to test the main channel in isolation.")
         )
         .trailing_var_arg(true)
         .arg(Arg::new("app to run").action(ArgAction::Append).required(true))
@@ -477,6 +505,52 @@ mod tests {
 
         let config = Configuration::from_arg_array(args);
         assert_eq!(None, config.kill);
+    }
+
+    #[test]
+    /// ctrlc-timeout defaults to 60 seconds when not set.
+    fn ctrlc_timeout_default() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+        assert_eq!(Some(Duration::from_secs(60)), config.ctrlc_timeout);
+    }
+
+    #[test]
+    /// ctrlc-timeout can be set to a specific value.
+    fn ctrlc_timeout_set() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--ctrlc-timeout"),
+            String::from("5000"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+        assert_eq!(Some(Duration::from_millis(5000)), config.ctrlc_timeout);
+    }
+
+    #[test]
+    /// -1 means wait indefinitely (no forced kill).
+    fn ctrlc_timeout_negative_means_indefinite() {
+        let args = vec![
+            String::from("g-cli"),
+            String::from("--ctrlc-timeout"),
+            String::from("-1"),
+            String::from("test.vi"),
+            String::from("--"),
+            String::from("test1"),
+        ];
+
+        let config = Configuration::from_arg_array(args);
+        assert_eq!(None, config.ctrlc_timeout);
     }
 
     #[test]

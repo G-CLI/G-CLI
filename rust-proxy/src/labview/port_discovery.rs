@@ -6,52 +6,98 @@ use ureq::get;
 
 pub struct Registration {
     id: String,
+    /// `None` when the signal channel is disabled (see `--no-signal`).
+    signal_id: Option<String>,
 }
 
 impl Registration {
+    /// Registers the main channel port, and the signal channel port if
+    /// provided, with the NI Service Locator.
+    ///
+    /// LabVIEW only relies on this lookup when it isn't allowed to run
+    /// multiple instances of the same VI (see `Check If Multiple LV
+    /// Instances Allowed.vi`) - when multiple instances are allowed the
+    /// registration ID (based only on VI path/version/bitness) can't
+    /// disambiguate between concurrently running instances, so LabVIEW reads
+    /// the port directly from the `-p:`/`-p2:` command line parameters
+    /// instead. We register both regardless so the lookup is available for
+    /// the single-instance case either way.
     pub fn register(
         vi: &VILocation,
         install: &LabviewInstall,
         port: &u16,
+        signal_port: Option<&u16>,
     ) -> Result<Registration, LabVIEWError> {
         let id = generate_registration_id(&vi.canonical_vi_path(), install);
-        // The response we want the discovery service to give. I'm not sure if these need further escaping but so far it works
-        let base_response = "HTTP/1.0%20200%20OK%0D%0AServer:%20Service%20Locator%0D%0APragma:%20no-cache%0D%0AConnection:%20Close%0D%0AContent-Length:%2012%0D%0AContent-Type:%20text/html%0D%0A%0D%0A";
-        let url = format!(
-            "http://localhost:3580/publish?{}={}Port={}%0D%0A",
-            id, base_response, port
-        );
+        publish(&id, port)?;
 
-        let response = get(&url)
-            .call()
-            .map_err(|e| LabVIEWError::ServiceLocatorCommsError(Box::new(e)))?;
+        let signal_id = match signal_port {
+            Some(signal_port) => {
+                let signal_id = format!("{}/signal", id);
+                publish(&signal_id, signal_port)?;
+                Some(signal_id)
+            }
+            None => None,
+        };
 
-        let status_code = response.status();
-
-        if !status_code.is_success() {
-            Err(LabVIEWError::ServiceLocatorResponseError(
-                status_code.as_u16(),
-            ))
-        } else {
-            Ok(Registration { id })
-        }
+        Ok(Registration { id, signal_id })
     }
 
-    /// Unregisters the port with the service locator and consumes the registration object.
-    pub fn unregister(self) -> Result<(), LabVIEWError> {
-        let response = get(&format!("http://localhost:3580/delete?{}", self.id))
-            .call()
-            .map_err(|e| LabVIEWError::ServiceLocatorCommsError(Box::new(e)))?;
+    /// Unregisters just the main channel's service locator entry. Call once
+    /// the main channel has actually connected - not before, and not
+    /// bundled with `unregister_signal`, since the signal channel may not
+    /// have connected yet at that point.
+    pub fn unregister_main(&self) -> Result<(), LabVIEWError> {
+        delete(&self.id)
+    }
 
-        let status_code = response.status();
-
-        if !status_code.is_success() {
-            Err(LabVIEWError::ServiceLocatorResponseError(
-                status_code.as_u16(),
-            ))
-        } else {
-            Ok(())
+    /// Unregisters just the signal channel's service locator entry. Call
+    /// once the signal channel has actually connected. A no-op if the signal
+    /// channel was never registered (`--no-signal`).
+    pub fn unregister_signal(&self) -> Result<(), LabVIEWError> {
+        match &self.signal_id {
+            Some(signal_id) => delete(signal_id),
+            None => Ok(()),
         }
+    }
+}
+
+fn publish(id: &str, port: &u16) -> Result<(), LabVIEWError> {
+    // The response we want the discovery service to give. I'm not sure if these need further escaping but so far it works
+    let base_response = "HTTP/1.0%20200%20OK%0D%0AServer:%20Service%20Locator%0D%0APragma:%20no-cache%0D%0AConnection:%20Close%0D%0AContent-Length:%2012%0D%0AContent-Type:%20text/html%0D%0A%0D%0A";
+    let url = format!(
+        "http://localhost:3580/publish?{}={}Port={}%0D%0A",
+        id, base_response, port
+    );
+
+    let response = get(&url)
+        .call()
+        .map_err(|e| LabVIEWError::ServiceLocatorCommsError(Box::new(e)))?;
+
+    let status_code = response.status();
+
+    if !status_code.is_success() {
+        Err(LabVIEWError::ServiceLocatorResponseError(
+            status_code.as_u16(),
+        ))
+    } else {
+        Ok(())
+    }
+}
+
+fn delete(id: &str) -> Result<(), LabVIEWError> {
+    let response = get(&format!("http://localhost:3580/delete?{}", id))
+        .call()
+        .map_err(|e| LabVIEWError::ServiceLocatorCommsError(Box::new(e)))?;
+
+    let status_code = response.status();
+
+    if !status_code.is_success() {
+        Err(LabVIEWError::ServiceLocatorResponseError(
+            status_code.as_u16(),
+        ))
+    } else {
+        Ok(())
     }
 }
 

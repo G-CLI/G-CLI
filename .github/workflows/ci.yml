@@ -3,7 +3,7 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'feature/**' ]
   pull_request:
     branches: [ main ]
 
@@ -126,7 +126,8 @@ jobs:
 
         
   build-lv:
-  
+    # Disabled in fork - requires self-hosted LabVIEW runner
+    if: false
     runs-on: labview
     needs: [build-windows, build-ubuntu]
     
