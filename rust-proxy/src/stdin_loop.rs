@@ -1,17 +1,22 @@
 use std::io::{self, BufRead};
-use std::sync::{Arc, atomic::AtomicBool, mpsc::{self, Sender, Receiver, RecvTimeoutError}};
+use std::sync::{
+    Arc,
+    atomic::AtomicBool,
+    mpsc::{self, Receiver, RecvTimeoutError, Sender},
+};
 use std::time::Duration;
 
-use log::debug;
+use log::{debug, error};
 
-use crate::action_loop::ActionMessage;
+use crate::comms::{AppConnection, MessageToLV};
 
 /// Interval at which buffered stdin data is sent to LabVIEW (in milliseconds).
 /// This timeout triggers sending of accumulated input even without a newline.
 /// Also used for checking the stop signal regularly for clean shutdown.
 const STDIN_SEND_INTERVAL: Duration = Duration::from_millis(100);
 
-/// Starts threads to read from stdin and send data to the action loop.
+/// Starts threads to read from stdin and send data to LabVIEW over the
+/// dedicated signal connection (separate from the main comms channel).
 ///
 /// This implementation uses a timeout-based approach where stdin input is sent
 /// either when a newline is encountered OR after a timeout, whichever comes first.
@@ -29,9 +34,9 @@ const STDIN_SEND_INTERVAL: Duration = Duration::from_millis(100);
 ///
 /// The threads will stop cleanly when:
 /// - The stop signal is set (checked every 100ms)
-/// - The action loop channel is closed
 /// - EOF is reached on stdin
-pub fn start(tx: Sender<ActionMessage>, stop: Arc<AtomicBool>) {
+/// - Writing to the signal connection fails (LabVIEW has gone away)
+pub fn start(mut connection: AppConnection, stop: Arc<AtomicBool>) {
     // Create a channel for the stdin reader thread to send data
     let (stdin_tx, stdin_rx): (Sender<StdinEvent>, Receiver<StdinEvent>) = mpsc::channel();
 
@@ -85,7 +90,7 @@ pub fn start(tx: Sender<ActionMessage>, stop: Arc<AtomicBool>) {
                     debug!("Stop signal received in stdin loop");
                     // Send any remaining accumulated data before exiting
                     if !accumulated.is_empty() {
-                        send_to_labview(&tx, &accumulated, &stop);
+                        send_to_labview(&mut connection, &accumulated, &stop);
                     }
                     break;
                 }
@@ -98,7 +103,7 @@ pub fn start(tx: Sender<ActionMessage>, stop: Arc<AtomicBool>) {
                         accumulated.push('\n'); // Preserve the newline
 
                         // Send immediately - this is a complete line
-                        send_to_labview(&tx, &accumulated, &stop);
+                        send_to_labview(&mut connection, &accumulated, &stop);
                         accumulated.clear();
                         last_send_was_partial = false;
                     }
@@ -106,14 +111,14 @@ pub fn start(tx: Sender<ActionMessage>, stop: Arc<AtomicBool>) {
                         // EOF reached - send any remaining data
                         debug!("EOF reached on stdin");
                         if !accumulated.is_empty() {
-                            send_to_labview(&tx, &accumulated, &stop);
+                            send_to_labview(&mut connection, &accumulated, &stop);
                         }
                         break;
                     }
                     Ok(StdinEvent::Error) => {
                         // Error from reader - send accumulated and exit
                         if !accumulated.is_empty() {
-                            send_to_labview(&tx, &accumulated, &stop);
+                            send_to_labview(&mut connection, &accumulated, &stop);
                         }
                         break;
                     }
@@ -127,7 +132,7 @@ pub fn start(tx: Sender<ActionMessage>, stop: Arc<AtomicBool>) {
                             // Only send on first timeout to avoid spamming
                             // If user is typing slowly, we send what we have so far
                             debug!("Timeout - sending accumulated partial input");
-                            send_to_labview(&tx, &accumulated, &stop);
+                            send_to_labview(&mut connection, &accumulated, &stop);
                             accumulated.clear();
                             last_send_was_partial = true;
                         }
@@ -138,7 +143,7 @@ pub fn start(tx: Sender<ActionMessage>, stop: Arc<AtomicBool>) {
                         // Stdin reader died
                         debug!("Stdin reader disconnected");
                         if !accumulated.is_empty() {
-                            send_to_labview(&tx, &accumulated, &stop);
+                            send_to_labview(&mut connection, &accumulated, &stop);
                         }
                         break;
                     }
@@ -160,12 +165,9 @@ enum StdinEvent {
     Error,
 }
 
-/// Sends accumulated stdin data to LabVIEW via the action loop.
-fn send_to_labview(
-    tx: &Sender<ActionMessage>,
-    text: &str,
-    stop: &Arc<AtomicBool>,
-) {
+/// Sends accumulated stdin data to LabVIEW as an `STIN` message on the
+/// dedicated signal connection.
+fn send_to_labview(connection: &mut AppConnection, text: &str, stop: &Arc<AtomicBool>) {
     if text.is_empty() {
         return;
     }
@@ -173,9 +175,8 @@ fn send_to_labview(
     // Don't trim - preserve whitespace and newlines as they may be significant
     debug!("Sending to LabVIEW: {:?}", text);
 
-    // Check if the channel is still open
-    if tx.send(ActionMessage::StdinInput(text.to_string())).is_err() {
-        debug!("Action loop has stopped, setting stop signal");
+    if let Err(e) = connection.write(MessageToLV::Stdin(text.to_string())) {
+        error!("Failed to send stdin to LabVIEW: {}", e);
         stop.store(true, std::sync::atomic::Ordering::Relaxed);
     }
 }

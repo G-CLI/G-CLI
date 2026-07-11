@@ -28,7 +28,7 @@ use vi_location::VILocation;
 
 use self::error::LabVIEWError;
 
-fn create_args(port: u16, allow_dialogs: bool) -> Vec<OsString> {
+fn create_args(port: u16, signal_port: Option<u16>, allow_dialogs: bool) -> Vec<OsString> {
     let mut args = vec![];
     if !allow_dialogs {
         args.push(OsString::from("-unattended"));
@@ -36,17 +36,25 @@ fn create_args(port: u16, allow_dialogs: bool) -> Vec<OsString> {
 
     args.push(OsString::from("--"));
     args.push(OsString::from(format!("-p:{}", port)));
+    if let Some(signal_port) = signal_port {
+        args.push(OsString::from(format!("-p2:{}", signal_port)));
+    }
     args
 }
 
-pub fn launch_exe(path: PathBuf, port: u16) -> Result<process::MonitoredProcess, LabVIEWError> {
-    process::MonitoredProcess::start(path, &create_args(port, true), None)
+pub fn launch_exe(
+    path: PathBuf,
+    port: u16,
+    signal_port: Option<u16>,
+) -> Result<process::MonitoredProcess, LabVIEWError> {
+    process::MonitoredProcess::start(path, &create_args(port, signal_port, true), None)
 }
 
 pub fn launch_lv(
     install: &installs::LabviewInstall,
     launch_vi: PathBuf,
     port: u16,
+    signal_port: Option<u16>,
     allow_dialogs: bool,
 ) -> Result<process::MonitoredProcess, LabVIEWError> {
     let mut vi = VILocation::new(&launch_vi);
@@ -67,11 +75,11 @@ pub fn launch_lv(
         return Err(LabVIEWError::ViDoesNotExist(launch_vi));
     }
 
-    let registration = Registration::register(&vi, install, &port)?;
+    let registration = Registration::register(&vi, install, &port, signal_port.as_ref())?;
 
     //todo: unwrap could fail here, can we validate it?
     let mut lv_args = vec![vi.labview_parameter()];
-    lv_args.append(&mut create_args(port, allow_dialogs));
+    lv_args.append(&mut create_args(port, signal_port, allow_dialogs));
 
     let path = install.application_path();
 
@@ -91,12 +99,13 @@ mod tests {
 
     #[test]
     fn test_args_with_port() {
-        let args = create_args(1234, false);
+        let args = create_args(1234, Some(5678), false);
 
         let expected = vec![
             OsString::from("-unattended"),
             OsString::from("--"),
             OsString::from("-p:1234"),
+            OsString::from("-p2:5678"),
         ];
 
         assert_eq!(args, expected);
@@ -104,9 +113,26 @@ mod tests {
 
     #[test]
     fn test_args_no_dialog() {
-        let args = create_args(1234, true);
+        let args = create_args(1234, Some(5678), true);
 
-        let expected = vec![OsString::from("--"), OsString::from("-p:1234")];
+        let expected = vec![
+            OsString::from("--"),
+            OsString::from("-p:1234"),
+            OsString::from("-p2:5678"),
+        ];
+
+        assert_eq!(args, expected);
+    }
+
+    #[test]
+    fn test_args_no_signal_port() {
+        let args = create_args(1234, None, false);
+
+        let expected = vec![
+            OsString::from("-unattended"),
+            OsString::from("--"),
+            OsString::from("-p:1234"),
+        ];
 
         assert_eq!(args, expected);
     }

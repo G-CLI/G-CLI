@@ -144,8 +144,10 @@ impl AppConnection {
         MessageFromLV::from_buffer(&self.buffer)
     }
 
-    /// Clone the underlying TCP stream to create a new connection.
-    /// This allows multiple threads to have independent connections to the same socket.
+    /// Clone the underlying TCP stream to create a new, independent connection
+    /// to the same socket. Used so multiple threads can each write to the same
+    /// channel without sharing a `&mut` (e.g. stdin_loop and signal_loop both
+    /// writing to the signal channel).
     pub fn try_clone(&self) -> Result<Self, CommsError> {
         let cloned_stream = self
             .stream
@@ -212,8 +214,11 @@ pub enum MessageToLV<'a> {
     Args(&'a [OsString]),
     /// Current working directory as a path.
     Ccwd(PathBuf),
-    /// Stdin command input (for interactive mode)
+    /// Stdin command input (for interactive mode). Sent on the signal channel.
     Stdin(String),
+    /// Ctrl+C / SIGINT notification. Sent on the signal channel.
+    /// Reserved for issue #188 - not yet triggered by the signal loop.
+    Signal,
 }
 
 impl<'a> MessageToLV<'a> {
@@ -225,6 +230,7 @@ impl<'a> MessageToLV<'a> {
             MessageToLV::Args(_) => "ARGS",
             MessageToLV::Ccwd(_) => "CCWD",
             MessageToLV::Stdin(_) => "STIN",
+            MessageToLV::Signal => "SIGI",
         };
 
         let message_contents = match &self {
@@ -236,6 +242,7 @@ impl<'a> MessageToLV<'a> {
                 .join("\t"),
             MessageToLV::Ccwd(path) => path.to_str().unwrap().to_string(),
             MessageToLV::Stdin(line) => line.clone(),
+            MessageToLV::Signal => String::new(),
         };
 
         let length = message_contents.len() + message_id.len();
@@ -406,6 +413,20 @@ mod tests {
         let expected = "\x00\x00\x00\x0BSTINadd 5 3";
 
         assert_eq!(size, 11 + 4); // 11 content bytes plus 4 for length
+        assert_eq!(&buffer[0..size], expected.as_bytes());
+    }
+
+    #[test]
+    fn signal_message_to_buffer() {
+        let mut buffer = [0u8; 9000];
+
+        let message = MessageToLV::Signal;
+
+        let size = message.to_buffer(&mut buffer);
+
+        let expected = "\x00\x00\x00\x04SIGI";
+
+        assert_eq!(size, 4 + 4); // 4 id bytes plus 4 for length, no payload.
         assert_eq!(&buffer[0..size], expected.as_bytes());
     }
 }

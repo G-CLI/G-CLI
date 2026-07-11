@@ -2,6 +2,7 @@ use super::{Registration, error::LabVIEWError};
 use log::{debug, info};
 use std::collections::HashMap;
 use std::ffi::OsString;
+use std::io::{IsTerminal, Write, stderr};
 use std::path::{Path, PathBuf};
 use std::sync::mpsc;
 use std::thread::{JoinHandle, sleep};
@@ -91,13 +92,23 @@ impl MonitoredProcess {
         self.monitor_thread.join().unwrap();
     }
 
-    /// Registers that the comms are connected so any action required can be taken like cancelling service discovery.
-    pub fn set_connected(&mut self) -> Result<(), LabVIEWError> {
-        // We will consume the registration so take it out of the monitor.
-        let port_registration = self.port_registration.take();
+    /// Registers that the main channel comms are connected, clearing just its
+    /// service locator entry. Called separately from `set_signal_connected`
+    /// so we don't delete the signal channel's entry before it has actually
+    /// been connected to.
+    pub fn set_main_connected(&self) -> Result<(), LabVIEWError> {
+        if let Some(registration) = &self.port_registration {
+            registration.unregister_main()?;
+        }
 
-        if let Some(registration) = port_registration {
-            registration.unregister()?;
+        Ok(())
+    }
+
+    /// Registers that the signal channel comms are connected, clearing its
+    /// service locator entry.
+    pub fn set_signal_connected(&self) -> Result<(), LabVIEWError> {
+        if let Some(registration) = &self.port_registration {
+            registration.unregister_signal()?;
         }
 
         Ok(())
@@ -113,17 +124,35 @@ fn kill_process_with_timeout(kill_option: Option<Duration>, thread_path: &Path, 
             timeout.as_millis()
         );
         let end_time = Instant::now() + timeout;
+        // Only show a live countdown on an actual terminal - avoids spamming
+        // \r-separated garbage into redirected/CI log output.
+        let show_countdown = stderr().is_terminal();
 
         loop {
             let process_closed = check_process(thread_path, pid).is_none();
-            let timeout_passed = Instant::now() > end_time;
+            let remaining = end_time.saturating_duration_since(Instant::now());
+
             if process_closed {
+                if show_countdown {
+                    eprint!("\r\x1b[KLabVIEW closed.\n");
+                    let _ = stderr().flush();
+                }
                 break;
-            } else if timeout_passed {
-                //kill the process.
+            } else if remaining.is_zero() {
+                if show_countdown {
+                    eprint!("\r\x1b[K");
+                }
+                eprintln!("Timed out waiting for LabVIEW to close - killing process.");
                 kill(pid);
                 break;
             } else {
+                if show_countdown {
+                    eprint!(
+                        "\rWaiting for LabVIEW to close... {}s remaining ",
+                        remaining.as_secs()
+                    );
+                    let _ = stderr().flush();
+                }
                 sleep(POLL_INTERVAL);
             }
         }

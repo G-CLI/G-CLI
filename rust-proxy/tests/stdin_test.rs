@@ -1,5 +1,6 @@
 // Integration test for stdin functionality
-// This test doesn't require LabVIEW - it simulates the LabVIEW side
+// This test doesn't require LabVIEW - it simulates the LabVIEW side of the
+// dedicated signal connection that carries STIN messages.
 
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
@@ -8,9 +9,10 @@ use std::time::Duration;
 
 #[test]
 fn test_stdin_message_format() {
-    // This test verifies that a CMND message is correctly formatted
+    // This test verifies that an STIN message is correctly formatted on the
+    // signal channel.
 
-    // Start a mock LabVIEW server
+    // Start a mock LabVIEW server acting as the signal channel listener.
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let port = listener.local_addr().unwrap().port();
 
@@ -23,7 +25,9 @@ fn test_stdin_message_format() {
         stream.read_exact(&mut buffer[0..4]).unwrap();
         let length = u32::from_be_bytes([buffer[0], buffer[1], buffer[2], buffer[3]]);
 
-        stream.read_exact(&mut buffer[4..(length as usize + 4)]).unwrap();
+        stream
+            .read_exact(&mut buffer[4..(length as usize + 4)])
+            .unwrap();
 
         // Extract message ID and content
         let msg_id = std::str::from_utf8(&buffer[4..8]).unwrap();
@@ -32,72 +36,57 @@ fn test_stdin_message_format() {
         println!("Received message ID: {}", msg_id);
         println!("Received content: {}", content);
 
-        // Verify it's a CMND message
-        assert_eq!(msg_id, "CMND");
-        assert_eq!(content, "test command");
-
-        // Send back a success response (OUTP message)
-        let response = "\x00\x00\x00\x0COUTPSuccess\n";
-        stream.write_all(response.as_bytes()).unwrap();
+        // Verify it's an STIN message
+        assert_eq!(msg_id, "STIN");
+        assert_eq!(content, "test command\n");
     });
 
     // Give server time to start
     thread::sleep(Duration::from_millis(100));
 
-    // Connect as client
+    // Connect as client (simulating g-cli's signal connection)
     let mut client = TcpStream::connect(format!("127.0.0.1:{}", port)).unwrap();
 
-    // Send a CMND message
-    let command = "test command";
-    let msg_id = "CMND";
+    // Send an STIN message
+    let command = "test command\n";
+    let msg_id = "STIN";
     let length = (msg_id.len() + command.len()) as u32;
 
-    // Write message
     client.write_all(&length.to_be_bytes()).unwrap();
     client.write_all(msg_id.as_bytes()).unwrap();
     client.write_all(command.as_bytes()).unwrap();
-
-    // Read response
-    let mut buffer = [0u8; 9000];
-    client.read_exact(&mut buffer[0..4]).unwrap();
-    let resp_length = u32::from_be_bytes([buffer[0], buffer[1], buffer[2], buffer[3]]);
-    client.read_exact(&mut buffer[4..(resp_length as usize + 4)]).unwrap();
-
-    let resp_id = std::str::from_utf8(&buffer[4..8]).unwrap();
-    let resp_content = std::str::from_utf8(&buffer[8..(resp_length as usize + 4)]).unwrap();
-
-    assert_eq!(resp_id, "OUTP");
-    assert_eq!(resp_content, "Success\n");
 
     server_thread.join().unwrap();
 }
 
 #[test]
-fn test_multiple_stdin_commands() {
-    // Test sending multiple commands in sequence
+fn test_multiple_stdin_lines() {
+    // Test sending multiple lines in sequence over the signal channel.
 
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let port = listener.local_addr().unwrap().port();
 
-    let commands = vec!["add 5 3", "multiply 10 2", "exit"];
-    let commands_clone = commands.clone();
+    let lines = vec!["add 5 3\n", "multiply 10 2\n", "exit\n"];
+    let lines_clone = lines.clone();
 
     let server_thread = thread::spawn(move || {
         let (mut stream, _) = listener.accept().unwrap();
         let mut buffer = [0u8; 9000];
 
-        for expected_cmd in commands_clone {
+        for expected_line in lines_clone {
             // Read message
             stream.read_exact(&mut buffer[0..4]).unwrap();
             let length = u32::from_be_bytes([buffer[0], buffer[1], buffer[2], buffer[3]]);
-            stream.read_exact(&mut buffer[4..(length as usize + 4)]).unwrap();
+            stream
+                .read_exact(&mut buffer[4..(length as usize + 4)])
+                .unwrap();
 
             let msg_id = std::str::from_utf8(&buffer[4..8]).unwrap();
             let content = std::str::from_utf8(&buffer[8..(length as usize + 4)]).unwrap();
 
-            assert_eq!(msg_id, "CMND");
-            assert_eq!(content, expected_cmd);
-            println!("✓ Received: {}", content);
+            assert_eq!(msg_id, "STIN");
+            assert_eq!(content, expected_line);
+            println!("Received: {}", content);
         }
     });
 
@@ -105,14 +94,50 @@ fn test_multiple_stdin_commands() {
 
     let mut client = TcpStream::connect(format!("127.0.0.1:{}", port)).unwrap();
 
-    for cmd in commands {
-        let msg_id = "CMND";
-        let length = (msg_id.len() + cmd.len()) as u32;
+    for line in lines {
+        let msg_id = "STIN";
+        let length = (msg_id.len() + line.len()) as u32;
 
         client.write_all(&length.to_be_bytes()).unwrap();
         client.write_all(msg_id.as_bytes()).unwrap();
-        client.write_all(cmd.as_bytes()).unwrap();
+        client.write_all(line.as_bytes()).unwrap();
     }
+
+    server_thread.join().unwrap();
+}
+
+#[test]
+fn test_signal_message_format() {
+    // Verifies the reserved SIGI (Ctrl+C, see issue #188) message format on
+    // the signal channel. Not yet sent by g-cli, but the wire format is
+    // locked in now so LabVIEW-side parsing can be written against it.
+
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+
+    let server_thread = thread::spawn(move || {
+        let (mut stream, _) = listener.accept().unwrap();
+        let mut buffer = [0u8; 9000];
+
+        stream.read_exact(&mut buffer[0..4]).unwrap();
+        let length = u32::from_be_bytes([buffer[0], buffer[1], buffer[2], buffer[3]]);
+        stream
+            .read_exact(&mut buffer[4..(length as usize + 4)])
+            .unwrap();
+
+        let msg_id = std::str::from_utf8(&buffer[4..8]).unwrap();
+        assert_eq!(msg_id, "SIGI");
+        assert_eq!(length, 4); // id only, empty payload.
+    });
+
+    thread::sleep(Duration::from_millis(100));
+
+    let mut client = TcpStream::connect(format!("127.0.0.1:{}", port)).unwrap();
+    let msg_id = "SIGI";
+    let length = msg_id.len() as u32;
+
+    client.write_all(&length.to_be_bytes()).unwrap();
+    client.write_all(msg_id.as_bytes()).unwrap();
 
     server_thread.join().unwrap();
 }

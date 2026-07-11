@@ -1,4 +1,4 @@
-use crate::comms::{AppConnection, MessageFromLV, MessageToLV};
+use crate::comms::MessageFromLV;
 use log::{debug, error};
 use std::error::Error;
 use std::io::Write;
@@ -10,8 +10,6 @@ pub enum ActionMessage {
     LVMessage(MessageFromLV),
     CommsError(Box<dyn Error + Send + Sync>),
     CtrlC,
-    /// Stdin input received (for interactive mode)
-    StdinInput(String),
 }
 
 pub enum ExitAction {
@@ -48,7 +46,7 @@ impl ActionLoop {
     ///
     /// Stops running once all writers drop their sender.
     /// returns an exit code to use.
-    pub fn run(self, mut connection: AppConnection) -> ExitAction {
+    pub fn run(self) -> ExitAction {
         let Self { tx, rx, stopped } = self;
 
         let mut exit_action = ExitAction::CleanExit(0);
@@ -84,15 +82,6 @@ impl ActionLoop {
                     set_stop(&stopped);
                     debug!("Recieved Ctrl+C Kill Signal");
                     exit_action = ExitAction::ForcedExit;
-                }
-                ActionMessage::StdinInput(line) => {
-                    // Send stdin command to LabVIEW
-                    debug!("Sending stdin to LabVIEW: {}", line);
-                    if let Err(e) = connection.write(MessageToLV::Stdin(line)) {
-                        error!("Failed to send stdin to LabVIEW: {}", e);
-                        exit_action = ExitAction::CleanExit(-1);
-                        set_stop(&stopped);
-                    }
                 }
             }
         }
