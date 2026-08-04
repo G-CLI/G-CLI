@@ -10,6 +10,19 @@ use sysinfo::{Pid, System};
 
 const POLL_INTERVAL: Duration = Duration::from_millis(1000);
 
+/// Grace period before the very first liveness check on a newly launched process.
+///
+/// On Linux, LabVIEW's own launcher re-execs/re-forks shortly after start (observed via
+/// `/proc/<pid>/cmdline` collapsing from the full VI path+args down to bare `labview` within
+/// milliseconds of launch, same PID). Checking liveness immediately after spawn races that
+/// transition: `sysinfo`'s process snapshot can momentarily fail to match the launched PID by
+/// executable path, which previously caused the monitor to conclude the process was already
+/// gone before it had ever been observed - permanently losing tracking (see `current_pid`
+/// below), which silently disables `--kill` and leaves the process running for the rest of
+/// the session. Waiting one poll interval before the first check gives the launcher time to
+/// settle before we try to identify it.
+const STARTUP_GRACE_PERIOD: Duration = POLL_INTERVAL;
+
 // TODO: There are definately improvements to the process monitoring. For example reusing the system item.
 
 pub struct MonitoredProcess {
@@ -37,6 +50,10 @@ impl MonitoredProcess {
             .name("Process Monitor".to_string())
             .spawn(move || {
                 let mut current_pid = Some(Pid::from_u32(original_pid));
+
+                // Give the freshly launched process a moment to settle (see
+                // STARTUP_GRACE_PERIOD) before the loop's first liveness check.
+                sleep(STARTUP_GRACE_PERIOD);
 
                 // Loop until we recieve a stop. The only way to leave is when the main thread has sent stop.
                 // if we stop independently we get a race condition where the main loop will send stop to an invalid channel.
