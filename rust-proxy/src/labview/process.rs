@@ -10,6 +10,19 @@ use sysinfo::{Pid, System};
 
 const POLL_INTERVAL: Duration = Duration::from_millis(1000);
 
+/// Grace period before the very first liveness check on a newly launched process.
+///
+/// On Linux, LabVIEW's own launcher re-execs/re-forks shortly after start (observed via
+/// `/proc/<pid>/cmdline` collapsing from the full VI path+args down to bare `labview` within
+/// milliseconds of launch, same PID). Checking liveness immediately after spawn races that
+/// transition: `sysinfo`'s process snapshot can momentarily fail to match the launched PID by
+/// executable path, which previously caused the monitor to conclude the process was already
+/// gone before it had ever been observed - permanently losing tracking (see `current_pid`
+/// below), which silently disables `--kill` and leaves the process running for the rest of
+/// the session. Waiting one poll interval before the first check gives the launcher time to
+/// settle before we try to identify it.
+const STARTUP_GRACE_PERIOD: Duration = POLL_INTERVAL;
+
 // TODO: There are definately improvements to the process monitoring. For example reusing the system item.
 
 pub struct MonitoredProcess {
@@ -38,6 +51,10 @@ impl MonitoredProcess {
             .spawn(move || {
                 let mut current_pid = Some(Pid::from_u32(original_pid));
 
+                // Give the freshly launched process a moment to settle (see
+                // STARTUP_GRACE_PERIOD) before the loop's first liveness check.
+                sleep(STARTUP_GRACE_PERIOD);
+
                 // Loop until we recieve a stop. The only way to leave is when the main thread has sent stop.
                 // if we stop independently we get a race condition where the main loop will send stop to an invalid channel.
                 // Wrap the PID in the option where None means we have lost the process to gate on the kill process.
@@ -45,9 +62,24 @@ impl MonitoredProcess {
                     match stop_rx.try_recv() {
                         Ok(kill) => {
                             //stop requested. See if we have been asked to kill the process.
-                            //disable if we aren't tracking a process though.
-                            if let Some(pid) = current_pid {
-                                kill_process_with_timeout(kill, &thread_path, pid)
+                            if kill.is_some() {
+                                // current_pid is commonly already None here: the periodic
+                                // liveness check above routinely loses tracking within the
+                                // first second or so of launch (see STARTUP_GRACE_PERIOD),
+                                // which previously caused --kill to silently no-op for the
+                                // rest of the invocation (see G-CLI/G-CLI#196) - the stale
+                                // LabVIEW process this was supposed to clean up then lives on
+                                // to break the *next* invocation's connection handshake.
+                                // Re-resolve from scratch by executable path rather than
+                                // giving up when the tracked PID is gone.
+                                let pid_to_kill = current_pid
+                                    .or_else(|| find_instances(&thread_path).keys().next().copied());
+
+                                if let Some(pid) = pid_to_kill {
+                                    kill_process_with_timeout(kill, &thread_path, pid)
+                                } else {
+                                    debug!("No LabVIEW process found to kill.");
+                                }
                             };
                             debug!(
                                 "Stopping LabVIEW monitoring due to stop command from application"
@@ -321,10 +353,17 @@ fn find_instances(path: &Path) -> HashMap<Pid, OsString> {
     let sys = System::new_all();
     let mut processes = HashMap::new();
 
+    let path_prefix = path.to_string_lossy();
+
     for (pid, process) in sys.processes() {
         if let Some(process_path) = process.exe() {
-            // We need to compare starts_with as linux will add suffixes for license version.
-            if process_path.starts_with(path) {
+            // We need to compare as a string prefix, not Path::starts_with, because Linux
+            // appends the license-edition suffix directly onto the executable's file name
+            // (e.g. "labview" -> "labviewprofull", confirmed via /proc/<pid>/exe) rather than
+            // adding a path component. Path::starts_with only matches whole components, so
+            // "labviewprofull" never matched a base path of ".../labview" - this was silently
+            // failing to find the launched process on every single invocation.
+            if process_path.to_string_lossy().starts_with(&*path_prefix) {
                 processes.insert(*pid, process.name().to_owned());
             }
         }
