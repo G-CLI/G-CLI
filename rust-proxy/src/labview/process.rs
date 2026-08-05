@@ -62,9 +62,24 @@ impl MonitoredProcess {
                     match stop_rx.try_recv() {
                         Ok(kill) => {
                             //stop requested. See if we have been asked to kill the process.
-                            //disable if we aren't tracking a process though.
-                            if let Some(pid) = current_pid {
-                                kill_process_with_timeout(kill, &thread_path, pid)
+                            if kill.is_some() {
+                                // current_pid is commonly already None here: the periodic
+                                // liveness check above routinely loses tracking within the
+                                // first second or so of launch (see STARTUP_GRACE_PERIOD),
+                                // which previously caused --kill to silently no-op for the
+                                // rest of the invocation (see G-CLI/G-CLI#196) - the stale
+                                // LabVIEW process this was supposed to clean up then lives on
+                                // to break the *next* invocation's connection handshake.
+                                // Re-resolve from scratch by executable path rather than
+                                // giving up when the tracked PID is gone.
+                                let pid_to_kill = current_pid
+                                    .or_else(|| find_instances(&thread_path).keys().next().copied());
+
+                                if let Some(pid) = pid_to_kill {
+                                    kill_process_with_timeout(kill, &thread_path, pid)
+                                } else {
+                                    debug!("No LabVIEW process found to kill.");
+                                }
                             };
                             debug!(
                                 "Stopping LabVIEW monitoring due to stop command from application"
