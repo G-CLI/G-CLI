@@ -353,10 +353,17 @@ fn find_instances(path: &Path) -> HashMap<Pid, OsString> {
     let sys = System::new_all();
     let mut processes = HashMap::new();
 
+    let path_prefix = path.to_string_lossy();
+
     for (pid, process) in sys.processes() {
         if let Some(process_path) = process.exe() {
-            // We need to compare starts_with as linux will add suffixes for license version.
-            if process_path.starts_with(path) {
+            // We need to compare as a string prefix, not Path::starts_with, because Linux
+            // appends the license-edition suffix directly onto the executable's file name
+            // (e.g. "labview" -> "labviewprofull", confirmed via /proc/<pid>/exe) rather than
+            // adding a path component. Path::starts_with only matches whole components, so
+            // "labviewprofull" never matched a base path of ".../labview" - this was silently
+            // failing to find the launched process on every single invocation.
+            if process_path.to_string_lossy().starts_with(&*path_prefix) {
                 processes.insert(*pid, process.name().to_owned());
             }
         }
